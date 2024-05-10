@@ -1,5 +1,4 @@
 import { DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,24 +11,10 @@ import { Button } from '@/components/ui/button';
 import { MdOutlineAccountCircle } from 'react-icons/md';
 import { FiArrowUpRight } from 'react-icons/fi';
 import Link from 'next/link';
-import { supabaseBrowserClient } from '@/utils/supabase/client';
-import { User } from '@supabase/supabase-js';
+import { getUserDetails } from '@/utils/supabase/server';
 
-const AccountSettings = () => {
-  const supabase = supabaseBrowserClient();
-
-  const [user, setUser] = useState<User>();
-
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user!);
-    };
-
-    fetchUserDetails();
-  }, [supabase.auth]);
+const AccountSettings = async () => {
+  const user = await getUserDetails();
 
   return (
     <Dialog>

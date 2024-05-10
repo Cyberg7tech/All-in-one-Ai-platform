@@ -1,9 +1,7 @@
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
-import React from 'react';
 import { FaPlus } from 'react-icons/fa';
 import SidebarItems from './SidebarItems';
-import { LuArrowUpRight } from 'react-icons/lu';
 import UserButton from './UserButton';
 import Link from 'next/link';
 import SidebarUpgradePlan from './SidebarUpgradePlan';

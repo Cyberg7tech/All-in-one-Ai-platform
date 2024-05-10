@@ -1,6 +1,4 @@
-'use client';
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,27 +9,13 @@ import {
 import Image from 'next/image';
 import { IoIosHelpCircleOutline } from 'react-icons/io';
 import AccountSettings from './AccountSettings';
+import { getUserDetails } from '@/utils/supabase/server';
 import { AiFillDollarCircle } from 'react-icons/ai';
 import Link from 'next/link';
-import ButtonSignout from '@/components/dashboard/ButtonSignout';
-import { supabaseBrowserClient } from '@/utils/supabase/client';
-import { User } from '@supabase/supabase-js';
+import ButtonSignout from '../ButtonSignout';
 
-const UserButton = () => {
-  const supabase = supabaseBrowserClient();
-
-  const [user, setUser] = useState<User>();
-
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user!);
-    };
-
-    fetchUserDetails();
-  }, [supabase.auth]);
+const UserButton = async () => {
+  const user = await getUserDetails();
 
   return (
     <DropdownMenu>
@@ -81,7 +65,9 @@ const UserButton = () => {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
         </Link>
+
         <ButtonSignout />
+
         <div className='flex items-center m-2 text-[12px] text-[#83888B]'>
           <a href=''>
             <span className='border-b'> Privacy policy</span> ,

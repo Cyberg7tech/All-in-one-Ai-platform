@@ -4,7 +4,7 @@ import { getUserDetails } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { ThemeProvider } from '@/components/theme-provider';
 import Sidebar from '@/components/dashboard/sidebar/Sidebar';
-import Navbar from '@/components/dashboard/Navbar';
+import Navbar from '@/components/dashboard/navbar/Navbar';
 
 type Props = {
   children: React.ReactNode;

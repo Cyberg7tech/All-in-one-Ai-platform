@@ -1,4 +1,3 @@
-import React from 'react';
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { FaBars } from 'react-icons/fa6';
 import Logo from '@/components/Logo';
@@ -6,13 +5,11 @@ import Link from 'next/link';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { FaPlus } from 'react-icons/fa';
 import UserButton from './UserButton';
-import { usePathname } from 'next/navigation';
-import { SidebarRoutes } from './SidebarItems';
-import { cn } from '@/utils/utils';
 import SidebarUpgradePlan from './SidebarUpgradePlan';
+import { SidebarRoutes } from './content';
+import { cn } from '@/utils/utils';
 
 const MobileSidebar = () => {
-  const pathname = usePathname();
   return (
     <Sheet>
       <SheetTrigger className=' pr-4 hover:opacity-75 transition'>
@@ -32,24 +29,14 @@ const MobileSidebar = () => {
             </Link>
 
             <div className='space-y-1'>
-              {SidebarRoutes.map((route, index) => {
-                const isActive = pathname.startsWith(route.path);
-
-                return (
-                  <SheetClose asChild key={index}>
-                    <Link
-                      href={route.path}
-                      className={cn(
-                        buttonVariants({ variant: 'light-gray' }),
-                        isActive &&
-                          'border !border-[#E8E8E8] dark:!border-dark rounded-lg bg-light-white dark:bg-light-dark/10 !text-[#3E3E3E] dark:!text-white'
-                      )}>
-                      <div>{route.icon}</div>
-                      <span>{route.label}</span>
-                    </Link>
-                  </SheetClose>
-                );
-              })}
+              {SidebarRoutes.map((route, index) => (
+                <SheetClose asChild key={index}>
+                  <Link href={route.path} className={cn(buttonVariants({ variant: 'light-gray' }), 'w-full')}>
+                    <div>{route.icon}</div>
+                    <span>{route.label}</span>
+                  </Link>
+                </SheetClose>
+              ))}
             </div>
           </div>
 

@@ -3,28 +3,8 @@
 import { cn } from '@/utils/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { RiLayoutGridFill } from 'react-icons/ri';
-import { PiMagicWand } from 'react-icons/pi';
-import { MdHistory } from 'react-icons/md';
 import { buttonVariants } from '@/components/ui/button';
-
-export const SidebarRoutes = [
-  {
-    icon: <RiLayoutGridFill className='size-5' />,
-    label: 'Home',
-    path: '/home',
-  },
-  {
-    icon: <MdHistory className='size-5' />,
-    label: 'History',
-    path: '/history',
-  },
-  {
-    icon: <PiMagicWand className='size-5' />,
-    label: 'Prompt library',
-    path: '/prompt-library',
-  },
-];
+import { SidebarRoutes } from './content';
 
 const SidebarItems = () => {
   const pathname = usePathname();

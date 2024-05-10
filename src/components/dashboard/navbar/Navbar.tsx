@@ -1,29 +1,13 @@
-'use client';
-
-import React from 'react';
-import { SelectTheme } from '../SelectTheme';
-import { usePathname } from 'next/navigation';
-import MobileSidebar from './sidebar/MobileSidebar';
+import { SelectTheme } from '../../SelectTheme';
+import MobileSidebar from '../sidebar/MobileSidebar';
 import { RxExternalLink } from 'react-icons/rx';
 import Link from 'next/link';
+import NavTitle from './NavTitle';
 
 const Navbar = () => {
-  const pathname = usePathname();
-
-  const title =
-    pathname === '/home'
-      ? 'Content Writer'
-      : pathname === '/history'
-        ? 'History'
-        : pathname === '/pricing'
-          ? 'Pricing'
-          : pathname === '/prompt-library'
-            ? 'Prompt Library'
-            : 'Dashboard';
-
   return (
     <div className='h-14 flex items-center justify-between mb-3.5'>
-      <div className='text-lg font-semibold text-grey dark:text-white'>{title}</div>
+      <NavTitle />
 
       <div className='flex items-center gap-5'>
         <div className='flex items-center gap-5 mr-2'>
@@ -38,7 +22,8 @@ const Navbar = () => {
             </Link>
           </div>
         </div>
-        <div className='block md:hidden'>
+
+        <div className='inline-block md:hidden'>
           <MobileSidebar />
         </div>
       </div>
