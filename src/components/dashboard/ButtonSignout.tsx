@@ -1,34 +1,29 @@
 // This snippet demonstrates the use of a ButtonSignout component to sign out a user from the application.
 // You can use the ButtonSignout component to create sign-out buttons anywhere in your application.
-
 'use client';
-
 import { FC } from 'react';
 import { supabaseBrowserClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
-import { Button } from '../ui/button';
+import { DropdownMenuItem } from '../ui/dropdown-menu';
+import { FiLogOut } from 'react-icons/fi';
 
 interface ButtonSignoutProps {
   className?: string;
 }
-
-const ButtonSignout: FC<ButtonSignoutProps> = ({ className }) => {
+const ButtonSignout: FC<ButtonSignoutProps> = () => {
   const supabase = supabaseBrowserClient();
-
   const router = useRouter();
 
   return (
-    <Button
-      variant='outline'
+    <DropdownMenuItem
+      className='cursor-pointer text-grey dark:text-white'
       onClick={async () => {
-        // Supabase function to sign out the user
         await supabase.auth.signOut();
         router.refresh();
-      }}
-      className={className}>
-      Sign Out
-    </Button>
+      }}>
+      <FiLogOut className='size-5 mr-2' />
+      Log Out
+    </DropdownMenuItem>
   );
 };
-
 export default ButtonSignout;

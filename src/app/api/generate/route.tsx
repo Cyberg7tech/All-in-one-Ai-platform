@@ -15,39 +15,63 @@ export const POST = async (req: Request) => {
     }
 
     // Parse JSON body from the request to get topic and style
-    const { topic, style } = await req.json();
+    const { topic, style, wordLimit, voice } = await req.json();
 
     // Validate that both topic and style are provided
-    if (!topic || !style) {
-      throw new Error('Missing topic or style in the request body.');
+    if (!topic || !style || !wordLimit || !voice) {
+      throw new Error('Please provide all required fields.');
     }
 
+    // TODO change prompt
     // Construct the prompt for the OpenAI content generation
     const prompt = `Generate 5 social media contents on the topic: ${topic}.
     Make sure the style of the content is around ${style}.
-    
-    The content should be at least 500 characters in length.
-    Please format the result in a simple HTML format as follows and strictly follow the structure below:
-    
-    <section>
-      <h2 style="font-weight: 600; margin-bottom: 0.5rem;">TITLE</h2>
-      <p style="text-align: justify;">DESCRIPTION</p>
-      <hr style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
-    </section>
-    
-    Repeat this structure for each of the 5 social media contents. and first i dont want this`;
+    Voice: ${voice}
+    Language: ${voice}
+`;
 
     // Configuration for the OpenAI API call
     const payload: OpenAIStreamPayload = {
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'user', content: `type JSON ${prompt}` }],
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0,
       stream: true,
       n: 1,
-      model: 'gpt-4-0125-preview',
+      model: 'gpt-4-turbo',
       max_tokens: 2000,
       temperature: 0.9,
+      response_format: { type: 'json_object' },
+      functions: [
+        {
+          name: 'generateSocialMediaContent',
+          description: 'Generate social media content based on the given inputs',
+          parameters: {
+            type: 'object',
+            properties: {
+              content_ideas: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  required: ['title', 'description'],
+                  properties: {
+                    title: {
+                      type: 'string',
+                      description: 'Title of the social media content. maximum 5-7 words',
+                    },
+                    description: {
+                      type: 'string',
+                      description:
+                        'Description of the social media content. must be 100 to 150 words and use icons also if required',
+                    },
+                  },
+                },
+              },
+            },
+            required: ['content_ideas'],
+          },
+        },
+      ],
     };
 
     // Call the OpenAI streaming function with the configured payload

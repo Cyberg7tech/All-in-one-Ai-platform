@@ -3,6 +3,44 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      chat_with_file: {
+        Row: {
+          chat_history: Json | null;
+          created_at: string;
+          file: string;
+          filename: string;
+          history_metadata: string | null;
+          id: string;
+          user_id: string;
+        };
+        Insert: {
+          chat_history?: Json | null;
+          created_at?: string;
+          file: string;
+          filename: string;
+          history_metadata?: string | null;
+          id?: string;
+          user_id: string;
+        };
+        Update: {
+          chat_history?: Json | null;
+          created_at?: string;
+          file?: string;
+          filename?: string;
+          history_metadata?: string | null;
+          id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'chat_with_file_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       content_creations: {
         Row: {
           created_at: string;
@@ -11,6 +49,8 @@ export type Database = {
           style: string;
           topic: string;
           user_id: string;
+          voice: string | null;
+          word_limit: string | null;
         };
         Insert: {
           created_at?: string;
@@ -19,6 +59,8 @@ export type Database = {
           style: string;
           topic: string;
           user_id: string;
+          voice?: string | null;
+          word_limit?: string | null;
         };
         Update: {
           created_at?: string;
@@ -27,6 +69,8 @@ export type Database = {
           style?: string;
           topic?: string;
           user_id?: string;
+          voice?: string | null;
+          word_limit?: string | null;
         };
         Relationships: [
           {
@@ -232,6 +276,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: 'interior_designs_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      multillm_chatgpt: {
+        Row: {
+          chat_history: Json | null;
+          created_at: string;
+          id: string;
+          model: string | null;
+          title: string | null;
+          user_id: string;
+        };
+        Insert: {
+          chat_history?: Json | null;
+          created_at?: string;
+          id?: string;
+          model?: string | null;
+          title?: string | null;
+          user_id: string;
+        };
+        Update: {
+          chat_history?: Json | null;
+          created_at?: string;
+          id?: string;
+          model?: string | null;
+          title?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'multillm_chatgpt_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'users';

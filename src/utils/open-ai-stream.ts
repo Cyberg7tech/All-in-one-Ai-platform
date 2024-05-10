@@ -27,6 +27,40 @@ export interface OpenAIStreamPayload {
   max_tokens: number;
   stream: boolean;
   n: number;
+  response_format: {
+    type: string;
+  };
+  functions: FunctionObject[];
+}
+
+// Defines the structure for the function object within the OpenAIStreamPayload.
+// Includes parameters for the function's name, description, and expected input properties.
+interface FunctionObject {
+  name: string;
+  description: string;
+  parameters: {
+    type: string;
+    properties: {
+      content_ideas: {
+        type: string;
+        items: {
+          type: string;
+          required: string[];
+          properties: {
+            title: {
+              type: string;
+              description: string;
+            };
+            description: {
+              type: string;
+              description: string;
+            };
+          };
+        };
+      };
+    };
+    required: string[];
+  };
 }
 
 export async function OpenAIStream(payload: OpenAIStreamPayload) {
@@ -59,7 +93,7 @@ export async function OpenAIStream(payload: OpenAIStreamPayload) {
 
           try {
             const json = JSON.parse(data);
-            const text = json.choices[0].delta?.content || '';
+            const text = json.choices[0]?.delta?.function_call?.arguments || '';
 
             if (counter < 2 && (text.match(/\n/) || []).length) {
               return;

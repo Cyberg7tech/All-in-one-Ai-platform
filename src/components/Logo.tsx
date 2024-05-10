@@ -9,7 +9,9 @@ export default function Logo() {
     <Link href='/'>
       <div className='flex items-center gap-2'>
         <Image src='/logo.png' className='size-8' width={50} height={50} alt='logo' />
-        <p className='text-2xl not-italic font-bold leading-6'>BuilderKit</p>
+        <p className='text-lg not-italic font-extrabold leading-6 text-[#3C3C3C] dark:text-white'>
+          BuilderKit
+        </p>
       </div>
     </Link>
   );

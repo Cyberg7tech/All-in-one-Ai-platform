@@ -7,7 +7,13 @@ import { getUserDetails, supabaseServerClient } from '@/utils/supabase/server';
 
 // Function to save content creation details to the database
 // Inputs: topic, style, and response details of the content
-export async function saveContent(topic: string, style: string, response: string) {
+export async function saveContent(
+  topic: string,
+  style: string,
+  wordLimit: string,
+  voice: string,
+  response: string
+) {
   const supabase = supabaseServerClient();
 
   try {
@@ -21,6 +27,8 @@ export async function saveContent(topic: string, style: string, response: string
         user_id: userId!,
         topic,
         style,
+        word_limit: wordLimit,
+        voice,
         results: response,
       })
       .select()

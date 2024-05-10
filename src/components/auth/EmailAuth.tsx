@@ -40,7 +40,7 @@ const EmailAuth: FC<EmailAuthProps> = () => {
       return;
     }
 
-    router.push('/generate');
+    router.push('/home');
   };
 
   return (

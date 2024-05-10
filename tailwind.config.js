@@ -71,6 +71,20 @@ module.exports = {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
+      textColor: {
+        grey: '#3E3E3E',
+        'light-gray': '#475467',
+        title: '#70747B',
+        orange: '#FF4D00',
+        'input-title': '#120500',
+      },
+      backgroundColor: {
+        'light-white': '#F9F9F9',
+        'light-dark': '#5a5959',
+      },
+      borderColor: {
+        dark: '#3b3a3a',
+      },
     },
   },
   plugins: [require('tailwindcss-animate')],
