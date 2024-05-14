@@ -1,18 +1,20 @@
 import React from 'react';
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import Image from 'next/image';
-import { IoIosHelpCircleOutline } from 'react-icons/io';
 import AccountSettings from './AccountSettings';
 import { getUserDetails } from '@/utils/supabase/server';
-import { AiFillDollarCircle } from 'react-icons/ai';
+import { AiOutlineQuestionCircle } from 'react-icons/ai';
 import Link from 'next/link';
 import ButtonSignout from '../ButtonSignout';
+import { AiOutlineDollarCircle } from 'react-icons/ai';
+import dynamic from 'next/dynamic';
+
+const DropdownContentWrapper = dynamic(() => import('./DropdownContentWrapper'), { ssr: false });
 
 const UserButton = async () => {
   const user = await getUserDetails();
@@ -31,7 +33,7 @@ const UserButton = async () => {
           <p className='font-semibold text-grey dark:text-white'>{user?.user_metadata?.full_name} </p>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className='rounded-lg m-2'>
+      <DropdownContentWrapper>
         <DropdownMenuItem className='flex items-start gap-3 overflow-hidden'>
           <Image
             src={user?.user_metadata?.avatar_url ?? '/avatar.png'}
@@ -50,9 +52,9 @@ const UserButton = async () => {
         <AccountSettings />
         <DropdownMenuSeparator />
 
-        <a href='mailto:support@example.com'>
+        <a href='mailto:vatsal1811@gmail.com'>
           <DropdownMenuItem className='cursor-pointer text-grey dark:text-white'>
-            <IoIosHelpCircleOutline className='size-5 mr-2' />
+            <AiOutlineQuestionCircle className='size-5 mr-2' />
             Support
           </DropdownMenuItem>
         </a>
@@ -60,7 +62,7 @@ const UserButton = async () => {
         <DropdownMenuSeparator />
         <Link href='/pricing'>
           <DropdownMenuItem className='cursor-pointer text-grey dark:text-white'>
-            <AiFillDollarCircle className='size-5 mr-2' />
+            <AiOutlineDollarCircle className='size-5 mr-2' />
             Pricing
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -68,13 +70,13 @@ const UserButton = async () => {
 
         <ButtonSignout />
 
-        <div className='flex items-center m-2 text-[12px] text-[#83888B]'>
+        <div className='flex items-center m-2 mt-2.5 text-[12px] text-[#83888B]'>
           <a href=''>
             <span className='border-b'> Privacy policy</span> ,
             <span className='border-b'> Terms & conditions</span>
           </a>
         </div>
-      </DropdownMenuContent>
+      </DropdownContentWrapper>
     </DropdownMenu>
   );
 };

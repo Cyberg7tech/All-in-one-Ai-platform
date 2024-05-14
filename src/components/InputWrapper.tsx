@@ -49,7 +49,7 @@ const InputWrapper: FC<InputWrapperProps> = ({
           <div className='flex items-end gap-1 w-full'>
             {/* Display the label text with small font size. */}
             {label && (
-              <p className={cn('text-sm leading-none font-semibold text-input-title dark:text-white')}>
+              <p className={cn('text-sm leading-none font-medium text-input-title dark:text-white')}>
                 {label}
               </p>
             )}

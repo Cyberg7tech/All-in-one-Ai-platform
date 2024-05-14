@@ -24,7 +24,7 @@ const MobileSidebar = () => {
 
             <Link href='/home'>
               <Button size='lg' className='w-full mb-3'>
-                <FaPlus className='mr-2' /> New Chat
+                <FaPlus className='mr-2' /> New Content
               </Button>
             </Link>
 

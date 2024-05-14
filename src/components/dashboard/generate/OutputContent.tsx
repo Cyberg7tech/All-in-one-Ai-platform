@@ -1,8 +1,9 @@
-import MachinLerningIcon from '@/assets/icons/MachinLerningIcon';
 import { toast } from '@/components/ui/use-toast';
 import { errorToast } from '@/utils/utils';
 import React from 'react';
-import { IoMdCopy } from 'react-icons/io';
+import { BiCopy } from 'react-icons/bi';
+import ZeroState from '@/assets/images/zero-state.png';
+import Image from 'next/image';
 
 type Content = {
   title: string;
@@ -24,7 +25,7 @@ const OutputContent = ({ contentData }: Props) => {
         </p>
       )}
       {contentData.length > 0 ? (
-        <div className='space-y-5 overflow-auto max-h-[calc(100vh-130px)]'>
+        <div className='space-y-5 overflow-auto h-full lg:max-h-[calc(100vh-130px)]'>
           {contentData.map((content, index) => (
             <div key={index} className='border border-[#EEE] dark:border-[#272626] p-4 rounded-lg '>
               <div className='flex justify-between items-start'>
@@ -32,8 +33,8 @@ const OutputContent = ({ contentData }: Props) => {
                   {content?.title}
                 </p>
 
-                <IoMdCopy
-                  className='size-10 p-1 rounded border text-[#3e3e3e] border-[#EEE] dark:border-[#272626] cursor-pointer'
+                <BiCopy
+                  className='size-8 p-1.5 rounded border text-[#3e3e3e] dark:text-white border-[#ECECEC] dark:border-[#272626] cursor-pointer'
                   onClick={() => {
                     navigator.clipboard
                       .writeText(`${content.title} \n ${content.description}`)
@@ -46,13 +47,15 @@ const OutputContent = ({ contentData }: Props) => {
                   }}
                 />
               </div>
-              <p className='text-base text-[#4B5563] dark:text-[#9CA3AF]'>{content.description}</p>
+              <p className='text-sm text-grey dark:text-[#9CA3AF] font-medium text-justify'>
+                {content.description}
+              </p>
             </div>
           ))}
         </div>
       ) : (
         <div className='flex justify-center'>
-          <MachinLerningIcon />
+          <Image src={ZeroState} height={478} width={478} alt='zero-state' />
         </div>
       )}
     </div>

@@ -6,35 +6,22 @@
 import EmailAuth from '@/components/auth/EmailAuth';
 import GoogleAuth from '@/components/auth/GoogleAuth';
 import { Separator } from '@/components/ui/separator';
-import Image from 'next/image';
 
 export default function Login() {
   return (
-    <div className='h-screen bg-[#031614] flex'>
-      <div className='w-full md:w-1/2 flex flex-col items-center justify-center px-6'>
-        <h1 className='text-white text-4xl font-medium mb-6'>Content Creator</h1>
-        <h2 className='text-[#8F95B2] text-sm mb-16'>Login or register with your email</h2>
-
-        <div className='w-full sm:max-w-md flex flex-col gap-8 items-center'>
+    <div className='h-screen flex'>
+      <div className='w-full flex flex-col items-center justify-center px-6'>
+        <div className='text-2xl md:text-4xl font-medium mb-6 text-center space-y-2'>
+          <p>AI Content Writer Tool </p>
+          <p className='text-lg'>by Builderkit.ai</p>
+        </div>
+        <h2 className='text-[#3E3E3E] dark:text-[#98A5A8] text-sm mt-3 mb-9 font-medium'>
+          Login or register with your email
+        </h2>
+        <div className='w-full sm:max-w-md flex flex-col gap-6 items-center'>
           <GoogleAuth />
           <Separator className='w-3/4 bg-[#A5ABB6]/20' />
           <EmailAuth />
-        </div>
-      </div>
-
-      <div className='w-1/2 hidden md:flex flex-col items-center justify-center gap-12 bg-gradient-to-r from-[#1C4E4933] to-[#031614]'>
-        <Image src={'/avatar.png'} alt='' width={150} height={250} />
-        <div className='w-2/3 mx-auto text-xl leading-relaxed tracking-wider font-light text-center text-white/65'>
-          <q>
-            I love using genai as it cutdowns my workflow and lore ipsum dolor sit amet lorem ipsum dolor sit
-            amet also
-          </q>
-        </div>
-        <div>
-          <p className='text-xl text-center text-white'>Kiya hector</p>
-          <p className='text-sm text-center italic font-light text-white/80 mt-4'>
-            Founder & CEO <span className='font-normal text-white/90'>@BuilderKit</span>
-          </p>
         </div>
       </div>
     </div>

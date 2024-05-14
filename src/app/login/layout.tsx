@@ -1,3 +1,4 @@
+import { ThemeProvider } from '@/components/theme-provider';
 import { getUserDetails } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import React from 'react';
@@ -15,7 +16,11 @@ const LoginLayout = async ({ children }: Props) => {
     redirect('/home');
   }
 
-  return children;
+  return (
+    <ThemeProvider attribute='class' defaultTheme='dark' enableSystem disableTransitionOnChange>
+      {children}
+    </ThemeProvider>
+  );
 };
 
 export default LoginLayout;

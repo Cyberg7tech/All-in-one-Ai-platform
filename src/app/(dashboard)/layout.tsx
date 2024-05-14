@@ -2,9 +2,9 @@
 
 import { getUserDetails } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { ThemeProvider } from '@/components/theme-provider';
 import Sidebar from '@/components/dashboard/sidebar/Sidebar';
 import Navbar from '@/components/dashboard/navbar/Navbar';
+import { ThemeProvider } from '@/components/theme-provider';
 
 type Props = {
   children: React.ReactNode;
@@ -22,7 +22,7 @@ export default async function Layout({ children }: Props) {
   return (
     // Wraps a ThemeProvider around the Navbar and children components. It allows user to switch between light and dark themes.
     <ThemeProvider attribute='class' defaultTheme='dark' enableSystem disableTransitionOnChange>
-      <div className='h-screen flex gap-3 p-2'>
+      <div className='h-screen flex gap-8 p-2'>
         <div className='w-72 hidden md:flex flex-col'>
           <Sidebar />
         </div>

@@ -51,7 +51,7 @@ const EmailAuth: FC<EmailAuthProps> = () => {
           name='full-name'
           placeholder='Name'
           required
-          className='text-white mb-2 border-[#FFFFFF2B]/15 h-11'
+          className='mb-2 h-11 border border-[#F1F1F1] bg-[#FCFBFB] dark:dark:border-[#1B1B1B] dark:bg-[#101010]'
         />
       )}
       <Input
@@ -59,7 +59,7 @@ const EmailAuth: FC<EmailAuthProps> = () => {
         name='email'
         placeholder='Email'
         required
-        className='text-white mb-2 border-[#FFFFFF2B]/15 h-11'
+        className='mb-2 h-11 border border-[#F1F1F1] bg-[#FCFBFB] dark:dark:border-[#1B1B1B] dark:bg-[#101010]'
       />
       <Input
         id='password'
@@ -67,22 +67,20 @@ const EmailAuth: FC<EmailAuthProps> = () => {
         name='password'
         placeholder='Password'
         required
-        className='text-white mb-6 border-[#FFFFFF2B]/15 h-11'
+        className='mb-10 h-11 border border-[#F1F1F1] bg-[#FCFBFB] dark:dark:border-[#1B1B1B] dark:bg-[#101010]'
       />
 
-      <SubmitButton
-        formAction={handleFormAction}
-        className='h-12 bg-gradient-to-r from-[#26AB75E5] to-[#26AB75]'>
+      <SubmitButton formAction={handleFormAction} className='h-12'>
         {isLogin ? 'Sign In' : 'Sign Up'}
       </SubmitButton>
 
-      <div className='text-sm text-white/50 font-light text-center mt-4'>
+      <div className='text-sm font-light text-center text-[#98A5A8] mt-4'>
         <span>{authStatusLabel}</span>
         <Button
           type='button'
           variant='link'
           onClick={() => setIsLogin(!isLogin)}
-          className='text-sm font-light text-[#18EDA7] px-2'>
+          className='text-sm text-primary px-2 font-semibold'>
           {isLogin ? 'Register' : 'Login'}
         </Button>
       </div>
