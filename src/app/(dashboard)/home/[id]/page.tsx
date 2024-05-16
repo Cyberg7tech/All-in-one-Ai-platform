@@ -14,7 +14,7 @@ export default async function Generate({ params }: { params: { id: string } }) {
     .single();
 
   return (
-    <div className='p-2 flex flex-col justify-between h-[calc(100vh-90px)]'>
+    <div className='flex flex-col justify-between h-[calc(100vh-86px)]'>
       <InputForm generatedData={data as TypeContent | null} />
     </div>
   );

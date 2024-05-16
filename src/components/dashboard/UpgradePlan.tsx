@@ -4,16 +4,16 @@ import Link from 'next/link';
 
 const UpgradePlan = () => {
   return (
-    <div className='p-4 border border-[#ECECEC] dark:border-dark rounded-lg mt-10 w-full'>
-      <p className='font-semibold text-lg mb-3'>Upgrade now to experience the best of builderkit</p>
+    <div className='px-4 py-3.5 border rounded-lg mt-10 w-full'>
+      <p className='font-semibold text-default mb-3'>Upgrade now to experience the best of builderkit</p>
 
-      <ul className='list-disc list-inside '>
+      <ul className='list-disc list-inside font-medium text-sm text-default'>
         <li>Get Access to Advanced Features</li>
         <li>Get Access to Top AI Models</li>
         <li>Get 24/7 Support</li>
       </ul>
       <Link href='/pricing'>
-        <Button className='mt-6 w-full font-semibold text-grey text-sm' variant='buy-now'>
+        <Button size='lg' variant='secondary' className='mt-6 w-full'>
           Upgrade Plan
         </Button>
       </Link>

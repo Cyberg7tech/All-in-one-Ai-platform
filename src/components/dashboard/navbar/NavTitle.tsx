@@ -8,20 +8,19 @@ interface NavTitleProps {}
 const NavTitle: FC<NavTitleProps> = () => {
   const pathname = usePathname();
 
-  const title =
-    pathname === '/home'
-      ? 'Content Writer'
-      : pathname === '/history'
-        ? 'History'
-        : pathname === '/pricing'
-          ? 'Pricing'
-          : pathname === '/prompt-library'
-            ? 'Prompt Library'
-            : 'Dashboard';
+  const title = pathname.includes('/home')
+    ? 'Content Writer'
+    : pathname === '/history'
+      ? 'History'
+      : pathname === '/pricing'
+        ? 'Pricing'
+        : pathname === '/prompt-library'
+          ? 'Prompt Library'
+          : 'Content Writer';
 
   return (
     <>
-      <div className='text-lg font-semibold text-grey dark:text-white'>{title}</div>
+      <div className='text-lg font-semibold text-default'>{title}</div>
     </>
   );
 };

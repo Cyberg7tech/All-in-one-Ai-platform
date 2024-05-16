@@ -16,25 +16,23 @@ type Props = {
 
 const OutputContent = ({ contentData }: Props) => {
   return (
-    <div className='w-full lg:w-1/2 pl-0 lg:pl-8 lg:border-l border-[#ECECEC] dark:border-[#272626]'>
+    <div className='w-full lg:w-1/2 pl-0 lg:pl-8 lg:border-l'>
       {contentData.length > 0 ? (
         <p className='text-sm font-medium mb-4'>Output</p>
       ) : (
-        <p className='text-base font-medium text-center mb-16 mt-10 text-input-title dark:text-white'>
+        <p className='text-base font-medium text-center mb-16 mt-10 text-default'>
           Your output will be displayed here
         </p>
       )}
       {contentData.length > 0 ? (
-        <div className='space-y-5 overflow-auto h-full lg:max-h-[calc(100vh-130px)]'>
+        <div className='space-y-5 overflow-auto h-full lg:max-h-[calc(100vh-122px)]'>
           {contentData.map((content, index) => (
-            <div key={index} className='border border-[#EEE] dark:border-[#272626] p-4 rounded-lg '>
+            <div key={index} className='border p-4 rounded-lg '>
               <div className='flex justify-between items-start'>
-                <p className='text-lg font-medium text-[#333333] dark:text-[#E5E7EB] mb-2'>
-                  {content?.title}
-                </p>
+                <p className='text-lg font-medium text-default mb-2'>{content?.title}</p>
 
                 <BiCopy
-                  className='size-8 p-1.5 rounded border text-[#3e3e3e] dark:text-white border-[#ECECEC] dark:border-[#272626] cursor-pointer'
+                  className='size-8 p-1.5 rounded border text-default cursor-pointer'
                   onClick={() => {
                     navigator.clipboard
                       .writeText(`${content.title} \n ${content.description}`)
@@ -47,9 +45,7 @@ const OutputContent = ({ contentData }: Props) => {
                   }}
                 />
               </div>
-              <p className='text-sm text-grey dark:text-[#9CA3AF] font-medium text-justify'>
-                {content.description}
-              </p>
+              <p className='text-sm text-default font-medium text-justify'>{content.description}</p>
             </div>
           ))}
         </div>

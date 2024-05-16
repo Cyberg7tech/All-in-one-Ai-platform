@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -13,6 +12,8 @@ import Link from 'next/link';
 import ButtonSignout from '../ButtonSignout';
 import { AiOutlineDollarCircle } from 'react-icons/ai';
 import dynamic from 'next/dynamic';
+import { cn } from '@/utils/utils';
+import { buttonVariants } from '@/components/ui/button';
 
 const DropdownContentWrapper = dynamic(() => import('./DropdownContentWrapper'), { ssr: false });
 
@@ -22,19 +23,23 @@ const UserButton = async () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className='bg-light-white dark:bg-light-dark/10 rounded-lg px-1.5 py-2.5 flex items-center gap-2 overflow-hidden cursor-pointer'>
+        <div
+          className={cn(
+            buttonVariants({ variant: 'secondary', size: 'lg' }),
+            'flex justify-start px-1.5 py-2.5 !w-full gap-2 cursor-pointer'
+          )}>
           <Image
             src={user?.user_metadata?.avatar_url ?? '/avatar.png'}
-            className='size-8 rounded-full'
+            className='size-5 rounded-full'
             width={20}
             height={20}
             alt='avatar'
           />
-          <p className='font-semibold text-grey dark:text-white'>{user?.user_metadata?.full_name} </p>
+          <p className='font-semibold text-default'>{user?.user_metadata?.full_name} </p>
         </div>
       </DropdownMenuTrigger>
       <DropdownContentWrapper>
-        <DropdownMenuItem className='flex items-start gap-3 overflow-hidden'>
+        <div className='flex items-center gap-3 overflow-hidden px-2 py-1.5'>
           <Image
             src={user?.user_metadata?.avatar_url ?? '/avatar.png'}
             className='size-10 rounded-full'
@@ -43,17 +48,18 @@ const UserButton = async () => {
             alt='avatar'
           />
           <div>
-            <p className='font-semibold text-grey dark:text-white'>{user?.user_metadata?.full_name}</p>
-            <p className='text-light-grey dark:text-white/90'>{user?.email}</p>
+            <p className='font-semibold text-default'>{user?.user_metadata?.full_name}</p>
+            <p className='text-default dark:text-white/90'>{user?.email}</p>
           </div>
-        </DropdownMenuItem>
+        </div>
         <DropdownMenuSeparator />
 
         <AccountSettings />
+
         <DropdownMenuSeparator />
 
         <a href='mailto:vatsal1811@gmail.com'>
-          <DropdownMenuItem className='cursor-pointer text-grey dark:text-white'>
+          <DropdownMenuItem className='cursor-pointer text-default'>
             <AiOutlineQuestionCircle className='size-5 mr-2' />
             Support
           </DropdownMenuItem>
@@ -61,7 +67,7 @@ const UserButton = async () => {
 
         <DropdownMenuSeparator />
         <Link href='/pricing'>
-          <DropdownMenuItem className='cursor-pointer text-grey dark:text-white'>
+          <DropdownMenuItem className='cursor-pointer text-default'>
             <AiOutlineDollarCircle className='size-5 mr-2' />
             Pricing
           </DropdownMenuItem>
@@ -70,7 +76,7 @@ const UserButton = async () => {
 
         <ButtonSignout />
 
-        <div className='flex items-center m-2 mt-2.5 text-[12px] text-[#83888B]'>
+        <div className='flex items-center m-2 mt-2.5 text-xs text-subtle'>
           <a href=''>
             <span className='border-b'> Privacy policy</span> ,
             <span className='border-b'> Terms & conditions</span>

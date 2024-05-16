@@ -16,7 +16,7 @@ const ButtonSignout: FC<ButtonSignoutProps> = () => {
 
   return (
     <DropdownMenuItem
-      className='cursor-pointer text-grey dark:text-white'
+      className='cursor-pointer text-default'
       onClick={async () => {
         await supabase.auth.signOut();
         router.refresh();

@@ -2,7 +2,7 @@ import { toast } from '@/components/ui/use-toast';
 import { supabaseBrowserClient } from '@/utils/supabase/client';
 import { cn, errorToast } from '@/utils/utils';
 import { useRouter } from 'next/navigation';
-import { FaRegTrashAlt } from 'react-icons/fa';
+import { LuTrash2 } from 'react-icons/lu';
 import {
   Dialog,
   DialogClose,
@@ -25,7 +25,7 @@ const ModalDeleteContent = ({ row }: { row: any }) => {
       const { error } = await supabase.from('content_creations').delete().eq('id', row.original.id);
 
       if (!error) {
-        toast({ title: 'Content deleted successfully', variant: 'default' });
+        toast({ title: 'Content deleted successfully', variant: 'destructive' });
         router.refresh();
       } else {
         errorToast('Something went wrong, please try again');
@@ -41,7 +41,7 @@ const ModalDeleteContent = ({ row }: { row: any }) => {
       <DialogTrigger asChild>
         <div className='flex justify-end'>
           <div className='rounded p-1 border cursor-pointer'>
-            <FaRegTrashAlt className='size-5' />
+            <LuTrash2 className='size-4' />
           </div>
         </div>
       </DialogTrigger>

@@ -42,9 +42,9 @@ const Footer = () => {
       </div>
 
       <div className='border-t border-white/10 space-y-12 px-4 py-16'>
-        <ul className='flex flex-col md:flex-row gap-5 justify-center text-[#A5ABB6]'>
+        <ul className='flex flex-col md:flex-row gap-5 justify-center text-[#ABABB0]'>
           {footerItems.map((item, index) => (
-            <li key={index} className='text-[#A5ABB6] text-base font-normal'>
+            <li key={index} className='text-[#ABABB0] text-base font-normal'>
               {item}
             </li>
           ))}

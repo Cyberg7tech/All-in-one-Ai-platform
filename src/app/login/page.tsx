@@ -15,12 +15,10 @@ export default function Login() {
           <p>AI Content Writer Tool </p>
           <p className='text-lg'>by Builderkit.ai</p>
         </div>
-        <h2 className='text-[#3E3E3E] dark:text-[#98A5A8] text-sm mt-3 mb-9 font-medium'>
-          Login or register with your email
-        </h2>
+        <h2 className='text-default text-sm mt-3 mb-9 font-medium'>Login or register with your email</h2>
         <div className='w-full sm:max-w-md flex flex-col gap-6 items-center'>
           <GoogleAuth />
-          <Separator className='w-3/4 bg-[#A5ABB6]/20' />
+          <Separator className='w-3/4' />
           <EmailAuth />
         </div>
       </div>

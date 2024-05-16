@@ -51,7 +51,7 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
   const parsedContentData = generatedData?.results ? JSON.parse(generatedData.results) : {};
 
   const [contentData, setContentData] = useState(parsedContentData.content_ideas ?? []);
-  const [howToUse, sethowToUse] = useState(firstTime);
+  const [howToUse, setHowToUse] = useState(firstTime);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -121,14 +121,14 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
 
   if (howToUse) {
     return (
-      <div className='flex flex-col justify-between w-full h-[calc(100vh-90px)] '>
-        <div className='border rounded-lg blue-gradient border-[#ECECEC] dark:border-dark px-6 py-5 w-full text-white'>
+      <div className='flex flex-col justify-between w-full h-[calc(100vh-86px)] '>
+        <div className='border rounded-lg blue-gradient px-6 py-5 w-full text-white'>
           <div className='flex items-center justify-between mb-3'>
             <p className='text-lg font-semibold'>How to use the builder kit tools</p>
             <Cross2Icon
               className='cursor-pointer size-6'
               onClick={() => {
-                sethowToUse(false);
+                setHowToUse(false);
               }}
             />
           </div>
@@ -136,8 +136,8 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
             <li className='flex items-center gap-2'>
               1. Click on
               <div
-                className='flex items-center w-fit border border-[#E2E2E2] rounded gap-0.5 py-0.5 px-1 text-[10px] font-medium text-[#91908F] bg-white cursor-pointer'
-                onClick={() => sethowToUse(false)}>
+                className='flex items-center w-fit rounded gap-0.5 py-0.5 px-1 text-[10px] font-medium text-default dark:text-black bg-white cursor-pointer'
+                onClick={() => setHowToUse(false)}>
                 <PlusIcon />
                 New Content
               </div>
@@ -154,8 +154,8 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
   return (
     <div className='block lg:flex items-start space-y-10 lg:space-y-0'>
       <div className='w-full lg:w-1/2 mr-0 lg:mr-8'>
-        <form>
-          <InputWrapper id='topic' label='What do you want to Generate?' className='mb-3'>
+        <form className='space-y-3'>
+          <InputWrapper id='topic' label='What do you want to Generate?'>
             <Input
               id='topic'
               name='topic'
@@ -166,7 +166,7 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
             />
           </InputWrapper>
 
-          <InputWrapper id='wordLimit' label='Word Limit' className='mb-3'>
+          <InputWrapper id='wordLimit' label='Word Limit'>
             <Input
               id='wordLimit'
               name='wordLimit'
@@ -176,7 +176,7 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
             />
           </InputWrapper>
 
-          <InputWrapper id='style' label='Style' className='mb-3'>
+          <InputWrapper id='style' label='Style'>
             <Input
               id='style'
               name='style'
@@ -186,7 +186,7 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
             />
           </InputWrapper>
 
-          <InputWrapper id='voice' label='Voice' className='mb-3'>
+          <InputWrapper id='voice' label='Voice'>
             <Input
               id='voice'
               name='voice'
@@ -196,29 +196,27 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
             />
           </InputWrapper>
 
-          <SubmitButton className='w-full rounded-lg mt-6' formAction={handleGeneration}>
+          <SubmitButton className='w-full !mt-8' formAction={handleGeneration}>
             Generate
           </SubmitButton>
         </form>
 
         <hr className='my-8' />
 
-        <p className='font-semibold text-sm mb-4 text-input-title dark:text-white'>
-          Start with one of these Prompts 👇🏻
-        </p>
+        <p className='font-semibold text-sm mb-4 text-default'>Start with one of these Prompts 👇🏻</p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
           {prompts.map((item, index) => (
             <div
               key={index}
-              className='px-4 py-5 space-y-2 border border-[#E4E4E4] dark:border-[#272626] rounded cursor-pointer'
+              className='px-4 py-5 space-y-2 border rounded cursor-pointer'
               onClick={() => {
                 setFormData({
                   ...item,
                 });
               }}>
-              <p className='font-semibold text-[#18181B] dark:text-white'>{item.topic}</p>
-              <p className='text-sm text-[#83888B] dark:text-white/90'>{item.style}</p>
+              <p className='font-semibold text-default'>{item.topic}</p>
+              <p className='text-sm text-subtle'>{item.style}</p>
             </div>
           ))}
         </div>

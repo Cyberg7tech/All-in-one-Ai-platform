@@ -48,11 +48,7 @@ const InputWrapper: FC<InputWrapperProps> = ({
           {extraOption && <div className='w-4'>{extraOption}</div>}
           <div className='flex items-end gap-1 w-full'>
             {/* Display the label text with small font size. */}
-            {label && (
-              <p className={cn('text-sm leading-none font-medium text-input-title dark:text-white')}>
-                {label}
-              </p>
-            )}
+            {label && <p className='text-sm leading-none font-medium text-default'>{label}</p>}
             {/* Comment text displayed next to the label. */}
             {comment && <p className='text-xs font-light text-gray-500'>({comment})</p>}
             {/* Info popover icon or component positioned on the far right. */}

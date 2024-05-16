@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import ZeroState from '@/assets/images/zero-state.png';
+import { useState } from 'react';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -18,11 +19,20 @@ interface DataTableProps<TData, TValue> {
 }
 
 export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 5,
+  });
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: setPagination,
+    state: {
+      pagination,
+    },
   });
 
   return (
@@ -34,7 +44,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className='px-4 text-[12px] font-normal uppercase'>
+                    <TableHead key={header.id} className='px-4 text-xs font-normal uppercase'>
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
@@ -49,9 +59,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className='border-b p-4 font-semibold text-grey dark:text-white/90'>
+                    <TableCell key={cell.id} className='border-b p-4 font-medium text-default text-sm'>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -61,8 +69,8 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
               <TableRow>
                 <TableCell colSpan={columns.length} className='mx-auto'>
                   <div className='flex flex-col justify-center items-center'>
-                    <Image src={ZeroState} height={478} width={478} alt='zero-state' />
-                    <p className='text-[#B8B8B8] font-medium mt-4'>No content generated yet</p>
+                    <Image src={ZeroState} height={250} width={250} alt='zero-state' />
+                    <p className='text-subtle font-medium mt-4'>No content generated yet</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -70,7 +78,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
           </TableBody>
         </Table>
       </div>
-      {data && (
+      {data.length !== 0 && (
         <div className='flex items-center justify-end space-x-2 py-4'>
           <Button
             variant='outline'

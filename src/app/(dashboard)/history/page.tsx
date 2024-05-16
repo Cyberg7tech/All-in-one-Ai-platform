@@ -16,7 +16,7 @@ const page = async () => {
     .not('topic', 'is', null);
 
   return (
-    <div className='p-2 flex flex-col justify-between items-center h-[calc(100vh-83px)]'>
+    <div className='flex flex-col justify-between items-center h-[calc(100vh-86px)]'>
       <div className='w-full'>
         <DataTable columns={columns} data={data ?? []} />
       </div>

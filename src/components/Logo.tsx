@@ -12,7 +12,7 @@ export default function Logo() {
   const pathname = usePathname();
   const isHomePage = pathname === '/';
 
-  const logoSrc = isHomePage || theme === 'dark' ? '/dark-logo.png' : '/light-logo.png';
+  const logoSrc = isHomePage || theme === 'light' ? '/light-logo.png' : '/dark-logo.png';
 
   return (
     <Link href='https://www.builderkit.ai/#pricing'>

@@ -31,7 +31,12 @@ const MobileSidebar = () => {
             <div className='space-y-1'>
               {SidebarRoutes.map((route, index) => (
                 <SheetClose asChild key={index}>
-                  <Link href={route.path} className={cn(buttonVariants({ variant: 'light-gray' }), 'w-full')}>
+                  <Link
+                    href={route.path}
+                    className={cn(
+                      buttonVariants({ variant: 'secondary' }),
+                      'w-full flex justify-start bg-transparent gap-2 font-semibold border border-transparent hover:border-border rounded-lg text-subtle tracking-tight'
+                    )}>
                     <div>{route.icon}</div>
                     <span>{route.label}</span>
                   </Link>

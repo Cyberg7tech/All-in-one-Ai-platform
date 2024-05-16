@@ -14,7 +14,7 @@ const Hero = () => {
       <div className='flex flex-col justify-center '>
         <div className='space-y-[18px] max-w-2xl mx-auto'>
           <div className='px-4 py-[6px] gap-2 bg-[#006C40]/30 rounded-full w-[15.3rem] mx-auto'>
-            <div className='text-[#18EDA7] text-[14px] font-semibold flex items-center gap-2'>
+            <div className='text-[#18EDA7] text-sm font-semibold flex items-center gap-2'>
               Unlock Your Creative Spark! <FaArrowRight className='size-3' />
             </div>
           </div>

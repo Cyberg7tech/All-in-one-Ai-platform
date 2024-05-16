@@ -11,17 +11,17 @@ const page = () => {
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
           {Array.from({ length: 10 }, (_, index) => (
             <Card key={index}>
-              <CardHeader className='pb-2 font-medium text-[#18181B] dark:text-white'>
+              <CardHeader className='pb-2 font-medium text-default'>
                 <p>Academic Research</p>
               </CardHeader>
               <CardContent>
-                <p className='text-[#83888B] text-sm'>
+                <p className='text-subtle/50 text-sm'>
                   Write in a scholarly tone, utilising accurate, authoritative sources and citations. Ensure
                   that your...
                 </p>
               </CardContent>
               <CardFooter>
-                <Button className='w-full' variant='gray'>
+                <Button className='w-full bg-muted hover:bg-muted/80'>
                   <FaPlus className='mr-2' /> Create content
                 </Button>
               </CardFooter>

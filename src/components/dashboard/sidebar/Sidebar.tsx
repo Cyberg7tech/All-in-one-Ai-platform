@@ -1,14 +1,15 @@
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { FaPlus } from 'react-icons/fa';
-import SidebarItems from './SidebarItems';
+import SidebarItem from './SidebarItem';
 import UserButton from './UserButton';
 import Link from 'next/link';
 import SidebarUpgradePlan from './SidebarUpgradePlan';
+import { SidebarRoutes } from './content';
 
 const Sidebar = () => {
   return (
-    <div className='h-full border border-[#F2F2F2] dark:border-[#272626] rounded-xl p-2.5 flex flex-col justify-between'>
+    <div className='h-full border rounded-xl p-2.5 pb-3.5 flex flex-col justify-between'>
       <div>
         <div className='mb-6'>
           <Logo />
@@ -20,7 +21,9 @@ const Sidebar = () => {
           </Button>
         </Link>
 
-        <SidebarItems />
+        <div className='space-y-1'>
+          {SidebarRoutes?.map((item) => <SidebarItem key={item.label} route={item} />)}
+        </div>
       </div>
 
       <div className='space-y-3'>

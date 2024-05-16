@@ -3,6 +3,7 @@ import MobileSidebar from '../sidebar/MobileSidebar';
 import { RxExternalLink } from 'react-icons/rx';
 import Link from 'next/link';
 import NavTitle from './NavTitle';
+import { Button } from '@/components/ui/button';
 
 const Navbar = () => {
   return (
@@ -15,10 +16,10 @@ const Navbar = () => {
 
           <div className='hidden md:flex'>
             <Link href='https://apps.builderkit.ai/' target='_blank'>
-              <div className='bg-light-white dark:bg-light-dark/10 rounded-lg px-4 py-2.5 flex items-center gap-2 cursor-pointer'>
+              <Button variant='secondary' className='gap-2'>
                 Demo Apps
                 <RxExternalLink />
-              </div>
+              </Button>
             </Link>
           </div>
         </div>

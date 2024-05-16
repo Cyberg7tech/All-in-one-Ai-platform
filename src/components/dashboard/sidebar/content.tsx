@@ -1,5 +1,4 @@
 import { RiLayoutGridFill } from 'react-icons/ri';
-import { PiMagicWand } from 'react-icons/pi';
 import { MdHistory } from 'react-icons/md';
 
 export const SidebarRoutes = [
