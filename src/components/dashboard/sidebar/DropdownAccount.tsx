@@ -17,7 +17,7 @@ import { buttonVariants } from '@/components/ui/button';
 
 const DropdownContentWrapper = dynamic(() => import('./DropdownContentWrapper'), { ssr: false });
 
-const UserButton = async () => {
+const DropdownAccount = async () => {
   const user = await getUserDetails();
 
   return (
@@ -87,4 +87,4 @@ const UserButton = async () => {
   );
 };
 
-export default UserButton;
+export default DropdownAccount;

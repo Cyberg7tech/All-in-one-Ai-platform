@@ -1,13 +1,13 @@
-import { Sheet, SheetClose, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { FaBars } from 'react-icons/fa6';
 import Logo from '@/components/Logo';
 import Link from 'next/link';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { FaPlus } from 'react-icons/fa';
-import UserButton from './UserButton';
+import DropdownAccount from './DropdownAccount';
 import SidebarUpgradePlan from './SidebarUpgradePlan';
 import { SidebarRoutes } from './content';
-import { cn } from '@/utils/utils';
+import MobileSidebarItem from './MobileSidebarItem';
 
 const MobileSidebar = () => {
   return (
@@ -30,25 +30,14 @@ const MobileSidebar = () => {
 
             <div className='space-y-1'>
               {SidebarRoutes.map((route, index) => (
-                <SheetClose asChild key={index}>
-                  <Link
-                    href={route.path}
-                    className={cn(
-                      buttonVariants({ variant: 'secondary' }),
-                      'w-full flex justify-start bg-transparent gap-2 font-semibold border border-transparent hover:border-border rounded-lg text-subtle tracking-tight'
-                    )}>
-                    <div>{route.icon}</div>
-                    <span>{route.label}</span>
-                  </Link>
-                </SheetClose>
+                <MobileSidebarItem key={index} route={route} />
               ))}
             </div>
           </div>
 
           <div className='space-y-3'>
             <SidebarUpgradePlan />
-
-            <UserButton />
+            <DropdownAccount />
           </div>
         </div>
       </SheetContent>

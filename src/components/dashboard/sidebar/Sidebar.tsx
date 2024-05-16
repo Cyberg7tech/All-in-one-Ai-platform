@@ -2,7 +2,7 @@ import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { FaPlus } from 'react-icons/fa';
 import SidebarItem from './SidebarItem';
-import UserButton from './UserButton';
+import DropdownAccount from './DropdownAccount';
 import Link from 'next/link';
 import SidebarUpgradePlan from './SidebarUpgradePlan';
 import { SidebarRoutes } from './content';
@@ -28,8 +28,7 @@ const Sidebar = () => {
 
       <div className='space-y-3'>
         <SidebarUpgradePlan />
-
-        <UserButton />
+        <DropdownAccount />
       </div>
     </div>
   );
