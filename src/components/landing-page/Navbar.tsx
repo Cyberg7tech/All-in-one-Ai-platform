@@ -47,7 +47,7 @@ export default async function Navbar() {
                   </li>
                 ))}
               </ul>
-              <Button className='rounded-lg w-full flex border border-[#51DCA3] green-btn-gradient'>
+              <Button className='rounded-lg w-full flex border border-lp-border green-btn-gradient'>
                 Sign Up
               </Button>
             </div>

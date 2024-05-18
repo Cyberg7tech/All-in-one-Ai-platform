@@ -10,12 +10,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { FiArrowUpRight } from 'react-icons/fi';
 import Link from 'next/link';
-import { getUserDetails } from '@/utils/supabase/server';
 import { LuUser } from 'react-icons/lu';
+import { User } from '@supabase/supabase-js';
 
-const AccountSettings = async () => {
-  const user = await getUserDetails();
-
+const AccountSettings = async ({ user }: { user: User }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>

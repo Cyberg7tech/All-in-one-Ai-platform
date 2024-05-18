@@ -7,6 +7,7 @@ import { FaDribbble, FaInstagram } from 'react-icons/fa';
 import { MdOutlineEmail } from 'react-icons/md';
 import Link from 'next/link';
 import ButtonCta from './ButtonCta';
+import { cn } from '@/utils/utils';
 
 const footerItems = ['Home', 'Pricing', 'FAQ', 'Changelog', 'License', 'Terms', 'Contact'];
 
@@ -20,15 +21,16 @@ const socialMediaIcons = [
 const Footer = () => {
   return (
     <div className='space-y-[154px] mt-44'>
-      <div className='space-y-10 max-w-[676px] mx-auto px-4'>
-        <h1 className='text-[#ABABB0] text-5xl md:text-[56px] text-center font-medium'>
-          Unleash the power of AI
-        </h1>
-        <p className='text-[#ABABB0] text-lg md:text-2xl font-normal leading-[30px] md:leading-[34px] tracking-[0.2px] text-center'>
-          Feel free to customize your reports. Utilize our super-table instead of exporting and importing data
+      <div className='space-y-10 mx-auto px-4'>
+        <p className='header-gradient text-5xl md:text-[56px] text-center font-medium leading-[64px]'>
+          Unleash the power of AI with GenAI
+        </p>
+        <p className='text-lp-subtle text-lg md:text-[22px] font-normal leading-[30px] md:leading-[34px] tracking-[0.2px] text-center max-w-3xl mx-auto'>
+          We share thoughts on design, tools, and productivity. If you don't want to miss them, subscribe to
+          our newsletter on Substack.
         </p>
         <div className='w-fit mt-8 mx-auto'>
-          <ButtonCta />
+          <ButtonCta className='px-10 py-3.5 h-10' />
         </div>
         <div className='flex gap-10 justify-center'>
           {socialMediaIcons.map((socialMedia, index) => (
@@ -42,9 +44,11 @@ const Footer = () => {
       </div>
 
       <div className='border-t border-white/10 space-y-12 px-4 py-16'>
-        <ul className='flex flex-col md:flex-row gap-5 justify-center text-[#ABABB0]'>
+        <ul className='flex flex-col md:flex-row gap-5 justify-center'>
           {footerItems.map((item, index) => (
-            <li key={index} className='text-[#ABABB0] text-base font-normal'>
+            <li
+              key={index}
+              className={cn(item === 'Home' ? 'text-white' : 'text-[#A5ABB6]', 'text-base font-normal')}>
               {item}
             </li>
           ))}

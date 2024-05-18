@@ -13,8 +13,8 @@ export default async function Home() {
   return (
     <>
       <Navbar />
-      <div className='bg-[#031614]'>
-        <div className='max-w-6xl mx-auto pt-10'>
+      <div className='bg-lp-background'>
+        <div className='max-w-6xl mx-auto pt-20'>
           <Hero />
           <FeaturedOn />
           <Features />

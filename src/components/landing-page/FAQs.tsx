@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import PlusIcon from '@/assets/icons/PlusIcon';
 import MinusIcon from '@/assets/icons/MinusIcon'; // Import your MinusIcon component
+import { cn } from '@/utils/utils';
 
 const accordionData = [
   {
@@ -36,10 +37,10 @@ const FAQs = () => {
   return (
     <div id='faq' className='space-y-16 mt-44'>
       <div className='space-y-5 px-4'>
-        <h1 className='text-center text-5xl md:text-[56px] font-medium leading-[56px] pricing-header '>
+        <h1 className='text-center text-5xl md:text-[56px] font-medium leading-[56px] header-gradient'>
           Need help?
         </h1>
-        <p className='text-[#C8C8C8] text-center text-lg md:text-xl not-italic font-normal leading-8 max-w-3xl mx-auto'>
+        <p className='text-light-grey text-center text-lg md:text-xl  font-normal leading-8 max-w-3xl mx-auto'>
           Don't worry, we got you. Here are some answers for your questions.
         </p>
       </div>
@@ -48,12 +49,15 @@ const FAQs = () => {
           {accordionData.map((item, index) => (
             <AccordionItem key={index} value={item.value} className='px-5'>
               <AccordionTrigger onClick={() => toggleAccordion(item.value)}>
-                <div className='flex items-center gap-4 text-base md:text-lg not-italic font-medium leading-7 text-white '>
+                <div className='flex items-center gap-4 text-base md:text-lg font-medium leading-7 text-white '>
                   {openAccordion === item.value ? <MinusIcon /> : <PlusIcon />} {item.question}
                 </div>
               </AccordionTrigger>
               <AccordionContent
-                className={`text-gray-600 text-base not-italic font-normal leading-8 ml-11 transition-max-height duration-300 ease-in-out ${openAccordion === item.value ? 'max-h-screen' : 'max-h-0'}`}>
+                className={cn(
+                  openAccordion === item.value ? 'max-h-screen' : 'max-h-0',
+                  'text-[#808080] text-base  font-normal leading-8 ml-11 transition-max-height duration-300 ease-in-out'
+                )}>
                 {item.answer}
               </AccordionContent>
             </AccordionItem>

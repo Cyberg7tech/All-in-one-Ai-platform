@@ -73,6 +73,24 @@ module.exports = {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
+      borderColor: {
+        // Green border color for landing page buttons
+        'lp-border': '#51DCA3',
+      },
+      textColor: {
+        // Description color for landing page
+        'lp-subtle': '#ABABB0',
+        // Green color for landing page buttons
+        'lp-primary': '#18EDA7',
+        // Light-grey text for landing page
+        'light-grey': '#C9C9C9',
+      },
+      backgroundColor: {
+        // Light green color for landing page
+        'lp-light-background': '#26AB75',
+        // Dark green color for landing page background
+        'lp-background': '#031614',
+      },
     },
   },
   plugins: [require('tailwindcss-animate')],
