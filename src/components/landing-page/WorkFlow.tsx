@@ -8,7 +8,7 @@ import multipleCard from '@/assets/images/multiple-cards.png';
 
 const WorkFlow = () => {
   return (
-    <div className='space-y-[96px] p-6 mt-44'>
+    <div className='space-y-[96px] p-6 mt-[200px]'>
       <div className='space-y-6 mx-auto'>
         <h1 className='header-gradient text-5xl md:text-[56px] text-center font-medium'>
           Unleash the power of AI

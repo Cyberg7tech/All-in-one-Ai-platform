@@ -7,7 +7,7 @@ import { FaGraduationCap } from 'react-icons/fa';
 
 const Features = () => {
   return (
-    <div id='features' className='space-y-[96px] mt-44'>
+    <div id='features' className='space-y-[96px]'>
       <div className='space-y-5 px-4'>
         <h1 className='text-center text-5xl md:text-[56px] font-medium leading-[56px] header-gradient'>
           Revolutionize your workflow

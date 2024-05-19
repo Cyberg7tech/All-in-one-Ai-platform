@@ -9,7 +9,14 @@ import Link from 'next/link';
 import ButtonCta from './ButtonCta';
 import { cn } from '@/utils/utils';
 
-const footerItems = ['Home', 'Pricing', 'FAQ', 'Changelog', 'License', 'Terms', 'Contact'];
+const footerItems = [
+  { name: 'Home', href: '/' },
+  { name: 'Pricing', href: '/#pricing' },
+  { name: 'FAQ', href: '/#faq' },
+  { name: 'License', href: '/' },
+  { name: 'Terms', href: '/' },
+  { name: 'Contact', href: 'mailto:vatsal1811@gmail.com' },
+];
 
 const socialMediaIcons = [
   { icon: <CiTwitter className='size-5 text-white' />, name: 'Twitter' },
@@ -20,7 +27,7 @@ const socialMediaIcons = [
 
 const Footer = () => {
   return (
-    <div className='space-y-[154px] mt-44'>
+    <div className='space-y-[154px] mt-[200px]'>
       <div className='space-y-10 mx-auto px-4'>
         <p className='header-gradient text-5xl md:text-[56px] text-center font-medium leading-[64px]'>
           Unleash the power of AI with GenAI
@@ -46,11 +53,12 @@ const Footer = () => {
       <div className='border-t border-white/10 space-y-12 px-4 py-16'>
         <ul className='flex flex-col md:flex-row gap-5 justify-center'>
           {footerItems.map((item, index) => (
-            <li
+            <Link
+              href={item.href}
               key={index}
-              className={cn(item === 'Home' ? 'text-white' : 'text-[#A5ABB6]', 'text-base font-normal')}>
-              {item}
-            </li>
+              className={cn(item.name === 'Home' ? 'text-white' : 'text-[#A5ABB6]', 'text-base font-normal')}>
+              {item.name}
+            </Link>
           ))}
         </ul>
 

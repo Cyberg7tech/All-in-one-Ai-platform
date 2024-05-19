@@ -35,7 +35,7 @@ const FAQs = () => {
   };
 
   return (
-    <div id='faq' className='space-y-16 mt-44'>
+    <div id='faq' className='space-y-16 mt-[200px]'>
       <div className='space-y-5 px-4'>
         <h1 className='text-center text-5xl md:text-[56px] font-medium leading-[56px] header-gradient'>
           Need help?

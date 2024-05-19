@@ -7,13 +7,19 @@ import { useTheme } from 'next-themes';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function Logo() {
+  const [logoSrc, setLogoSrc] = useState<string>('/light-logo.png');
+
   const { theme } = useTheme();
   const pathname = usePathname();
   const isHomePage = pathname === '/';
 
-  const logoSrc = isHomePage || theme === 'dark' ? '/light-logo.png' : '/dark-logo.png';
+  useEffect(() => {
+    const src = isHomePage || theme === 'dark' ? '/light-logo.png' : '/dark-logo.png';
+    setLogoSrc(src);
+  }, [isHomePage, theme]);
 
   return (
     <Link href='https://www.builderkit.ai/#pricing'>

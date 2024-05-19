@@ -8,7 +8,6 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { FaFire } from 'react-icons/fa';
 import CheckedIcon from '@/assets/icons/CheckedIcon';
-import { CiGift } from 'react-icons/ci';
 import { cn } from '@/utils/utils';
 import GreenBadge from '@/assets/icons/GreenBadge';
 
@@ -55,7 +54,7 @@ const ListItem = ({ text }: { text: string }) => (
 
 const Pricing = () => {
   return (
-    <div className='space-y-[120px] px-6 mt-44'>
+    <div id='pricing' className='space-y-[120px] px-6 mt-[200px] mb-24'>
       <div className='space-y-6'>
         <h1 className='text-center text-5xl md:text-[56px] font-medium leading-[66px] header-gradient tracking-[-1.12px]'>
           Pay once, use forever, upgrade for free
@@ -67,7 +66,9 @@ const Pricing = () => {
       </div>
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 space-y-10 md:space-y-0'>
         {plans.map((plan, index) => (
-          <Card key={index} className={cn(plan.isHiglighted ? 'border-4 border-[#26AB75]' : 'w-full h-fit')}>
+          <Card
+            key={index}
+            className={cn(plan.isHiglighted && 'border-4 border-[#26AB75]', 'w-full h-fit bg-white')}>
             <CardContent className='m-8 p-0 text-[#050316]'>
               {plan.isHiglighted && (
                 <div className='relative'>
@@ -89,7 +90,7 @@ const Pricing = () => {
               </p>
               <Button
                 className={cn(
-                  'rounded-full w-full border py-6 font-bold mt-6 mb-12 gap-2 shadow-none',
+                  'rounded-full w-full border border-[#e7e7e7] py-6 font-bold mt-6 mb-12 gap-2 shadow-none',
                   plan.isHiglighted ? 'text-white bg-lp-light-background' : 'text-[#2AA875] bg-[#DFFFF2]'
                 )}>
                 <FaFire className='size-5' />
@@ -103,14 +104,6 @@ const Pricing = () => {
             </CardContent>
           </Card>
         ))}
-      </div>
-      <div className='mt-5 mb-24 flex justify-center items-center'>
-        <Button
-          variant='default'
-          className='rounded-full text-green-600 text-center text-base  font-medium leading-6 gap-3 py-6 bg-background '>
-          <CiGift className='size-6' />
-          Try free demo
-        </Button>
       </div>
     </div>
   );

@@ -20,11 +20,11 @@ const NavbarRoutes = [
 
 export default async function Navbar() {
   return (
-    <div className='w-full text-white bg-[#031614]'>
+    <div className='w-full text-white bg-lp-background'>
       <div className={cn('max-w-6xl mx-auto flex justify-between items-center p-4')}>
         <Logo />
 
-        <ul className='hidden md:flex items-center gap-6'>
+        <ul className='hidden md:flex items-center gap-12'>
           {NavbarRoutes.map((item, index) => (
             <li key={index} className='text-sm cursor-pointer font-medium leading-6'>
               <Link href={item.url}>{item.label}</Link>
@@ -32,7 +32,9 @@ export default async function Navbar() {
           ))}
         </ul>
 
-        <ButtonCta label='Sign In' />
+        <div className='hidden md:block'>
+          <ButtonCta label='Sign In' />
+        </div>
 
         <Sheet>
           <SheetTrigger className='block md:hidden'>
@@ -47,9 +49,7 @@ export default async function Navbar() {
                   </li>
                 ))}
               </ul>
-              <Button className='rounded-lg w-full flex border border-lp-border green-btn-gradient'>
-                Sign Up
-              </Button>
+              <ButtonCta className='w-full' label='Sign In' />
             </div>
           </SheetContent>
         </Sheet>
