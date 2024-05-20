@@ -8,7 +8,6 @@ import Link from 'next/link';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { HiBars3 } from 'react-icons/hi2';
 import ButtonCta from './ButtonCta';
-import { Button } from '../ui/button';
 import Logo from '../Logo';
 
 const NavbarRoutes = [

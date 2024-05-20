@@ -1,106 +1,124 @@
-# BuilderKit
+# AI Content Writer Tool by [BuilderKit.ai](https://www.builderkit.ai)
 
-BuilderKit is an AI-powered content creation tool designed to streamline the process of generating high-quality content for various platforms.
+`nextjs` `typescript` `openai` `supabase` `tailwindcss` `shadcn`
 
-## Table of Contents
+## Introduction
 
-- [How to Run the App](#how-to-run-the-app)
-- [Possibilities](#possibilities)
-- [Requirements](#requirements)
+Content generation tool designed to assist users in creating high-quality social media posts, blog entries, and other content types efficiently. Utilizing advanced AI models, the platform offers a variety of customization options to match the user's style and preferences.
 
-## How to Run the App
+<a href="https://content-writer.builderkit.ai/home" target="_blank" rel="noopener">
+  <picture>
+    <img alt="AI Content Writer Tool" src="https://content-writer.builderkit.ai/github-cover.webp" />
+  </picture>
+</a>
 
-### Development
+## Features
 
-To run the app in development mode:
+- 🤖 AI-powered content generation using OpenAI.
+- 🔒 Integration with Supabase for authentication and database management.
+- 💻 Responsive design using Next.js, TailwindCSS and Shadcn.
+- 🎨 Theme switching between light and dark modes.
+- 😃 User-friendly dashboard for managing and generating content.
+- 🔗 Secure user authentication with OAuth support.
 
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
+## Quickstart Guide
+
+### Prerequisites
+
+Ensure you have the following installed:
+
+- Node.js (v14 or higher)
+- npm (v6 or higher)
+
+### Installation
+
+1. **Clone the repository:**
+
+   ```sh
+   git clone https://github.com/1811-Labs-LLC/BuilderKit.git
+
    cd builderkit
+
+   git checkout content-writer
    ```
-2. Install the dependencies:
-   ```bash
+
+2. **Install dependencies:**
+
+   ```sh
    npm install
    ```
-3. Start the development server:
-   ```bash
+
+3. **Environment Variables:**
+
+   Create a `.env.local` file in the root directory and add the following variables:
+
+   ```plaintext
+   NEXT_PUBLIC_SUPABASE_URL=<your-supabase-url>
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+   OPENAI_API_KEY=<your-openai-api-key>
+   NEXT_PUBLIC_GOOGLE_ANALYTICS_KEY=<your-google-analytics-key>
+   ```
+
+4. **Sync Supabase Types:**
+
+   This will sync the table schema locally from Supabase. Run the below commands to login to supabase and sync the schema type.
+
+   ```sh
+   supabase login
+
+   npx supabase gen types typescript --project-id <project-id> --schema public > src/types/supabase.ts
+   ```
+
+### Running the Application
+
+1. **Development Mode:**
+
+   ```sh
    npm run dev
    ```
 
-### Production
+   This will start the development server on `http://localhost:3000`.
 
-To build and run the app in production mode:
+2. **Build for Production:**
 
-1. Build the application:
-   ```bash
+   ```sh
    npm run build
    ```
-2. Start the application:
-   ```bash
+
+   This command compiles the application for production usage.
+
+3. **Start the Production Server:**
+
+   ```sh
    npm start
    ```
 
-### Other Commands
+   This will start the application in production mode.
 
-- Lint the code:
-  ```bash
-  npm run lint
-  ```
-- Format the code:
-  ```bash
-  npm run format
-  ```
-- Run type checks:
-  ```bash
-  npm run typecheck
+### Additional Scripts
+
+- **Prepare Husky for Git hooks:**
+
+  ```sh
+  npm run prepare
   ```
 
-## Possibilities
+- **Validate the code with Linting, Formatting & Typecheck:**
 
-BuilderKit offers a range of functionalities:
-
-1. **Content Creation**: Generate various types of content based on user-defined topics and styles.
-2. **Image Generation**: Create images based on prompts, including interior designs and headshots.
-3. **Voice Transcriptions**: Convert audio files into text transcriptions and summaries.
-4. **QR Code Generation**: Create QR codes based on user-provided URLs.
-5. **User Authentication**: Secure user authentication using Supabase with support for OAuth and email/password sign-in.
-6. **Dashboard Features**: Access a dashboard with features like content history, user settings, and subscription management.
+  ```sh
+  npm run validate
+  ```
 
 ## Requirements
 
-To run BuilderKit, ensure you have the following:
-
-1. **Node.js**: Version 18 or higher.
-2. **npm**: Version 8 or higher.
-3. **Environment Variables**: Create a `.env` file in the root directory and add the following variables:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=<your-supabase-url>
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-supabase-anon-key>
-   NEXT_PUBLIC_GOOGLE_ANALYTICS_KEY=<your-google-analytics-key>
-   OPENAI_API_KEY=<your-openai-api-key>
-   ```
-4. **Supabase**: A Supabase project with the necessary tables and configurations.
-
-## Dependencies
-
-The project relies on several key dependencies, including but not limited to:
-
-- `next`: Latest version
-- `react`: ^18
-- `supabase`: Latest version
-- `tailwindcss`: ^3.4.1
-- `typescript`: ^5.3.3
-- Various Radix UI components for enhanced UI/UX
+- **Node.js**: Download and install from [here](https://nodejs.org/).
+- **Supabase**: Create an account and a new project on [Supabase](https://supabase.com/). Obtain the `SUPABASE_URL` and `SUPABASE_ANON_KEY` from your project settings.
+- **OpenAI API Key**: Sign up for an API key on [OpenAI](https://openai.com/).
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. See the [LICENSE](https://www.builderkit.ai/license) file for details.
 
-## Author
+## Contact
 
-BuilderKit is developed and maintained by [@saddysk](https://github.com/saddysk).
-
----
-
-Feel free to contribute to the project by submitting issues or pull requests.
+For any inquiries or issues, please open an issue on the [GitHub repository](https://github.com/1811-Labs-LLC/BuilderKit) or contact the author at [vatsal1811@gmail.com](mailto:vatsal1811@gmail.com).
