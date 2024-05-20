@@ -1,11 +1,9 @@
 import Logo from '@/components/Logo';
-import { Button } from '@/components/ui/button';
-import { FaPlus } from 'react-icons/fa';
 import SidebarItem from './SidebarItem';
 import DropdownAccount from './DropdownAccount';
-import Link from 'next/link';
 import SidebarUpgradePlan from './SidebarUpgradePlan';
 import { SidebarRoutes } from './content';
+import ButtonNewContent from './ButtonNewContent';
 
 const Sidebar = () => {
   return (
@@ -15,11 +13,7 @@ const Sidebar = () => {
           <Logo />
         </div>
 
-        <Link href='/home'>
-          <Button size='lg' className='w-full mb-3'>
-            <FaPlus className='mr-2' /> New Content
-          </Button>
-        </Link>
+        <ButtonNewContent />
 
         <div className='space-y-1'>
           {SidebarRoutes?.map((item) => <SidebarItem key={item.label} route={item} />)}

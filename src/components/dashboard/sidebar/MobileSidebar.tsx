@@ -1,13 +1,11 @@
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { FaBars } from 'react-icons/fa6';
 import Logo from '@/components/Logo';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { FaPlus } from 'react-icons/fa';
 import DropdownAccount from './DropdownAccount';
 import SidebarUpgradePlan from './SidebarUpgradePlan';
 import { SidebarRoutes } from './content';
 import MobileSidebarItem from './MobileSidebarItem';
+import ButtonNewContent from './ButtonNewContent';
 
 const MobileSidebar = () => {
   return (
@@ -22,11 +20,7 @@ const MobileSidebar = () => {
               <Logo />
             </div>
 
-            <Link href='/home'>
-              <Button size='lg' className='w-full mb-3'>
-                <FaPlus className='mr-2' /> New Content
-              </Button>
-            </Link>
+            <ButtonNewContent />
 
             <div className='space-y-1'>
               {SidebarRoutes.map((route, index) => (

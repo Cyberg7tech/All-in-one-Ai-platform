@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import OutputContent from './OutputContent';
 import InputWrapper from '@/components/InputWrapper';
 import { Input } from '@/components/ui/input';
@@ -8,8 +8,9 @@ import { SubmitButton } from '@/components/SubmitButton';
 import { errorToast } from '@/utils/utils';
 import { saveContent } from '@/app/(dashboard)/home/actions';
 import { TypeContent } from '@/types/types';
-import { Cross2Icon, PlusIcon } from '@radix-ui/react-icons';
+import { PlusIcon } from '@radix-ui/react-icons';
 import UpgradePlan from '../UpgradePlan';
+import { useShowNewForm } from '@/hooks/use-new-content';
 
 type Props = {
   generatedData?: TypeContent | null;
@@ -51,7 +52,14 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
   const parsedContentData = generatedData?.results ? JSON.parse(generatedData.results) : {};
 
   const [contentData, setContentData] = useState(parsedContentData.content_ideas ?? []);
-  const [howToUse, setHowToUse] = useState(firstTime);
+
+  const { showNewForm, setShowNewForm } = useShowNewForm();
+
+  useEffect(() => {
+    if (firstTime) {
+      setShowNewForm(true);
+    }
+  }, [firstTime, setShowNewForm]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -119,25 +127,17 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
     await saveContent(topic, style, wordLimit, voice, streamData).catch((error) => errorToast(error));
   };
 
-  if (howToUse) {
+  if (showNewForm) {
     return (
       <div className='flex flex-col justify-between w-full h-[calc(100vh-86px)] '>
         <div className='border rounded-lg blue-gradient px-6 py-5 w-full text-white'>
-          <div className='flex items-center justify-between mb-3'>
-            <p className='text-lg font-semibold'>How to use the builder kit tools</p>
-            <Cross2Icon
-              className='cursor-pointer size-6'
-              onClick={() => {
-                setHowToUse(false);
-              }}
-            />
-          </div>
-          <ul>
+          <p className='text-lg font-semibold mb-3'>How to use the builder kit tools</p>
+          <ul className='text-sm'>
             <li className='flex items-center gap-2'>
               1. Click on
               <div
                 className='flex items-center w-fit rounded gap-0.5 py-0.5 px-1 text-[10px] font-medium text-default dark:text-black bg-white cursor-pointer'
-                onClick={() => setHowToUse(false)}>
+                onClick={() => setShowNewForm(false)}>
                 <PlusIcon />
                 New Content
               </div>

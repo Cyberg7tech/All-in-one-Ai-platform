@@ -28,7 +28,7 @@ Content generation tool designed to assist users in creating high-quality social
 Ensure you have the following installed:
 
 - Node.js (v14 or higher)
-- npm (v6 or higher)
+- npm or yarn
 
 ### Installation
 
@@ -46,6 +46,8 @@ Ensure you have the following installed:
 
    ```sh
    npm install
+   # or
+   yarn install
    ```
 
 3. **Environment Variables:**
@@ -71,26 +73,32 @@ Ensure you have the following installed:
 
 ### Running the Application
 
-1. **Development Mode:**
+1. **Run the development server:**
 
    ```sh
    npm run dev
+   # or
+   yarn dev
    ```
 
    This will start the development server on `http://localhost:3000`.
 
-2. **Build for Production:**
+2. **Build for production:**
 
    ```sh
    npm run build
+   # or
+   yarn build
    ```
 
    This command compiles the application for production usage.
 
-3. **Start the Production Server:**
+3. **Start the production server:**
 
    ```sh
    npm start
+   # or
+   yarn start
    ```
 
    This will start the application in production mode.
