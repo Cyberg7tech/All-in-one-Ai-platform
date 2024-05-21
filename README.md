@@ -34,8 +34,13 @@ Ensure you have the following installed:
 
 1. **Clone the repository:**
 
+   Use the Project Url based on your plan
+
+   - Starter - https://github.com/1811-Labs-LLC/BuilderKit-Starter.git
+   - Pro - https://github.com/1811-Labs-LLC/BuilderKit-Pro.git
+
    ```sh
-   git clone https://github.com/1811-Labs-LLC/BuilderKit.git
+   git clone <url>
 
    cd builderkit
 
