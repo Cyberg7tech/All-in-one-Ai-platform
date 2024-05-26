@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/button';
-import Link from 'next/link';
+import ModalUpgradePlan from './ModalUpgradePlan';
 
 const UpgradePlan = () => {
   return (
@@ -12,11 +12,11 @@ const UpgradePlan = () => {
         <li>Get Access to Top AI Models</li>
         <li>Get 24/7 Support</li>
       </ul>
-      <Link href='/pricing'>
+      <ModalUpgradePlan>
         <Button size='lg' variant='secondary' className='mt-6 w-full'>
           Upgrade Plan
         </Button>
-      </Link>
+      </ModalUpgradePlan>
     </div>
   );
 };

@@ -14,10 +14,15 @@ const Navbar = () => {
         <div className='flex items-center gap-5 mr-2'>
           <SelectTheme />
 
-          <div className='hidden md:flex'>
+          <div className='hidden md:flex items-center gap-3'>
             <Link href='https://apps.builderkit.ai/' target='_blank'>
               <Button variant='secondary' className='gap-2'>
                 Demo Apps
+              </Button>
+            </Link>
+            <Link href='https://www.builderkit.ai/#pricing' target='_blank'>
+              <Button className='gap-2 border border-destructive/10 bg-destructive/10 dark:bg-destructive/20 text-destructive shadow-none'>
+                Get Builderkit.ai
                 <RxExternalLink />
               </Button>
             </Link>
