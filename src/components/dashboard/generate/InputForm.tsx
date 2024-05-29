@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import OutputContent from './OutputContent';
 import InputWrapper from '@/components/InputWrapper';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,8 @@ import { TypeContent } from '@/types/types';
 import { PlusIcon } from '@radix-ui/react-icons';
 import UpgradePlan from '../UpgradePlan';
 import { useShowNewForm } from '@/hooks/use-new-content';
+import { supabaseBrowserClient } from '@/utils/supabase/client';
+import ModalLimitExceeded from './ModalLimitExceeded';
 
 type Props = {
   generatedData?: TypeContent | null;
@@ -53,7 +55,29 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
 
   const [contentData, setContentData] = useState(parsedContentData.content_ideas ?? []);
 
+  //state to check if the user has reached the limit of content creations
+  const [limitExceeded, setIsLimitExceeded] = useState(false);
+
   const { showNewForm, setShowNewForm } = useShowNewForm();
+
+  //function to check the limit of content creations and set the state accordingly
+  const limitUser = useCallback(async () => {
+    const supabase = supabaseBrowserClient();
+    const { error, count } = await supabase
+      .from('content_creations')
+      .select('*', { count: 'exact', head: true });
+    if (error) {
+      return errorToast('Something went wrong, please try again');
+    }
+    if (count && count > 5) {
+      setIsLimitExceeded(true);
+    }
+  }, []);
+
+  //checking on load if the user has reached the limit of content creations
+  useEffect(() => {
+    limitUser();
+  }, [limitUser]);
 
   useEffect(() => {
     if (firstTime) {
@@ -153,6 +177,8 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
 
   return (
     <div className='block lg:flex items-start space-y-10 lg:space-y-0'>
+      <ModalLimitExceeded isModalOpen={limitExceeded} />
+
       <div className='w-full lg:w-1/2 mr-0 lg:mr-8'>
         <form className='space-y-3'>
           <InputWrapper id='topic' label='What do you want to Generate?'>
@@ -196,7 +222,7 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
             />
           </InputWrapper>
 
-          <SubmitButton className='w-full !mt-8' formAction={handleGeneration}>
+          <SubmitButton disabled={limitExceeded} className='w-full !mt-8' formAction={handleGeneration}>
             Generate
           </SubmitButton>
         </form>
