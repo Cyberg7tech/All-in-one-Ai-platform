@@ -14,10 +14,10 @@ const ModalLimitExceeded: FC<ModalLimitExceededProps> = ({ isModalOpen }) => {
         <DialogHeader>
           <DialogTitle className='text-center text-lg font-semibold mb-1.5'>Trial Limit Exceeded</DialogTitle>
           <DialogDescription className='text-center text-sm leading-6'>
-            Get all the apps with complete GitHub access with BuilderKit.ai
+            Get all the apps with complete GitHub access with NextJs Boilerplate
           </DialogDescription>
         </DialogHeader>
-        <Link href='https://www.builderkit.ai/#pricing' target='_blank'>
+        <Link href='https://www.builderkit.ai/#pricing'>
           <Button className='mt-4 w-full'>Get Builderkit.ai</Button>
         </Link>
       </DialogContent>

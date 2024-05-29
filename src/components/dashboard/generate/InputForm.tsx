@@ -54,8 +54,7 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
   const parsedContentData = generatedData?.results ? JSON.parse(generatedData.results) : {};
 
   const [contentData, setContentData] = useState(parsedContentData.content_ideas ?? []);
-
-  //state to check if the user has reached the limit of content creations
+  // State to check if the user has reached the limit of content creations
   const [limitExceeded, setIsLimitExceeded] = useState(false);
 
   const { showNewForm, setShowNewForm } = useShowNewForm();
@@ -63,13 +62,15 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
   //function to check the limit of content creations and set the state accordingly
   const limitUser = useCallback(async () => {
     const supabase = supabaseBrowserClient();
+
     const { error, count } = await supabase
       .from('content_creations')
       .select('*', { count: 'exact', head: true });
+
     if (error) {
-      return errorToast('Something went wrong, please try again');
+      return errorToast(error.message);
     }
-    if (count && count > 5) {
+    if (count && count >= 5) {
       setIsLimitExceeded(true);
     }
   }, []);
