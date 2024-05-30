@@ -39,17 +39,17 @@ Ensure you have the following installed:
    **Starter**
 
    ```sh
-   git clone https://github.com/1811-Labs-LLC/BuilderKit-Starter.git [APP_NAME]
+   git clone https://github.com/1811-Labs-LLC/BuilderKit-Starter.git [YOUR_APP_NAME]
    ```
 
    **Pro**
 
    ```sh
-   git clone https://github.com/1811-Labs-LLC/BuilderKit-Pro.git [APP_NAME]
+   git clone https://github.com/1811-Labs-LLC/BuilderKit-Pro.git [YOUR_APP_NAME]
    ```
 
    ```sh
-   cd [APP_NAME]
+   cd [YOUR_APP_NAME]
 
    git remote remove origin
 
