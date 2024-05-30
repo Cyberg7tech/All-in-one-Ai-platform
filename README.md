@@ -28,21 +28,30 @@ Content generation tool designed to assist users in creating high-quality social
 Ensure you have the following installed:
 
 - Node.js (v14 or higher)
-- npm or yarn
+- npm or pnpm or yarn `(npm for me)`
 
 ### Installation
 
 1. **Clone the repository:**
 
-   Use the Project Url based on your plan
+   Use the Project URL based on your plan
 
-   - Starter - https://github.com/1811-Labs-LLC/BuilderKit-Starter.git
-   - Pro - https://github.com/1811-Labs-LLC/BuilderKit-Pro.git
+   **Starter**
 
    ```sh
-   git clone <url>
+   git clone https://github.com/1811-Labs-LLC/BuilderKit-Starter.git [APP_NAME]
+   ```
 
-   cd builderkit
+   **Pro**
+
+   ```sh
+   git clone https://github.com/1811-Labs-LLC/BuilderKit-Pro.git [APP_NAME]
+   ```
+
+   ```sh
+   cd [APP_NAME]
+
+   git remote remove origin
 
    git checkout content-writer
    ```
@@ -51,8 +60,6 @@ Ensure you have the following installed:
 
    ```sh
    npm install
-   # or
-   yarn install
    ```
 
 3. **Environment Variables:**
@@ -66,15 +73,106 @@ Ensure you have the following installed:
    NEXT_PUBLIC_GOOGLE_ANALYTICS_KEY=<your-google-analytics-key>
    ```
 
-4. **Sync Supabase Types:**
+4. **Create Table in Supabase:**
+
+   > #### To Create a Table in Supabase
+   >
+   > - Go to the **SQL editor** section
+   > - Click **New Query**
+   > - Enter the **SQL Script** provided below for the given table
+
+   First, Create an User table if you have not created one already.
+
+   _Email, full name and avatar url is auto synced with the auth table managed by supabase. Once user sign in through google or email, password. The User table gets synced with the new user data._
+
+   ```sql
+   -- Create a table for public users
+   create table users (
+      id uuid references auth.users on delete cascade not null primary key,
+      created_at timestamp with time zone not null default now(),
+      email text not null,
+      full_name text null,
+      avatar_url text null,
+      constraint users_email_key unique (email)
+   );
+
+   -- Set up Row Level Security (RLS)
+   alter table users
+   enable row level security;
+
+   create policy "Users can insert their own row." on users
+   for insert with check (auth.uid() = id);
+
+   create policy "Users can update own row" on users
+   for update using (auth.uid() = id);
+
+   create policy "Users can read own row" on users
+   for select using (auth.uid() = id);
+
+   -- This trigger automatically creates a profile entry when a new user signs up via Supabase Auth.
+   create function public.handle_new_user()
+   returns trigger as $$
+   begin
+   insert into public.users (id, email, full_name, avatar_url)
+   values (new.id, new.email, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url');
+   return new;
+   end;
+   $$ language plpgsql security definer;
+   create trigger on_auth_user_created_trigger
+   after insert on auth.users
+   for each row execute procedure public.handle_new_user();
+   ```
+
+   **Now, create the Content Writer table required for this tool.**
+
+   ```sql
+   -- Create a table for AI Content Creation
+   create table content_creations (
+      id uuid not null default uuid_generate_v4(),
+      created_at timestamp with time zone not null default now(),
+      user_id uuid not null,
+      topic text not null,
+      style text not null,
+      word_limit text not null,
+      voice text not null,
+      results text not null,
+      constraint content_creations_pkey primary key (id),
+      constraint content_creations_user_id_fkey foreign key (user_id) references users (id)
+   );
+
+   -- Set up Row Level Security (RLS)
+   alter table content_creations
+   enable row level security;
+
+   create policy "Users can insert their own row." on content_creations
+   for insert with check (auth.uid() = user_id);
+
+   create policy "Users can update own row" on content_creations
+   for update using (auth.uid() = user_id);
+
+   create policy "Users can read own row" on content_creations
+   for select using (auth.uid() = user_id);
+
+   -- Enable Realtime
+   alter publication supabase_realtime add table content_creations;
+   ```
+
+   > - **For Content Writer tool, we are enabling Supabase Realtime (last line of the script)**
+   > - For all the tables, we enable the RLS policy by default with necessary permissions as mentioned in the script.
+
+5. **Sync Supabase Types:**
 
    This will sync the table schema locally from Supabase. Run the below commands to login to supabase and sync the schema type.
 
    ```sh
-   supabase login
+   npx supabase login
 
-   npx supabase gen types typescript --project-id <project-id> --schema public > src/types/supabase.ts
+   npx supabase init
+
+   npx supabase gen types typescript --project-id [PROJECT_ID] --schema public > src/types/supabase.ts
    ```
+
+   _To get the **PROJECT ID**, go to **Project Settings** in Supabase where you have created your project. You will find **Reference ID** under **General settings** section which is your Project ID._
 
 ### Running the Application
 
@@ -82,8 +180,6 @@ Ensure you have the following installed:
 
    ```sh
    npm run dev
-   # or
-   yarn dev
    ```
 
    This will start the development server on `http://localhost:3000`.
@@ -92,8 +188,6 @@ Ensure you have the following installed:
 
    ```sh
    npm run build
-   # or
-   yarn build
    ```
 
    This command compiles the application for production usage.
@@ -102,8 +196,6 @@ Ensure you have the following installed:
 
    ```sh
    npm start
-   # or
-   yarn start
    ```
 
    This will start the application in production mode.
