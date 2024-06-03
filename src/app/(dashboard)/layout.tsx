@@ -4,7 +4,6 @@ import { getUserDetails } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import Sidebar from '@/components/dashboard/sidebar/Sidebar';
 import Navbar from '@/components/dashboard/navbar/Navbar';
-import { ThemeProvider } from '@/components/theme-provider';
 import { Providers } from '@/components/providers';
 
 type Props = {

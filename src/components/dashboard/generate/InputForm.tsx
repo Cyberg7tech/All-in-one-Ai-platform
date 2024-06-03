@@ -55,7 +55,7 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
 
   const [contentData, setContentData] = useState(parsedContentData.content_ideas ?? []);
   // State to check if the user has reached the limit of content creations
-  const [limitExceeded, setIsLimitExceeded] = useState(false);
+  const [hasLimitExceeded, setHasLimitExceeded] = useState(false);
 
   const { showNewForm, setShowNewForm } = useShowNewForm();
 
@@ -71,7 +71,7 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
       return errorToast(error.message);
     }
     if (count && count >= 5) {
-      setIsLimitExceeded(true);
+      setHasLimitExceeded(true);
     }
   }, []);
 
@@ -178,7 +178,7 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
 
   return (
     <div className='block lg:flex items-start space-y-10 lg:space-y-0'>
-      <ModalLimitExceeded isModalOpen={limitExceeded} />
+      <ModalLimitExceeded isModalOpen={hasLimitExceeded} />
 
       <div className='w-full lg:w-1/2 mr-0 lg:mr-8'>
         <form className='space-y-3'>
@@ -223,7 +223,7 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
             />
           </InputWrapper>
 
-          <SubmitButton disabled={limitExceeded} className='w-full !mt-8' formAction={handleGeneration}>
+          <SubmitButton disabled={hasLimitExceeded} className='w-full !mt-8' formAction={handleGeneration}>
             Generate
           </SubmitButton>
         </form>
