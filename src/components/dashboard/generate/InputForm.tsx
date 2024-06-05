@@ -142,7 +142,7 @@ const InputForm = ({ generatedData }: Props) => {
 
   return (
     <div className='block lg:flex items-start space-y-10 lg:space-y-0'>
-      <ModalLimitExceeded isModalOpen={hasLimitExceeded} />
+      {hasLimitExceeded && <ModalLimitExceeded isModalOpen={hasLimitExceeded} />}
 
       <div className='w-full lg:w-1/2 mr-0 lg:mr-8'>
         <form className='space-y-3'>
