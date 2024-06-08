@@ -35,7 +35,7 @@ const DropdownAccount = async () => {
             height={20}
             alt='avatar'
           />
-          <p className='font-semibold text-default'>{user?.user_metadata?.full_name} </p>
+          <p className='font-semibold text-default truncate'>{user?.user_metadata?.full_name} </p>
         </div>
       </DropdownMenuTrigger>
       <DropdownContentWrapper>
