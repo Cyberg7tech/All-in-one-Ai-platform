@@ -25,7 +25,7 @@ const OutputContent = ({ contentData }: Props) => {
         </p>
       )}
       {contentData.length > 0 ? (
-        <div className='space-y-5 overflow-auto h-full lg:max-h-[calc(100vh-122px)]'>
+        <div className='space-y-5 sm:pr-2 overflow-auto h-full lg:max-h-[calc(100vh-122px)]'>
           {contentData.map((content, index) => (
             <div key={index} className='border p-4 rounded-lg '>
               <div className='flex justify-between items-start'>

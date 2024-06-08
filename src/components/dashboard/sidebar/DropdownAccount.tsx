@@ -66,7 +66,7 @@ const DropdownAccount = async () => {
         </a>
 
         <DropdownMenuSeparator />
-        <Link href='/pricing'>
+        <Link href='https://www.builderkit.ai/#pricing' target='_blank'>
           <DropdownMenuItem className='cursor-pointer text-default'>
             <AiOutlineDollarCircle className='size-5 mr-2' />
             Pricing
@@ -77,7 +77,7 @@ const DropdownAccount = async () => {
         <ButtonSignout />
 
         <div className='flex items-center m-2 mt-2.5 text-xs text-subtle'>
-          <a href=''>
+          <a href='#'>
             <span className='border-b'> Privacy policy</span> ,
             <span className='border-b'> Terms & conditions</span>
           </a>
