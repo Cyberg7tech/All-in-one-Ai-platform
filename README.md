@@ -150,12 +150,8 @@ Ensure you have the following installed:
 
    create policy "Users can read own row" on content_creations
    for select using (auth.uid() = user_id);
-
-   -- Enable Realtime
-   alter publication supabase_realtime add table content_creations;
    ```
 
-   > - **For Content Writer tool, we are enabling Supabase Realtime (last line of the script)**
    > - For all the tables, we enable the RLS policy by default with necessary permissions as mentioned in the script.
 
 5. **Sync Supabase Types:**
