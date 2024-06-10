@@ -52,7 +52,15 @@ Ensure you have the following installed:
    cd [YOUR_APP_NAME]
 
    git checkout content-writer
+
+   git remote remove origin
    ```
+
+   Removing the `origin remote` ensures you can work locally without pushing changes back to the original repository.
+   
+     
+   > - **However, note that after removing the remote, you won't be able to switch branches, so you'll need to clone the repository again if you want to work on another branch.**
+ 
 
 2. **Install dependencies:**
 
@@ -150,6 +158,9 @@ Ensure you have the following installed:
 
    create policy "Users can read own row" on content_creations
    for select using (auth.uid() = user_id);
+   
+   create policy "Users can delete own row" on content_creations
+   for delete using (auth.uid() = user_id);
 
    -- Enable Realtime
    alter publication supabase_realtime add table content_creations;
@@ -157,8 +168,13 @@ Ensure you have the following installed:
 
    > - **For Content Writer tool, we are enabling Supabase Realtime (last line of the script)**
    > - For all the tables, we enable the RLS policy by default with necessary permissions as mentioned in the script.
+ 
+ 5. **Enable the Google Auth Provider:**
 
-5. **Sync Supabase Types:**
+    Follow this [documentation](https://supabase.com/docs/guides/auth/social-login/auth-google#application-code-configuration) for detailed steps to configure OAuth Credentials in the [Google Cloud Console](https://console.cloud.google.com/) & enabling the Auth Provider in the [Supabase Dashboard](https://supabase.com/dashboard/project/_/auth/providers).
+
+
+6. **Sync Supabase Types:**
 
    This will sync the table schema locally from Supabase. Run the below commands to login to supabase and sync the schema type.
 
