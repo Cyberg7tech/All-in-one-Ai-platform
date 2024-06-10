@@ -55,10 +55,9 @@ Ensure you have the following installed:
 
    git remote remove origin
    ```
-
+   
    Removing the `origin remote` ensures you can work locally without pushing changes back to the original repository.
    
-     
    > - **However, note that after removing the remote, you won't be able to switch branches, so you'll need to clone the repository again if you want to work on another branch.**
  
 
