@@ -168,12 +168,7 @@ Ensure you have the following installed:
    > - **For Content Writer tool, we are enabling Supabase Realtime (last line of the script)**
    > - For all the tables, we enable the RLS policy by default with necessary permissions as mentioned in the script.
  
- 5. **Enable the Google Auth Provider:**
-
-    Follow this [documentation](https://supabase.com/docs/guides/auth/social-login/auth-google#application-code-configuration) for detailed steps to configure OAuth Credentials in the [Google Cloud Console](https://console.cloud.google.com/) & enabling the Auth Provider in the [Supabase Dashboard](https://supabase.com/dashboard/project/_/auth/providers).
-
-
-6. **Sync Supabase Types:**
+ 5. **Sync Supabase Types:**
 
    This will sync the table schema locally from Supabase. Run the below commands to login to supabase and sync the schema type.
 
@@ -196,6 +191,8 @@ Ensure you have the following installed:
    ```
 
    This will start the development server on `http://localhost:3000`.
+
+   > Note: To enable Google Authentication for your application, please refer to the [Supabase Setup Guide](https://docs.builderkit.ai/setup/supabase).   
 
 2. **Build for production:**
 
