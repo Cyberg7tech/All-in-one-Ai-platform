@@ -52,7 +52,13 @@ Ensure you have the following installed:
    cd [YOUR_APP_NAME]
 
    git checkout content-writer
+
+   git remote remove origin
    ```
+
+   Removing the `origin remote` ensures you can work locally without pushing changes back to the original repository.
+
+   > - **However, note that after removing the remote, you won't be able to switch branches, so you'll need to clone the repository again if you want to work on another branch.**
 
 2. **Install dependencies:**
 
@@ -150,15 +156,14 @@ Ensure you have the following installed:
 
    create policy "Users can read own row" on content_creations
    for select using (auth.uid() = user_id);
-
-   -- Enable Realtime
-   alter publication supabase_realtime add table content_creations;
+   
+   create policy "Users can delete own row" on content_creations
+   for delete using (auth.uid() = user_id);
    ```
 
-   > - **For Content Writer tool, we are enabling Supabase Realtime (last line of the script)**
    > - For all the tables, we enable the RLS policy by default with necessary permissions as mentioned in the script.
-
-5. **Sync Supabase Types:**
+ 
+ 5. **Sync Supabase Types:**
 
    This will sync the table schema locally from Supabase. Run the below commands to login to supabase and sync the schema type.
 
@@ -181,6 +186,8 @@ Ensure you have the following installed:
    ```
 
    This will start the development server on `http://localhost:3000`.
+
+   > Note: To enable Google Authentication for your application, please refer to the [Supabase Setup Guide](https://docs.builderkit.ai/setup/supabase).   
 
 2. **Build for production:**
 
