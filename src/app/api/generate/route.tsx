@@ -1,9 +1,11 @@
 // This route is used for generating custom social media content based on user-defined topics and styles.
 // The API is called by the Content Writer component in the frontend where users can specify the desired topic and style.
 
-import { OpenAIStream, OpenAIStreamPayload } from '@/utils/open-ai-stream';
 import { getUserDetails } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
+import OpenAI from 'openai';
+
+const openai = new OpenAI();
 
 export const POST = async (req: Request) => {
   try {
@@ -27,11 +29,10 @@ export const POST = async (req: Request) => {
     const prompt = `Generate 5 social media contents on the topic: ${topic}.
     Make sure the style of the content is around ${style}.
     Voice: ${voice}
-    Language: ${voice}
-`;
+    Language: ${voice}`;
 
     // Configuration for the OpenAI API call
-    const payload: OpenAIStreamPayload = {
+    const stream = await openai.chat.completions.create({
       messages: [{ role: 'user', content: `type JSON ${prompt}` }],
       top_p: 1,
       frequency_penalty: 0,
@@ -72,13 +73,26 @@ export const POST = async (req: Request) => {
           },
         },
       ],
-    };
+    });
 
-    // Call the OpenAI streaming function with the configured payload
-    const stream = await OpenAIStream(payload);
+    const encoder = new TextEncoder();
+    const readableStream = new ReadableStream({
+      start(controller) {
+        // Asynchronously iterate over the stream from conversationalRetrievalQAChain.
+        (async () => {
+          for await (const chunk of stream) {
+            // The encoder converts each string chunk to Uint8Array before enqueueing to the stream.
+            const chunkData = encoder.encode(chunk.choices[0]?.delta?.function_call?.arguments || '');
+            controller.enqueue(chunkData);
+          }
+          // Close the stream when the iteration is complete.
+          controller.close();
+        })();
+      },
+    });
 
-    // Return the streaming response to the client
-    return new Response(stream);
+    // Return a new Response object with the readableStream.
+    return new Response(readableStream);
   } catch (error) {
     console.error('An error occurred:', error);
     return NextResponse.error();
