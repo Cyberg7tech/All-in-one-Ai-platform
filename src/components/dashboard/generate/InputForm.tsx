@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import OutputContent from './OutputContent';
 import InputWrapper from '@/components/InputWrapper';
 import { Input } from '@/components/ui/input';
@@ -8,13 +8,11 @@ import { SubmitButton } from '@/components/SubmitButton';
 import { errorToast } from '@/utils/utils';
 import { saveContent } from '@/app/(dashboard)/home/actions';
 import { TypeContent } from '@/types/types';
-import { PlusIcon } from '@radix-ui/react-icons';
-import UpgradePlan from '../UpgradePlan';
-import { useShowNewForm } from '@/hooks/use-new-content';
+import { supabaseBrowserClient } from '@/utils/supabase/client';
+import ModalLimitExceeded from './ModalLimitExceeded';
 
 type Props = {
   generatedData?: TypeContent | null;
-  firstTime?: boolean;
 };
 
 type FormFields = {
@@ -41,7 +39,7 @@ const prompts = [
   },
 ];
 
-const InputForm = ({ generatedData, firstTime }: Props) => {
+const InputForm = ({ generatedData }: Props) => {
   const [formData, setFormData] = useState<FormFields>({
     topic: generatedData?.topic ?? '',
     style: generatedData?.style ?? '',
@@ -52,14 +50,29 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
   const parsedContentData = generatedData?.results ? JSON.parse(generatedData.results) : {};
 
   const [contentData, setContentData] = useState(parsedContentData.content_ideas ?? []);
+  // State to check if the user has reached the limit of content creations
+  const [hasLimitExceeded, setHasLimitExceeded] = useState(false);
 
-  const { showNewForm, setShowNewForm } = useShowNewForm();
+  //function to check the limit of content creations and set the state accordingly
+  const limitUser = useCallback(async () => {
+    const supabase = supabaseBrowserClient();
 
-  useEffect(() => {
-    if (firstTime) {
-      setShowNewForm(true);
+    const { error, count } = await supabase
+      .from('content_creations')
+      .select('*', { count: 'exact', head: true });
+
+    if (error) {
+      return errorToast(error.message);
     }
-  }, [firstTime, setShowNewForm]);
+    if (count && count >= 5) {
+      setHasLimitExceeded(true);
+    }
+  }, []);
+
+  //checking on load if the user has reached the limit of content creations
+  useEffect(() => {
+    limitUser();
+  }, [limitUser]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -127,32 +140,10 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
     await saveContent(topic, style, wordLimit, voice, streamData).catch((error) => errorToast(error));
   };
 
-  if (showNewForm) {
-    return (
-      <div className='flex flex-col justify-between w-full h-[calc(100vh-86px)] '>
-        <div className='border rounded-lg blue-gradient px-6 py-5 w-full text-white'>
-          <p className='text-lg font-semibold mb-3'>How to use the builder kit tools</p>
-          <ul className='text-sm'>
-            <li className='flex items-center gap-2'>
-              1. Click on
-              <div
-                className='flex items-center w-fit rounded gap-0.5 py-0.5 px-1 text-[10px] font-medium text-default dark:text-black bg-white cursor-pointer'
-                onClick={() => setShowNewForm(false)}>
-                <PlusIcon />
-                New Content
-              </div>
-            </li>
-            <li>2. Enter the input data</li>
-            <li>3. Generate the output</li>
-          </ul>
-        </div>
-        <UpgradePlan />
-      </div>
-    );
-  }
-
   return (
     <div className='block lg:flex items-start space-y-10 lg:space-y-0'>
+      <ModalLimitExceeded isModalOpen={hasLimitExceeded} />
+
       <div className='w-full lg:w-1/2 mr-0 lg:mr-8'>
         <form className='space-y-3'>
           <InputWrapper id='topic' label='What do you want to Generate?'>
@@ -196,7 +187,7 @@ const InputForm = ({ generatedData, firstTime }: Props) => {
             />
           </InputWrapper>
 
-          <SubmitButton className='w-full !mt-8' formAction={handleGeneration}>
+          <SubmitButton disabled={hasLimitExceeded} className='w-full !mt-8' formAction={handleGeneration}>
             Generate
           </SubmitButton>
         </form>
