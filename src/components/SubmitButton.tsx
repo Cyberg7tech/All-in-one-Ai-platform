@@ -19,7 +19,7 @@ export function SubmitButton({ loaderColor, children, ...props }: Props) {
   const isPending = pending && action === props.formAction;
 
   return (
-    <Button {...props} type='submit' aria-disabled={pending}>
+    <Button {...props} type='submit' aria-disabled={pending} disabled={pending}>
       {isPending ? <BarLoader height={1} color={loaderColor ?? 'white'} /> : children}
     </Button>
   );
