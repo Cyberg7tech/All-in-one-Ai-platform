@@ -5,47 +5,41 @@
 'use client';
 
 import { supabaseBrowserClient } from '@/utils/supabase/client';
-import { Auth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { useTheme } from 'next-themes';
+import { Button } from '../ui/button';
+import { cn } from '@/utils/utils';
+import { FaGoogle } from 'react-icons/fa';
 
 export default function GoogleAuth() {
-  const supabase = supabaseBrowserClient();
   const { theme } = useTheme();
 
-  // Define theme-dependent variables
-  const textColor = theme === 'dark' ? 'text-white' : 'text-black';
-  const buttonBackground = theme === 'dark' ? '#2A2A2A' : '#F7F7F7';
-  const buttonBackgroundHover = theme === 'dark' ? '#2A2A2A' : '#F7F7F7';
-  const buttonBorder = theme === 'dark' ? '#2A2A2A' : '#F7F7F7';
+  const handleGoogleAuth = async () => {
+    const supabase = supabaseBrowserClient();
 
-  // Ensure the redirect URL is configured correctly in the Supabase project settings.
-  // Incorrect configuration can lead to failed authentication attempts or security vulnerabilities.
-  const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`;
+    // Ensure the redirect URL is configured correctly in the Supabase project settings.
+    // Incorrect configuration can lead to failed authentication attempts or security vulnerabilities.
+    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`;
+
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectUrl,
+      },
+    });
+  };
+
   return (
-    <div className='w-full'>
-      <Auth
-        supabaseClient={supabase}
-        onlyThirdPartyProviders={true}
-        providers={['google']}
-        redirectTo={redirectUrl}
-        appearance={{
-          theme: ThemeSupa,
-          variables: {
-            default: {
-              colors: {
-                defaultButtonText: textColor,
-                defaultButtonBackground: buttonBackground,
-                defaultButtonBackgroundHover: buttonBackgroundHover,
-                defaultButtonBorder: buttonBorder,
-              },
-              radii: {
-                borderRadiusButton: '6px',
-              },
-            },
-          },
-        }}
-      />
+    <div className='w-full my-4'>
+      <Button
+        size='lg'
+        onClick={handleGoogleAuth}
+        className={cn(
+          'w-full h-11 gap-2',
+          theme != 'light' ? 'text-white bg-[#2A2A2A]' : 'text-black bg-[#F7F7F7]'
+        )}>
+        <FaGoogle size={17} />
+        <span>Sign in with Google</span>
+      </Button>
     </div>
   );
 }
