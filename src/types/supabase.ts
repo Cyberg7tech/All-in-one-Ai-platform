@@ -41,6 +41,59 @@ export type Database = {
           },
         ];
       };
+      chat_with_youtube: {
+        Row: {
+          chat_history: Json | null;
+          created_at: string;
+          history_metadata: string | null;
+          id: string;
+          ingestion_done: boolean | null;
+          style: string;
+          summary: string | null;
+          tone: string;
+          transcription: string;
+          url: string;
+          user_id: string;
+          video_title: string;
+        };
+        Insert: {
+          chat_history?: Json | null;
+          created_at?: string;
+          history_metadata?: string | null;
+          id?: string;
+          ingestion_done?: boolean | null;
+          style: string;
+          summary?: string | null;
+          tone: string;
+          transcription: string;
+          url: string;
+          user_id: string;
+          video_title: string;
+        };
+        Update: {
+          chat_history?: Json | null;
+          created_at?: string;
+          history_metadata?: string | null;
+          id?: string;
+          ingestion_done?: boolean | null;
+          style?: string;
+          summary?: string | null;
+          tone?: string;
+          transcription?: string;
+          url?: string;
+          user_id?: string;
+          video_title?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'chat_with_youtube_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       content_creations: {
         Row: {
           created_at: string;
@@ -48,7 +101,7 @@ export type Database = {
           results: string | null;
           style: string;
           topic: string;
-          user_id: string;
+          user_id: string | null;
           voice: string | null;
           word_limit: string | null;
         };
@@ -58,7 +111,7 @@ export type Database = {
           results?: string | null;
           style: string;
           topic: string;
-          user_id: string;
+          user_id?: string | null;
           voice?: string | null;
           word_limit?: string | null;
         };
@@ -68,7 +121,7 @@ export type Database = {
           results?: string | null;
           style?: string;
           topic?: string;
-          user_id?: string;
+          user_id?: string | null;
           voice?: string | null;
           word_limit?: string | null;
         };
@@ -173,6 +226,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: 'headshot_models_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      image_enhancer_upscaler: {
+        Row: {
+          created_at: string;
+          error: string | null;
+          id: string;
+          input_image: string;
+          output_image: string | null;
+          prediction_id: string;
+          type: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          error?: string | null;
+          id?: string;
+          input_image: string;
+          output_image?: string | null;
+          prediction_id: string;
+          type: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          error?: string | null;
+          id?: string;
+          input_image?: string;
+          output_image?: string | null;
+          prediction_id?: string;
+          type?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'image_enhancer_upscaler_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'users';
@@ -287,7 +381,7 @@ export type Database = {
           id: string;
           model: string | null;
           title: string | null;
-          user_id: string;
+          user_id: string | null;
         };
         Insert: {
           chat_history?: Json | null;
@@ -295,7 +389,7 @@ export type Database = {
           id?: string;
           model?: string | null;
           title?: string | null;
-          user_id: string;
+          user_id?: string | null;
         };
         Update: {
           chat_history?: Json | null;
@@ -303,7 +397,7 @@ export type Database = {
           id?: string;
           model?: string | null;
           title?: string | null;
-          user_id?: string;
+          user_id?: string | null;
         };
         Relationships: [
           {
@@ -473,6 +567,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: 'voice_transcriptions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      youtube_content_generator: {
+        Row: {
+          created_at: string;
+          generated_content: Json | null;
+          id: string;
+          language: string | null;
+          summary: string | null;
+          transcription: string;
+          url: string;
+          user_id: string;
+          youtube_title: string;
+        };
+        Insert: {
+          created_at?: string;
+          generated_content?: Json | null;
+          id?: string;
+          language?: string | null;
+          summary?: string | null;
+          transcription: string;
+          url: string;
+          user_id: string;
+          youtube_title: string;
+        };
+        Update: {
+          created_at?: string;
+          generated_content?: Json | null;
+          id?: string;
+          language?: string | null;
+          summary?: string | null;
+          transcription?: string;
+          url?: string;
+          user_id?: string;
+          youtube_title?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'youtube_content_generator_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'users';
