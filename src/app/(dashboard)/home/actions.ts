@@ -24,7 +24,7 @@ export async function saveContent(
     const { data, error } = await supabase
       .from('content_creations')
       .insert({
-        user_id: userId!,
+        user_id: userId,
         topic,
         style,
         word_limit: wordLimit,
