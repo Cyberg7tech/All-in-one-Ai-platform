@@ -28,35 +28,43 @@ const DropdownAccount = async () => {
             buttonVariants({ variant: 'secondary', size: 'lg' }),
             'flex justify-start px-1.5 py-2.5 !w-full gap-2 cursor-pointer'
           )}>
-          <Image
-            src={user?.user_metadata?.avatar_url ?? '/avatar.png'}
-            className='size-5 rounded-full'
-            width={20}
-            height={20}
-            alt='avatar'
-          />
-          <p className='font-semibold text-default truncate'>{user?.user_metadata?.full_name} </p>
+          {user ? (
+            <>
+              <Image
+                src={user.user_metadata?.avatar_url ?? '/avatar.png'}
+                className='size-5 rounded-full'
+                width={20}
+                height={20}
+                alt='avatar'
+              />
+              <p className='font-semibold text-default truncate'>{user.user_metadata?.full_name} </p>
+            </>
+          ) : (
+            <p className='font-semibold text-default truncate'>Settings</p>
+          )}
         </div>
       </DropdownMenuTrigger>
       <DropdownContentWrapper>
-        <div className='flex items-start gap-3 overflow-hidden px-2 py-1.5'>
-          <Image
-            src={user?.user_metadata?.avatar_url ?? '/avatar.png'}
-            className='size-10 rounded-full'
-            width={20}
-            height={20}
-            alt='avatar'
-          />
-          <div>
-            <p className='font-semibold text-default'>{user?.user_metadata?.full_name}</p>
-            <p className='text-default dark:text-white/90'>{user?.email}</p>
-          </div>
-        </div>
-        <DropdownMenuSeparator />
-
-        <AccountSettings user={user!} />
-
-        <DropdownMenuSeparator />
+        {user && (
+          <>
+            <div className='flex items-start gap-3 overflow-hidden px-2 py-1.5'>
+              <Image
+                src={user.user_metadata?.avatar_url ?? '/avatar.png'}
+                className='size-10 rounded-full'
+                width={20}
+                height={20}
+                alt='avatar'
+              />
+              <div>
+                <p className='font-semibold text-default'>{user.user_metadata?.full_name}</p>
+                <p className='text-default dark:text-white/90'>{user.email}</p>
+              </div>
+            </div>
+            <DropdownMenuSeparator />
+            <AccountSettings user={user!} />
+            <DropdownMenuSeparator />
+          </>
+        )}
 
         <a href='mailto:vatsal1811@gmail.com'>
           <DropdownMenuItem className='cursor-pointer text-default'>
@@ -74,7 +82,7 @@ const DropdownAccount = async () => {
           <DropdownMenuSeparator />
         </Link>
 
-        <ButtonSignout />
+        {user && <ButtonSignout />}
 
         <div className='flex items-center m-2 mt-2.5 text-xs text-subtle'>
           <a href='#'>
