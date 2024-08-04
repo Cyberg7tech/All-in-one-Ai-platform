@@ -61,7 +61,7 @@ const DropdownAccount = async () => {
               </div>
             </div>
             <DropdownMenuSeparator />
-            <AccountSettings user={user!} />
+            <AccountSettings user={user} />
             <DropdownMenuSeparator />
           </>
         )}

@@ -134,7 +134,7 @@ Ensure you have the following installed:
    create table content_creations (
       id uuid not null default uuid_generate_v4(),
       created_at timestamp with time zone not null default now(),
-      user_id uuid not null,
+      user_id uuid null,
       topic text not null,
       style text not null,
       word_limit text not null,
@@ -156,26 +156,26 @@ Ensure you have the following installed:
 
    create policy "Users can read own row" on content_creations
    for select using (auth.uid() = user_id);
-   
+
    create policy "Users can delete own row" on content_creations
    for delete using (auth.uid() = user_id);
    ```
 
    > - For all the tables, we enable the RLS policy by default with necessary permissions as mentioned in the script.
- 
- 5. **Sync Supabase Types:**
 
-   This will sync the table schema locally from Supabase. Run the below commands to login to supabase and sync the schema type.
+5. **Sync Supabase Types:**
 
-   ```sh
-   npx supabase login
+This will sync the table schema locally from Supabase. Run the below commands to login to supabase and sync the schema type.
 
-   npx supabase init
+```sh
+npx supabase login
 
-   npx supabase gen types typescript --project-id [PROJECT_ID] --schema public > src/types/supabase.ts
-   ```
+npx supabase init
 
-   _To get the **PROJECT ID**, go to **Project Settings** in Supabase where you have created your project. You will find **Reference ID** under **General settings** section which is your Project ID._
+npx supabase gen types typescript --project-id [PROJECT_ID] --schema public > src/types/supabase.ts
+```
+
+_To get the **PROJECT ID**, go to **Project Settings** in Supabase where you have created your project. You will find **Reference ID** under **General settings** section which is your Project ID._
 
 ### Running the Application
 
@@ -187,7 +187,7 @@ Ensure you have the following installed:
 
    This will start the development server on `http://localhost:3000`.
 
-   > Note: To enable Google Authentication for your application, please refer to the [Supabase Setup Guide](https://docs.builderkit.ai/setup/supabase).   
+   > Note: To enable Google Authentication for your application, please refer to the [Supabase Setup Guide](https://docs.builderkit.ai/setup/supabase).
 
 2. **Build for production:**
 
