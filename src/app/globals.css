@@ -109,3 +109,8 @@
   background-color: #dfdfdf;
   border-radius: 10px;
 }
+
+.markdown strong {
+  display: block;
+  margin-top: 24px;
+}
