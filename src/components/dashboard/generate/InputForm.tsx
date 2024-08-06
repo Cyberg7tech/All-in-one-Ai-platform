@@ -27,15 +27,15 @@ const prompts = [
     topic: 'AI news show',
     style:
       'Write in a scholarly tone, utilising accurate, authoritative sources and citations. Ensure that your...',
-    wordLimit: '300',
-    voice: 'formal',
+    wordLimit: '100',
+    voice: 'english',
   },
   {
     topic: 'Virtual Reality',
     style:
       'Write in a conversational tone, using simple language and examples to explain complex concepts...',
-    wordLimit: '400',
-    voice: 'formal',
+    wordLimit: '150',
+    voice: 'english',
   },
 ];
 
@@ -47,9 +47,7 @@ const InputForm = ({ generatedData }: Props) => {
     voice: generatedData?.voice ?? '',
   });
 
-  const parsedContentData = generatedData?.results ? JSON.parse(generatedData.results) : {};
-
-  const [contentData, setContentData] = useState(parsedContentData.content_ideas ?? []);
+  const [contentData, setContentData] = useState(generatedData?.results ?? '');
   // State to check if the user has reached the limit of content creations
   const [hasLimitExceeded, setHasLimitExceeded] = useState(false);
 
@@ -89,17 +87,12 @@ const InputForm = ({ generatedData }: Props) => {
     let done = false;
     let streamData = '';
 
-    // Append the stream data to the contentData state as it arrives
     while (!done) {
       const { value, done: doneReading } = await reader.read();
       done = doneReading;
       const chunkValue = decoder.decode(value);
       streamData += chunkValue;
-    }
-
-    if (done) {
-      const parsedData = JSON.parse(streamData);
-      setContentData(parsedData.content_ideas);
+      setContentData((prev: any) => prev + chunkValue);
     }
 
     return streamData;
@@ -116,9 +109,7 @@ const InputForm = ({ generatedData }: Props) => {
     // Makes an api call to /api/generate and receives a stream response
     const res = await fetch('/api/generate', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),
     });
 
@@ -177,11 +168,11 @@ const InputForm = ({ generatedData }: Props) => {
             />
           </InputWrapper>
 
-          <InputWrapper id='voice' label='Voice'>
+          <InputWrapper id='voice' label='Language'>
             <Input
               id='voice'
               name='voice'
-              placeholder='Elon Musk, David Perrel, Sahil Bloom etc'
+              placeholder='English, Hindi, Urdu, Mandarin, etc.'
               value={formData.voice}
               onChange={handleInputChange}
             />
