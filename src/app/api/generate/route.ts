@@ -6,6 +6,8 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 
+export const runtime = 'edge';
+
 const openai = new OpenAI();
 
 export const POST = async (req: Request) => {
