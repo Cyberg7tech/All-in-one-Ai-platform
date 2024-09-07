@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import ModalSelectRoomTheme from './ModalSelectRoomTheme';
 import OutputGeneration from './OutputGeneration';
-import { generateDesignFn } from '@/app/dashboard/(apps)/interior-design-generator/actions';
+import { generateDesignFn } from '@/app/dashboard/(apps)/interior-design/actions';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { cn, errorToast } from '@/utils/utils';

@@ -32,7 +32,7 @@ export function sentenceCase(text: string) {
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 }
 
-// ---------- HEADSHOT + QR CODE GENERATOR + INTERIOR DESIGN GENERATOR ----------
+// ---------- HEADSHOT + QR CODE GENERATOR + INTERIOR DESIGN ----------
 // Helper function: image download
 function forceDownload(blobUrl: string, filename: string) {
   const a = document.createElement('a');

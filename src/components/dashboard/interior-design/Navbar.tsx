@@ -9,8 +9,8 @@ import { SelectTheme } from '@/components/SelectTheme';
 import DropdownAccount from '../sidebar/DropdownAccount';
 
 export const navItems = [
-  { title: 'New Room', href: '/dashboard/interior-design-generator', icon: <GrAdd /> },
-  { title: 'My Generated Rooms', href: '/dashboard/interior-design-generator/history', icon: <IoIosHome /> },
+  { title: 'New Room', href: '/dashboard/interior-design', icon: <GrAdd /> },
+  { title: 'My Generated Rooms', href: '/dashboard/interior-design/history', icon: <IoIosHome /> },
   { title: 'Demo Apps', href: 'https://apps.builderkit.ai/' },
 ];
 

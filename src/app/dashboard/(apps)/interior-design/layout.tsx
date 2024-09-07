@@ -2,7 +2,7 @@
 // It ensures that a user is authenticated before rendering children components.
 // If not authenticated, it redirects to the login page.
 
-import Navbar from '@/components/dashboard/interior-design-generator/Navbar';
+import Navbar from '@/components/dashboard/interior-design/Navbar';
 import { ThemeProvider } from '@/components/theme-provider';
 import { getUserDetails } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';

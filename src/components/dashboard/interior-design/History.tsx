@@ -27,7 +27,7 @@ const HistoryGrid: FC<HistoryGridProps> = ({ data }) => {
                 src={item?.image_urls?.[1] ?? ''}
                 alt='generated-room'
                 className='object-cover rounded-lg w-full h-64 cursor-pointer'
-                onClick={() => router.push(`/dashboard/interior-design-generator/${item.id}`)}
+                onClick={() => router.push(`/dashboard/interior-design/${item.id}`)}
                 width={300}
                 height={300}
               />
@@ -41,7 +41,7 @@ const HistoryGrid: FC<HistoryGridProps> = ({ data }) => {
         <div className='flex flex-col items-center justify-center h-72'>
           <NoStateIcon />
           <p className='text-lg text-subtle my-5'>No Room Available</p>
-          <Link href='/dashboard/interior-design-generator'>
+          <Link href='/dashboard/interior-design'>
             <Button variant='default'>Generate New Rooms</Button>
           </Link>
         </div>

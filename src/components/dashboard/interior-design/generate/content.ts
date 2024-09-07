@@ -14,7 +14,7 @@ import {
   Room13,
   Room14,
   Room15,
-} from '@/assets/images/interior-design-generator';
+} from '@/assets/images/interior-design';
 
 export const roomThemes = [
   { image: Room1, name: 'Bohemian' },
