@@ -17,3 +17,6 @@ export type TypeUpdateChat = Database['public']['Tables']['chat_with_file']['Upd
 export type TypeHeadshotModel = Database['public']['Tables']['headshot_models']['Row'];
 
 export type TypeHeadshotGeneration = Database['public']['Tables']['headshot_generations']['Row'];
+
+// HEADSHOT GENERATOR
+export type TypeAudio = Database['public']['Tables']['voice_transcriptions']['Row'];

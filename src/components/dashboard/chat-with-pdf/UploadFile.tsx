@@ -10,8 +10,8 @@ import { createNewChat } from '@/app/dashboard/(apps)/chat-with-pdf/actions/stor
 import { ingestFileInVector } from '@/app/dashboard/(apps)/chat-with-pdf/actions/ingest-pdf';
 import { LuLoader } from 'react-icons/lu';
 import { supabaseBrowserClient } from '@/utils/supabase/client';
-import ModalLimitExceeded from '@/components/dashboard/chat-with-pdf/ModalLimitExceeded';
 import { Input } from '@/components/ui/input';
+import ModalLimitExceeded from '../ModalLimitExceeded';
 
 // Max file size limit is 4.5mb. This is the limit allowed by Vercel.
 // Alternate way is to upload the image to a cloud storage from the client side (front-end) and provide the link here.

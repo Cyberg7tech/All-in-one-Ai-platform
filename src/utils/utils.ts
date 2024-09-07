@@ -70,3 +70,18 @@ export function formatDate(date: string) {
 
   return formattedDate;
 }
+
+// ---------- VOICE TRANSCRIPTION ----------
+// formatTime is a utility function that takes a recording time in seconds and returns a formatted time string.
+export const formatTime = (recordingTime: number): string => {
+  // Convert recordingTime to minutes and seconds
+  const minutes = Math.floor(recordingTime / 60);
+  const seconds = recordingTime % 60;
+
+  // Pad the minutes and seconds with leading zeros if necessary
+  const formattedMinutes = String(minutes).padStart(2, '0');
+  const formattedSeconds = String(seconds).padStart(2, '0');
+
+  // Return the formatted time
+  return `${formattedMinutes}:${formattedSeconds}`;
+};

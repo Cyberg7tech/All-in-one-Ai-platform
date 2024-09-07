@@ -5,11 +5,11 @@ export const SidebarRoutes = [
   {
     icon: <RiLayoutGridFill className='size-5' />,
     label: 'Home',
-    path: '/dashboard/content-writer',
+    path: '/dashboard/voice-transcription',
   },
   {
     icon: <MdHistory className='size-5' />,
     label: 'History',
-    path: '/dashboard/content-writer/history',
+    path: '/dashboard/voice-transcription/history',
   },
 ];
