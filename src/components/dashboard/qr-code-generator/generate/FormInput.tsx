@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import UpgradePlan from '@/components/dashboard/UpgradePlan';
 import { Button } from '@/components/ui/button';
 import { supabaseBrowserClient } from '@/utils/supabase/client';
-import ModalLimitExceeded from '@/components//dashboard/qr-code-generator/generate/ModalLimitExceeded';
+import ModalLimitExceeded from '../../ModalLimitExceeded';
 
 type FormInputProps = {
   data: TypeQrCodeGeneration[];
@@ -87,7 +87,7 @@ const FormInput: FC<FormInputProps> = () => {
 
   return (
     <div className='flex flex-col justify-between h-[calc(100vh-87px)]'>
-      <ModalLimitExceeded isModalOpen={hasLimitExceeded} />
+      {hasLimitExceeded && <ModalLimitExceeded isModalOpen={hasLimitExceeded} />}
 
       <div className='block md:flex gap-4'>
         <form className='border p-4 rounded-lg w-full md:w-1/2'>

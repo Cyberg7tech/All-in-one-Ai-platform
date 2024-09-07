@@ -42,7 +42,7 @@ const HistoryGrid: FC<HistoryGridProps> = ({ data }) => {
             <NoStateIcon />
             <p className='text-xl text-default font-semibold text-center'>Generated QR will appear here</p>
             <p className='text-subtle text-sm text-center'>Click on the below button to generate</p>
-            <Link href='/generate' className='w-full'>
+            <Link href='/dashboard/qr-code-generator' className='w-full'>
               <Button className='w-full'>Generate the QR</Button>
             </Link>
           </div>

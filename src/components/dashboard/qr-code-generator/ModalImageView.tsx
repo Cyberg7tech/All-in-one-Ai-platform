@@ -52,7 +52,7 @@ const ModalImageView: FC<ModalImageViewProps> = ({ children, data, imageUrl, isF
                 </Button>
               </DialogClose>
               <DialogClose className='w-full'>
-                <Link href='/generate'>
+                <Link href='/dashboard/qr-code-generator'>
                   <Button className='w-full'>Generate new image</Button>
                 </Link>
               </DialogClose>

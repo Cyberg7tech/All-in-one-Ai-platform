@@ -26,3 +26,6 @@ export type TypeImageGeneration = Database['public']['Tables']['image_generation
 
 // QR CODE GENERATOR
 export type TypeQrCodeGeneration = Database['public']['Tables']['qr_code_generations']['Row'];
+
+// INTERIOR DESIGN GENERATOR
+export type TypeInteriorDesign = Database['public']['Tables']['interior_designs']['Row'];
