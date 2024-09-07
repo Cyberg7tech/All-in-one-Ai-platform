@@ -29,3 +29,6 @@ export type TypeQrCodeGeneration = Database['public']['Tables']['qr_code_generat
 
 // INTERIOR DESIGN
 export type TypeInteriorDesign = Database['public']['Tables']['interior_designs']['Row'];
+
+// TEXT TO SPEECH
+export type TypeTTS = Database['public']['Tables']['text_to_speech']['Row'];
