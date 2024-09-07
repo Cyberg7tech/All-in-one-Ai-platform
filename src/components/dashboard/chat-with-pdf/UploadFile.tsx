@@ -76,7 +76,7 @@ export default function UploadFile() {
         throw fileIngestResponse;
       }
 
-      router.replace(`/chat/${newChatResponse.id}`);
+      router.replace(`/dashboard/chat-with-pdf/${newChatResponse.id}`);
     } catch (error) {
       errorToast(`${error}`);
       setIsPending(false);

@@ -35,3 +35,8 @@ export type TypeTTS = Database['public']['Tables']['text_to_speech']['Row'];
 
 // MUSIC GENERATOR
 export type TypeMusic = Database['public']['Tables']['music_generations']['Row'];
+
+// LLAMA 3.1 CHATGPT
+export type TypeLlamaGPT = Database['public']['Tables']['llamagpt']['Row'];
+
+export type TypeSaveLlamaChat = Database['public']['Tables']['llamagpt']['Update'];
