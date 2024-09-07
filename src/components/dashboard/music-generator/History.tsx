@@ -56,7 +56,7 @@ const HistoryGrid: FC<HistoryGridProps> = ({ data }) => {
         <div className='flex flex-col items-center justify-center h-72'>
           <NoStateIcon />
           <p className='text-lg text-subtle my-5'>No Music Available</p>
-          <Link href='/generate'>
+          <Link href='/dashboard/image-enhancer-upscaler'>
             <Button variant='default'>Generate New Music</Button>
           </Link>
         </div>

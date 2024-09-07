@@ -57,8 +57,8 @@ const apps = [
     url: 'youtube-content-generation',
   },
   {
-    name: 'Image Upscaler & Enhancer',
-    url: 'image-upscaler-enhancer',
+    name: 'Image Enhancer & Upscaler',
+    url: 'image-enhancer-upscaler',
   },
 ];
 

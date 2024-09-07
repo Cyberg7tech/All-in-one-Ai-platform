@@ -40,3 +40,6 @@ export type TypeMusic = Database['public']['Tables']['music_generations']['Row']
 export type TypeLlamaGPT = Database['public']['Tables']['llamagpt']['Row'];
 
 export type TypeSaveLlamaChat = Database['public']['Tables']['llamagpt']['Update'];
+
+// IMAGE ENHANCER UPSCALER
+export type TypeImageEnhancerUpscaler = Database['public']['Tables']['image_enhancer_upscaler']['Row'];
