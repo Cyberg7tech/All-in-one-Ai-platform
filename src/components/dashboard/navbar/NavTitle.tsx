@@ -8,7 +8,7 @@ interface NavTitleProps {}
 const NavTitle: FC<NavTitleProps> = () => {
   const pathname = usePathname();
 
-  const title = pathname.includes('/home')
+  const title = pathname.includes('/content-writer')
     ? 'Content Writer'
     : pathname === '/history'
       ? 'History'
@@ -16,7 +16,7 @@ const NavTitle: FC<NavTitleProps> = () => {
         ? 'Pricing'
         : pathname === '/prompt-library'
           ? 'Prompt Library'
-          : 'Content Writer';
+          : 'Dashboard';
 
   return (
     <>

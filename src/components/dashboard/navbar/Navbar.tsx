@@ -1,5 +1,5 @@
 import { SelectTheme } from '../../SelectTheme';
-import MobileSidebar from '../sidebar/MobileSidebar';
+import MobileSidebar from '../content-writer/sidebar/MobileSidebar';
 import { RxExternalLink } from 'react-icons/rx';
 import Link from 'next/link';
 import NavTitle from './NavTitle';

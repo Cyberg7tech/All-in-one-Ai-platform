@@ -13,7 +13,7 @@ const LoginLayout = async ({ children }: Props) => {
 
   // Redirects to login page if user is not authenticated
   if (user) {
-    redirect('/home');
+    redirect('/dashboard');
   }
 
   return (

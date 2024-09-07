@@ -11,7 +11,7 @@ export type Database = {
           filename: string;
           history_metadata: string | null;
           id: string;
-          user_id: string;
+          user_id: string | null;
         };
         Insert: {
           chat_history?: Json | null;
@@ -20,7 +20,7 @@ export type Database = {
           filename: string;
           history_metadata?: string | null;
           id?: string;
-          user_id: string;
+          user_id?: string | null;
         };
         Update: {
           chat_history?: Json | null;
@@ -29,7 +29,7 @@ export type Database = {
           filename?: string;
           history_metadata?: string | null;
           id?: string;
-          user_id?: string;
+          user_id?: string | null;
         };
         Relationships: [
           {
@@ -53,7 +53,7 @@ export type Database = {
           tone: string;
           transcription: string;
           url: string;
-          user_id: string;
+          user_id: string | null;
           video_title: string;
         };
         Insert: {
@@ -67,7 +67,7 @@ export type Database = {
           tone: string;
           transcription: string;
           url: string;
-          user_id: string;
+          user_id?: string | null;
           video_title: string;
         };
         Update: {
@@ -81,7 +81,7 @@ export type Database = {
           tone?: string;
           transcription?: string;
           url?: string;
-          user_id?: string;
+          user_id?: string | null;
           video_title?: string;
         };
         Relationships: [
@@ -374,6 +374,38 @@ export type Database = {
           },
         ];
       };
+      llamagpt: {
+        Row: {
+          chat_history: Json | null;
+          created_at: string;
+          id: string;
+          title: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          chat_history?: Json | null;
+          created_at?: string;
+          id?: string;
+          title?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          chat_history?: Json | null;
+          created_at?: string;
+          id?: string;
+          title?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'llamagpt_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       multillm_chatgpt: {
         Row: {
           chat_history: Json | null;
@@ -409,6 +441,53 @@ export type Database = {
           },
         ];
       };
+      music_generations: {
+        Row: {
+          created_at: string;
+          duration: number;
+          error: string | null;
+          genre: string;
+          id: string;
+          mood: string;
+          music_url: string | null;
+          prediction_id: string;
+          prompt: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          duration: number;
+          error?: string | null;
+          genre: string;
+          id?: string;
+          mood: string;
+          music_url?: string | null;
+          prediction_id: string;
+          prompt: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          duration?: number;
+          error?: string | null;
+          genre?: string;
+          id?: string;
+          mood?: string;
+          music_url?: string | null;
+          prediction_id?: string;
+          prompt?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'music_generations_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       qr_code_generations: {
         Row: {
           created_at: string;
@@ -417,7 +496,7 @@ export type Database = {
           image_url: string | null;
           prompt: string;
           url: string;
-          user_id: string;
+          user_id: string | null;
         };
         Insert: {
           created_at?: string;
@@ -426,7 +505,7 @@ export type Database = {
           image_url?: string | null;
           prompt: string;
           url: string;
-          user_id: string;
+          user_id?: string | null;
         };
         Update: {
           created_at?: string;
@@ -435,7 +514,7 @@ export type Database = {
           image_url?: string | null;
           prompt?: string;
           url?: string;
-          user_id?: string;
+          user_id?: string | null;
         };
         Relationships: [
           {
@@ -494,6 +573,47 @@ export type Database = {
           },
           {
             foreignKeyName: 'subscriptions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      text_to_speech: {
+        Row: {
+          audio_url: string;
+          content: string;
+          created_at: string;
+          id: string;
+          model: string;
+          title: string;
+          user_id: string | null;
+          voice: string;
+        };
+        Insert: {
+          audio_url: string;
+          content: string;
+          created_at?: string;
+          id?: string;
+          model: string;
+          title: string;
+          user_id?: string | null;
+          voice: string;
+        };
+        Update: {
+          audio_url?: string;
+          content?: string;
+          created_at?: string;
+          id?: string;
+          model?: string;
+          title?: string;
+          user_id?: string | null;
+          voice?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'text_to_speech_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'users';
@@ -583,7 +703,7 @@ export type Database = {
           summary: string | null;
           transcription: string;
           url: string;
-          user_id: string;
+          user_id: string | null;
           youtube_title: string;
         };
         Insert: {
@@ -594,7 +714,7 @@ export type Database = {
           summary?: string | null;
           transcription: string;
           url: string;
-          user_id: string;
+          user_id?: string | null;
           youtube_title: string;
         };
         Update: {
@@ -605,7 +725,7 @@ export type Database = {
           summary?: string | null;
           transcription?: string;
           url?: string;
-          user_id?: string;
+          user_id?: string | null;
           youtube_title?: string;
         };
         Relationships: [

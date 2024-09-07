@@ -22,7 +22,7 @@ export default function Logo() {
   }, [isHomePage, theme]);
 
   return (
-    <Link href='https://www.builderkit.ai/#pricing'>
+    <Link href='/dashboard'>
       <div className='flex items-center gap-2 w-fit'>
         <Image src={logoSrc} width={150} height={128} alt='logo' />
       </div>

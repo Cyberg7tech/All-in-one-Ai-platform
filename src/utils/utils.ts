@@ -10,3 +10,16 @@ export const errorToast = (description: string, title?: string) =>
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+// Get the initials of a user's name for MULTILLM CHATGPT & CHAT WITH PDF
+export function userNameInitials(name: string) {
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('');
+}
+
+// Get the document ID from the filename for CHAT WITH PDF
+export function getDocIdFromFilename(fileName: string) {
+  return fileName.split('.')[0];
+}
