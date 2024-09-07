@@ -22,8 +22,8 @@ const MobileSidebarItem: FC<MobileSidebarItemProps> = ({ route }) => {
       <Link
         href={route.path}
         className={cn(
-          'w-full h-9 px-4 py-2 flex justify-start bg-transparent gap-2 text-sm font-semibold border border-transparent hover:border-border rounded-lg text-subtle tracking-tight',
-          pathname === route.path && 'border-border rounded-lg !text-default bg-secondary'
+          'w-full h-10 flex gap-2 px-4 py-2 text-sm font-medium border border-transparent hover:border-border rounded-lg text-subtle tracking-tight',
+          pathname === route.path && 'border-border !text-default bg-secondary'
         )}>
         <div>{route.icon}</div>
         <span>{route.label}</span>

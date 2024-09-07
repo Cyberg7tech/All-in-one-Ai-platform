@@ -12,3 +12,8 @@ export type TypeSaveChat = Database['public']['Tables']['multillm_chatgpt']['Upd
 export type TypeChat = Database['public']['Tables']['chat_with_file']['Row'];
 
 export type TypeUpdateChat = Database['public']['Tables']['chat_with_file']['Update'];
+
+// HEADSHOT GENERATOR
+export type TypeHeadshotModel = Database['public']['Tables']['headshot_models']['Row'];
+
+export type TypeHeadshotGeneration = Database['public']['Tables']['headshot_generations']['Row'];

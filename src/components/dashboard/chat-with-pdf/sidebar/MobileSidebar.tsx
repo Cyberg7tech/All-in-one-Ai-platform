@@ -29,7 +29,7 @@ const MobileSidebar = async () => {
               <Logo />
             </div>
 
-            <Link href='/chat'>
+            <Link href='/dashboard/chat-with-pdf'>
               <Button size='lg' className='w-full'>
                 <FaPlus className='mr-2' /> New Chat
               </Button>

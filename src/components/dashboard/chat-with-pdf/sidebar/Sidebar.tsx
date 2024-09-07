@@ -22,7 +22,7 @@ const Sidebar = async () => {
           <Logo />
         </div>
 
-        <Link href='/chat'>
+        <Link href='/dashboard/chat-with-pdf'>
           <Button className='w-full'>
             <FaPlus className='mr-2' /> New Chat
           </Button>

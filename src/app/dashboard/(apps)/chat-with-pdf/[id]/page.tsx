@@ -15,7 +15,7 @@ export default async function GenerateImage({ params }: { params: { id: string }
     return (
       <div className='max-w-6xl mx-auto flex flex-col items-center gap-10 pt-10'>
         <p className='text-2xl text-center mt-10'>Chat not found!</p>
-        <Link href='/chat'>
+        <Link href='/dashboard/chat-with-pdf'>
           <Button variant='link' className='mx-auto'>
             Start New Chat <ArrowRightIcon className='ml-2' />
           </Button>

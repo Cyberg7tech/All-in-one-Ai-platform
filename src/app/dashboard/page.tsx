@@ -18,7 +18,7 @@ const apps = [
   },
   {
     name: 'Voice Transcription',
-    url: 'Voice Transcription',
+    url: 'voice-transcription',
   },
   {
     name: 'Headshot Generator',

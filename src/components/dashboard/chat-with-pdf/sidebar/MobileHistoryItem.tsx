@@ -18,7 +18,7 @@ const MobileHistoryItem: FC<MobileHistoryItemProps> = ({ history }) => {
   return (
     <SheetClose asChild>
       <Link
-        href={`/chat/${history.id}`}
+        href={`/dashboard/chat-with-pdf/${history.id}`}
         className={cn(
           'w-full h-10 block px-4 py-2 text-sm font-medium border border-transparent hover:border-border rounded-lg text-subtle hover:text-default tracking-tight',
           history.id === chatId && 'border-border !text-default bg-secondary'

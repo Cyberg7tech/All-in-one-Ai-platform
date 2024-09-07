@@ -1,20 +1,15 @@
 import { RiLayoutGridFill } from 'react-icons/ri';
 import { MdHistory } from 'react-icons/md';
 
-export const SidebarRoutes = [
+export const sidebarRoutes = [
   {
     icon: <RiLayoutGridFill className='size-5' />,
     label: 'Home',
-    path: '/home',
+    path: '/dashboard/headshot-generator',
   },
   {
     icon: <MdHistory className='size-5' />,
     label: 'History',
-    path: '/history',
+    path: '/dashboard/headshot-generator/history',
   },
-  // {
-  //   icon: <PiMagicWand className='size-5' />,
-  //   label: 'Prompt library',
-  //   path: '/prompt-library',
-  // },
 ];

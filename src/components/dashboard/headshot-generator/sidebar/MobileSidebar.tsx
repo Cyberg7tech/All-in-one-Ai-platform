@@ -1,16 +1,18 @@
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { FaBars } from 'react-icons/fa6';
 import Logo from '@/components/Logo';
-import DropdownAccount from '../../sidebar/DropdownAccount';
-import SidebarUpgradePlan from '../../sidebar/SidebarUpgradePlan';
-import { SidebarRoutes } from './content';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { FaPlus } from 'react-icons/fa';
+import { sidebarRoutes } from './content';
 import MobileSidebarItem from './MobileSidebarItem';
-import ButtonNewContent from './ButtonNewContent';
+import SidebarUpgradePlan from '../../sidebar/SidebarUpgradePlan';
+import DropdownAccount from '../../sidebar/DropdownAccount';
 
 const MobileSidebar = () => {
   return (
     <Sheet>
-      <SheetTrigger className='flex lg:hidden items-center gap-2 pr-4 hover:opacity-75 transition'>
+      <SheetTrigger className=' pr-4 hover:opacity-75 transition'>
         <FaBars />
       </SheetTrigger>
       <SheetContent side='left' className='p-5 pt-8'>
@@ -20,10 +22,14 @@ const MobileSidebar = () => {
               <Logo />
             </div>
 
-            <ButtonNewContent />
+            <Link href='/dashboard/headshot-generator'>
+              <Button size='lg' className='w-full mb-3'>
+                <FaPlus className='mr-2' /> Train Model
+              </Button>
+            </Link>
 
             <div className='space-y-1'>
-              {SidebarRoutes.map((route, index) => (
+              {sidebarRoutes.map((route, index) => (
                 <MobileSidebarItem key={index} route={route} />
               ))}
             </div>

@@ -56,6 +56,9 @@ dependencies:
   '@tanstack/react-table':
     specifier: ^8.16.0
     version: 8.17.3(react-dom@18.2.0)(react@18.2.0)
+  axios:
+    specifier: ^1.7.7
+    version: 1.7.7
   class-variance-authority:
     specifier: ^0.7.0
     version: 0.7.0
@@ -73,7 +76,7 @@ dependencies:
     version: 0.7.0
   langchain:
     specifier: ^0.2.18
-    version: 0.2.18(@pinecone-database/pinecone@3.0.2)(@supabase/supabase-js@2.42.4)(openai@4.51.0)(pdf-parse@1.1.1)
+    version: 0.2.18(@pinecone-database/pinecone@3.0.2)(@supabase/supabase-js@2.42.4)(axios@1.7.7)(openai@4.51.0)(pdf-parse@1.1.1)
   nanoid:
     specifier: ^5.0.7
     version: 5.0.7
@@ -2290,6 +2293,16 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
+  /axios@1.7.7:
+    resolution: {integrity: sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==}
+    dependencies:
+      follow-redirects: 1.15.9
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
   /axobject-query@3.2.1:
     resolution: {integrity: sha512-jsyHu61e6N4Vbz/v18DHwWYKK0bSWLqn47eeDSKPB7m8tqMHF9YJ+mhIk2lVteyZrY8tnSj/jHOv4YiTCuCJgg==}
     dependencies:
@@ -3345,6 +3358,16 @@ packages:
   /flatted@3.3.1:
     resolution: {integrity: sha512-X8cqMLLie7KsNUDSdzeN8FYK9rEt4Dt67OsG/DNGnYTSDBG4uFAJFBnUeiV+zCVAvwFy56IjM9sH51jVaEhNxw==}
 
+  /follow-redirects@1.15.9:
+    resolution: {integrity: sha512-gew4GsXizNgdoRyqmyfMHyAmXsZDk6mHkSxZFCzW9gwlbtOW44CDtYavM+y+72qD/Vq2l550kMF52DT8fOLJqQ==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dev: false
+
   /for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
     dependencies:
@@ -4043,7 +4066,7 @@ packages:
     dependencies:
       json-buffer: 3.0.1
 
-  /langchain@0.2.18(@pinecone-database/pinecone@3.0.2)(@supabase/supabase-js@2.42.4)(openai@4.51.0)(pdf-parse@1.1.1):
+  /langchain@0.2.18(@pinecone-database/pinecone@3.0.2)(@supabase/supabase-js@2.42.4)(axios@1.7.7)(openai@4.51.0)(pdf-parse@1.1.1):
     resolution: {integrity: sha512-7+5Y2FsdjlUBKJf1N+MyHn1PrGZQ9m87l3du7IeH4RiQp4j8Bz7mGV+Bjhr8FEXFjo85zLrbnpsN87pZCstubA==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -4231,6 +4254,7 @@ packages:
       '@langchain/textsplitters': 0.0.3(langchain@0.2.18)(openai@4.51.0)
       '@pinecone-database/pinecone': 3.0.2
       '@supabase/supabase-js': 2.42.4
+      axios: 1.7.7
       binary-extensions: 2.3.0
       js-tiktoken: 1.0.14
       js-yaml: 4.1.0
@@ -4265,7 +4289,7 @@ packages:
       '@langchain/core': 0.2.31(langchain@0.2.18)(openai@4.51.0)
       '@types/uuid': 10.0.0
       commander: 10.0.1
-      langchain: 0.2.18(@pinecone-database/pinecone@3.0.2)(@supabase/supabase-js@2.42.4)(openai@4.51.0)(pdf-parse@1.1.1)
+      langchain: 0.2.18(@pinecone-database/pinecone@3.0.2)(@supabase/supabase-js@2.42.4)(axios@1.7.7)(openai@4.51.0)(pdf-parse@1.1.1)
       openai: 4.51.0
       p-queue: 6.6.2
       p-retry: 4.6.2
@@ -4290,7 +4314,7 @@ packages:
       '@langchain/core': 0.2.31(langchain@0.2.18)(openai@4.58.1)
       '@types/uuid': 10.0.0
       commander: 10.0.1
-      langchain: 0.2.18(@pinecone-database/pinecone@3.0.2)(@supabase/supabase-js@2.42.4)(openai@4.51.0)(pdf-parse@1.1.1)
+      langchain: 0.2.18(@pinecone-database/pinecone@3.0.2)(@supabase/supabase-js@2.42.4)(axios@1.7.7)(openai@4.51.0)(pdf-parse@1.1.1)
       openai: 4.58.1(zod@3.23.8)
       p-queue: 6.6.2
       p-retry: 4.6.2
@@ -5539,6 +5563,10 @@ packages:
 
   /property-information@6.5.0:
     resolution: {integrity: sha512-PgTgs/BlvHxOu8QuEN7wi5A0OmXaBcHpmCSTehcs6Uuu9IkDIEo13Hy7n898RHfrQ49vKCoGeWZSaAK01nwVig==}
+    dev: false
+
+  /proxy-from-env@1.1.0:
+    resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
     dev: false
 
   /punycode@2.3.1:

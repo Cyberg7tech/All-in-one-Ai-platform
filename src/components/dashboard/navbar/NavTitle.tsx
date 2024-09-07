@@ -8,21 +8,12 @@ interface NavTitleProps {}
 const NavTitle: FC<NavTitleProps> = () => {
   const pathname = usePathname();
 
-  const title = pathname.includes('/content-writer')
-    ? 'Content Writer'
-    : pathname === '/history'
-      ? 'History'
-      : pathname === '/pricing'
-        ? 'Pricing'
-        : pathname === '/prompt-library'
-          ? 'Prompt Library'
-          : 'Dashboard';
+  const appUrl = pathname.split('/')[2];
+  const appName = appUrl.replaceAll('-', ' ');
 
-  return (
-    <>
-      <div className='text-lg font-semibold text-default'>{title}</div>
-    </>
-  );
+  const title = pathname.includes('/history') ? 'History' : appName;
+
+  return <div className='text-lg font-semibold text-default capitalize'>{title}</div>;
 };
 
 export default NavTitle;
