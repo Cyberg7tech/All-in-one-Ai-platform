@@ -23,3 +23,6 @@ export type TypeAudio = Database['public']['Tables']['voice_transcriptions']['Ro
 
 // IMAGE GENERATOR
 export type TypeImageGeneration = Database['public']['Tables']['image_generations']['Row'];
+
+// QR CODE GENERATOR
+export type TypeQrCodeGeneration = Database['public']['Tables']['qr_code_generations']['Row'];

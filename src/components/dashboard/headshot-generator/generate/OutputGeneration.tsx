@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { LuLoader } from 'react-icons/lu';
 import { Button } from '@/components/ui/button';
 import { TbDownload } from 'react-icons/tb';
-import downloadHeadshot from '@/utils/utils';
+import downloadImage from '@/utils/utils';
 
 interface OutputGenerationProps {
   isPending: boolean;
@@ -52,7 +52,7 @@ const OutputGeneration: FC<OutputGenerationProps> = ({ isPending, generatedImage
                   <div className='absolute inset-0 bg-black/50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
                     <Button
                       variant='outline'
-                      onClick={() => downloadHeadshot(imageUrl, `output-${index + 1}.png`)}
+                      onClick={() => downloadImage(imageUrl, `output-${index + 1}.png`)}
                       className='rounded-full text-white border-white'>
                       <TbDownload className='mr-2' />
                       Download

@@ -32,6 +32,7 @@ export function sentenceCase(text: string) {
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 }
 
+// ---------- HEADSHOT + QR CODE GENERATOR ----------
 // Helper function: image download
 function forceDownload(blobUrl: string, filename: string) {
   const a = document.createElement('a');
@@ -42,8 +43,8 @@ function forceDownload(blobUrl: string, filename: string) {
   a.remove();
 }
 
-// QR Code download function. It takes the URL of the QR code image and the filename as arguments.
-export default function downloadHeadshot(url: string, filename: string) {
+// Image download function. It takes the URL of the Image and the filename as arguments.
+export default function downloadImage(url: string, filename: string) {
   fetch(url, {
     headers: new Headers({
       Origin: location.origin,
