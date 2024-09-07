@@ -20,3 +20,6 @@ export type TypeHeadshotGeneration = Database['public']['Tables']['headshot_gene
 
 // HEADSHOT GENERATOR
 export type TypeAudio = Database['public']['Tables']['voice_transcriptions']['Row'];
+
+// IMAGE GENERATOR
+export type TypeImageGeneration = Database['public']['Tables']['image_generations']['Row'];
