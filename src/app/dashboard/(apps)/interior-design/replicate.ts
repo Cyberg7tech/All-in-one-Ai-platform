@@ -30,7 +30,7 @@ export async function startGeneration(inputs: TypeGenerationInput): Promise<stri
       num_samples: '4',
     },
     // Webhook url where Replicate will send updates on the generation status/result.
-    webhook: `${origin}/api/webhooks/replicate`,
+    webhook: `${origin}/api/interior-design/webhooks/replicate`,
     // Filter for the webhook events to receive updates only for the 'completed' event.
     webhook_events_filter: ['completed'],
   });

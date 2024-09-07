@@ -67,7 +67,7 @@ const Chat: FC<ChatProps> = ({ chat, userName }) => {
     const documentId = getDocIdFromFilename(chat.file);
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch('/api/chat-with-pdf/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

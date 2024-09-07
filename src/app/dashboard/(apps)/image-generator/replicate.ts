@@ -27,7 +27,7 @@ export async function startGeneration(inputs: TypeGenerationInput): Promise<stri
       num_outputs: noOfOutputs ?? 1,
       apply_watermark: false,
     },
-    webhook: `${origin}/api/webhooks/replicate`, // Webhook URL to receive updates on generation response.
+    webhook: `${origin}/api/image-generator/webhooks/replicate`, // Webhook URL to receive updates on generation response.
     webhook_events_filter: ['completed'], // Filter to receive only completed events.
   });
 

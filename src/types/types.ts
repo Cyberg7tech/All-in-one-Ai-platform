@@ -32,3 +32,6 @@ export type TypeInteriorDesign = Database['public']['Tables']['interior_designs'
 
 // TEXT TO SPEECH
 export type TypeTTS = Database['public']['Tables']['text_to_speech']['Row'];
+
+// MUSIC GENERATOR
+export type TypeMusic = Database['public']['Tables']['music_generations']['Row'];

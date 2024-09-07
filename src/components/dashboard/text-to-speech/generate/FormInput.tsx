@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { SubmitButton } from '@/components/SubmitButton';
 import { errorToast } from '@/utils/utils';
 import { supabaseBrowserClient } from '@/utils/supabase/client';
-import ModalLimitExceeded from '@/components/dashboard/text-to-speech/generate/ModalLimitExceeded';
 import InputWrapper from '@/components/InputWrapper';
 import { IoDocumentTextOutline } from 'react-icons/io5';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,6 +14,7 @@ import { modelOptions, TypeModels, voiceOptions } from './content';
 import { saveGeneratedAudio } from '@/app/dashboard/(apps)/text-to-speech/actions';
 import { useRouter } from 'next/navigation';
 import { upload } from '@/app/dashboard/(apps)/text-to-speech/storage';
+import ModalLimitExceeded from '../../ModalLimitExceeded';
 
 export type FormFields = {
   content: string;
@@ -115,7 +115,7 @@ const FormInput = () => {
         throw 'Text content is required to generate audio';
       }
 
-      const response = await fetch('/api/generate', {
+      const response = await fetch('/api/text-to-speech/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

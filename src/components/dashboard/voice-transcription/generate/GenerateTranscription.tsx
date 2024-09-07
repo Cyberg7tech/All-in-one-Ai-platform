@@ -150,10 +150,10 @@ const GenerateTranscription: FC<GenerateTranscriptionProps> = () => {
     [transcriptionId]
   );
 
-  // Function to generate the summary of the transcription by making api call to '/api/summary'
+  // Function to generate the summary of the transcription by making api call to '/api/voice-transcription/summary'
   const generateSummary = useCallback(
     async (transciption: string) => {
-      const response = await fetch('/api/summary', {
+      const response = await fetch('/api/voice-transcription/summary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transciption }),

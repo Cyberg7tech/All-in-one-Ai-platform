@@ -9,7 +9,7 @@ export async function startTranscription(audioUrl: string) {
   try {
     // Creating the webhook URL where the transcription response will be sent from Deepgram.
     const origin = headers().get('origin');
-    const callbackUrl = new CallbackUrl(`${origin}/api/webhooks/deepgram`);
+    const callbackUrl = new CallbackUrl(`${origin}/api/voice-transcription/webhooks/deepgram`);
 
     const { result, error } = await deepgram.listen.prerecorded.transcribeUrlCallback(
       { url: audioUrl }, // Audio URL to be transcribed.
