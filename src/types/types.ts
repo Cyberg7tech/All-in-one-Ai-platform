@@ -43,3 +43,6 @@ export type TypeSaveLlamaChat = Database['public']['Tables']['llamagpt']['Update
 
 // IMAGE ENHANCER UPSCALER
 export type TypeImageEnhancerUpscaler = Database['public']['Tables']['image_enhancer_upscaler']['Row'];
+
+// YOUTUBE CONTENT GENERATOR
+export type TypeYoutubeContent = Database['public']['Tables']['youtube_content_generator']['Row'];

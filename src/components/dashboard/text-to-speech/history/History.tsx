@@ -19,7 +19,7 @@ export function History({ data }: HistoryProps) {
         <SpeakerIcon />
         <p className='text-xl text-default font-medium text-center'>Generated speech will appear here</p>
         <p className='text-subtle font-light'>Click on the below button to generate</p>
-        <Link href='/home' className='w-5/6'>
+        <Link href='/dashboard/youtube-content-generator' className='w-5/6'>
           <Button className='w-full'>Generate text to speech</Button>
         </Link>
       </div>

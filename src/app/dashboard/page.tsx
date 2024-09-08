@@ -53,8 +53,8 @@ const apps = [
     url: 'llamagpt',
   },
   {
-    name: 'Youtube Content Generation',
-    url: 'youtube-content-generation',
+    name: 'Youtube Content Generator',
+    url: 'youtube-content-generator',
   },
   {
     name: 'Image Enhancer & Upscaler',
@@ -64,9 +64,9 @@ const apps = [
 
 export default async function Dashboard() {
   return (
-    <div>
+    <div className='space-y-10 mb-6'>
       {/* Navbar */}
-      <div className='h-16 shadow mb-10 px-4 md:px-6'>
+      <div className='h-16 shadow px-4 md:px-6'>
         <div className='h-full flex items-center justify-between max-w-6xl mx-auto'>
           <Logo />
 
@@ -89,7 +89,7 @@ export default async function Dashboard() {
       </div>
 
       <div className='max-w-6xl mx-auto px-4 md:px-0'>
-        <h1 className='text-2xl text-center font-semibold mb-4'>All Demo Apps</h1>
+        <h1 className='text-4xl text-center font-medium mb-6'>All Apps</h1>
 
         <div className='grid grid-cols-2 md:grid-cols-5 gap-4'>
           {apps.map((app) => (
@@ -98,7 +98,7 @@ export default async function Dashboard() {
               href={`/dashboard/${app.url}`}
               className='min-h-16 border shadow-sm rounded-lg px-2'>
               <div className='h-full flex items-center justify-center'>
-                <p className='text-center text-sm'>{app.name}</p>
+                <p className='text-center text-sm font-medium'>{app.name}</p>
               </div>
             </Link>
           ))}

@@ -4,7 +4,7 @@ const TopicCell = ({ row }: { row: any }) => {
   const router = useRouter();
 
   const handlePush = (id: string) => {
-    router.push(`/home/${id}`);
+    router.push(`/dashboard/youtube-content-generator/${id}`);
   };
 
   return (
