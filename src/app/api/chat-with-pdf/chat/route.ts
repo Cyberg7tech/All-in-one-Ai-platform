@@ -1,14 +1,14 @@
 // This is the API route that will be used to handle the chat functionality.
 
 import { NextResponse } from 'next/server';
-import { pineconeIndex } from '../pinecone';
-import { loadEmbeddings, openAIModel } from '../openai';
+import { pineconeIndex } from '@/utils/pinecone';
+import { loadEmbeddings, openAIModel } from '@/utils/langchain-openai';
 import { PineconeStore } from '@langchain/pinecone';
-import { promptTemplate } from './prompt-template';
 import { getUserDetails } from '@/utils/supabase/server';
 import { RunnableSequence } from '@langchain/core/runnables';
 import { formatDocumentsAsString } from 'langchain/util/document';
 import { StringOutputParser } from '@langchain/core/output_parsers';
+import { promptTemplate } from '@/utils/prompt-template';
 
 export const runtime = 'edge';
 

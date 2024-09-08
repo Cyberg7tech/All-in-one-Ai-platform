@@ -6,9 +6,9 @@ import { PineconeStore } from '@langchain/pinecone';
 import { Document } from 'langchain/document';
 import ytdl from '@distube/ytdl-core';
 import { parseStringPromise } from 'xml2js';
-import { loadEmbeddings } from '@/app/api/chat-with-youtube/chat/openai';
-import { pineconeIndex } from '@/app/api/chat-with-youtube/chat/pinecone';
-import ytCookies from './youtube-cookies';
+import { loadEmbeddings } from '@/utils/langchain-openai';
+import { pineconeIndex } from '@/utils/pinecone';
+import ytCookies from '@/utils/youtube-cookies';
 
 // Save new chat with the provided tone, style, video title, and URL.
 export async function createNewChat(

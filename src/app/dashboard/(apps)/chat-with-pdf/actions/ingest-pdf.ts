@@ -9,8 +9,8 @@ import { TokenTextSplitter } from 'langchain/text_splitter';
 import { PineconeStore } from '@langchain/pinecone';
 import { downloadFile } from './storage';
 import { getDocIdFromFilename } from '@/utils/utils';
-import { loadEmbeddings } from '@/app/api/chat-with-pdf/openai';
-import { pineconeIndex } from '@/app/api/chat-with-pdf/pinecone';
+import { loadEmbeddings } from '@/utils/langchain-openai';
+import { pineconeIndex } from '@/utils/pinecone';
 
 // Function to ingest the PDF file and store it in the vector store.
 export async function ingestFileInVector(fileName: string) {

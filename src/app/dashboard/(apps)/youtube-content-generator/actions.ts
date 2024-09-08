@@ -3,7 +3,7 @@
 import { getUserDetails, supabaseServerClient } from '@/utils/supabase/server';
 import { parseStringPromise } from 'xml2js';
 import ytdl from '@distube/ytdl-core';
-import ytCookies from './youtube-cookies';
+import ytCookies from '@/utils/youtube-cookies';
 
 export async function getYoutubeVideoDetails(url: string) {
   const supabase = supabaseServerClient();
