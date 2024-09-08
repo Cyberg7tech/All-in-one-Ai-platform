@@ -104,7 +104,7 @@ const GenerateContent: FC<GenerateContentProps> = ({ data }) => {
     }
 
     try {
-      const res = await fetch('/api/generate', {
+      const res = await fetch('/api/youtube-content-generator/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, summary, language }),

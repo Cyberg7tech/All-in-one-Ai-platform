@@ -46,3 +46,6 @@ export type TypeImageEnhancerUpscaler = Database['public']['Tables']['image_enha
 
 // YOUTUBE CONTENT GENERATOR
 export type TypeYoutubeContent = Database['public']['Tables']['youtube_content_generator']['Row'];
+
+// CHAT WITH YOUTUBE
+export type TypeYoutubeChat = Database['public']['Tables']['chat_with_youtube']['Row'];

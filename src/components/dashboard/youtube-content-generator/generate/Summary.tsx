@@ -46,10 +46,10 @@ const Summary: FC<SummaryProps> = ({ data }) => {
     return streamData;
   };
 
-  // Function to generate the summary of the transcription by making api call to '/api/summary'
+  // Function to generate the summary of the transcription by making api call to '/api/youtube-content-generator/summary'
   const generateSummary = useCallback(async (subTitle: string) => {
     try {
-      const response = await fetch('/api/summary', {
+      const response = await fetch('/api/youtube-content-generator/summary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ subTitle }),
