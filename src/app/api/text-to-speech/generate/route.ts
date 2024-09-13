@@ -1,8 +1,8 @@
 // This route is used for text to speech audio based on the given text content and selected AI model, voice, and language
 
 import { getUserDetails } from '@/utils/supabase/server';
-import { openAITTS } from './models/openai';
-import { elevenLabsTTS } from './models/elevenlabs';
+import { openAITTS } from '../models/openai';
+import { elevenLabsTTS } from '../models/elevenlabs';
 
 export const runtime = 'edge';
 
