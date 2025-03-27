@@ -105,10 +105,8 @@ const FormInput = () => {
 
       // If the user has reached the limit of content creations, show a toast message
       if (limitExceeded) {
-        return errorToast(
-          'You have reached the limit of content creations for the trial period.',
-          'Limit Exceeded'
-        );
+        errorToast('You have reached the limit of content creations for the trial period.', 'Limit Exceeded');
+        return;
       }
 
       if (!formData.content) {

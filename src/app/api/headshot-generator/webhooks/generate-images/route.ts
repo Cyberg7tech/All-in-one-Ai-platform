@@ -43,7 +43,7 @@ export async function POST(req: Request): Promise<NextResponse> {
       .update({
         image_urls: prompt.images,
       })
-      .eq('generation_id', prompt.id);
+      .eq('generation_id', String(prompt.id));
 
     if (updateImageError) {
       console.error({ updateImageError });

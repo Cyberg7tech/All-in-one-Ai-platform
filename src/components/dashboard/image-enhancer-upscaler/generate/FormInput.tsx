@@ -43,7 +43,8 @@ const FormInput: FC<FormInputProps> = ({ inputImage, outputImage }) => {
   // Function to initiate the image upscaling/enhancing process by calling generateFn from server actions.
   const handleGeneration = async () => {
     if (type === '') {
-      return errorToast('Please select enhance or upscale type.');
+      errorToast('Please select enhance or upscale type.');
+      return;
     }
 
     const image = formData.input_image;
