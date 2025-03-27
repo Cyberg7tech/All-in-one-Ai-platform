@@ -66,7 +66,7 @@ const DropdownAccount = async () => {
           </>
         )}
 
-        <a href='mailto:vatsal1811@gmail.com'>
+        <a href='mailto:hello@builderkit.ai'>
           <DropdownMenuItem className='cursor-pointer text-default'>
             <AiOutlineQuestionCircle className='size-5 mr-2' />
             Support
