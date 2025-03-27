@@ -53,7 +53,7 @@ export async function POST(req: Request): Promise<NextResponse> {
         trained_at: tune.trained_at,
         expires_at: tune.expires_at,
       })
-      .eq('model_id', tune.id);
+      .eq('model_id', String(tune.id));
 
     if (modelUpdatedError) {
       console.error({ modelUpdatedError });

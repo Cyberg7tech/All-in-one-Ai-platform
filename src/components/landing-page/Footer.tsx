@@ -15,7 +15,7 @@ const footerItems = [
   { name: 'FAQ', href: '/#faq' },
   { name: 'License', href: '/' },
   { name: 'Terms', href: '/' },
-  { name: 'Contact', href: 'mailto:vatsal1811@gmail.com' },
+  { name: 'Contact', href: 'mailto:hello@builderkit.ai' },
 ];
 
 const socialMediaIcons = [

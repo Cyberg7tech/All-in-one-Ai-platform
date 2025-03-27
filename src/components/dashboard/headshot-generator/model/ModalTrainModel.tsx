@@ -114,10 +114,11 @@ const ModalTrainModel: FC<ModalTrainModelProps> = ({ buttonText }) => {
   // In case of API errors or successful training, it updates the UI and navigates as needed.
   const trainModel = async (inputData: FormData) => {
     if (hasLimitExceeded) {
-      return errorToast(
+      errorToast(
         'You have reached the limit of content creations. Please purchase a plan to continue.',
         'Limit Exceeded'
       );
+      return;
     }
     images.forEach((file) => {
       inputData.append(`images`, file);

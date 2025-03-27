@@ -61,7 +61,8 @@ const Chat: FC<ChatProps> = ({ chat, userName }) => {
   const handleChatFn = async (formData: FormData) => {
     const question = formData.get('question') as string;
     if (!question) {
-      return errorToast('Please enter a question');
+      errorToast('Please enter a question');
+      return;
     }
 
     const documentId = getDocIdFromFilename(chat.file);

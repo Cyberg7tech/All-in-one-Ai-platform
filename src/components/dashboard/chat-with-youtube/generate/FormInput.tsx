@@ -84,10 +84,8 @@ const FormInput = () => {
 
     // If the user has reached the limit of content creations, show a toast message
     if (limitExceeded) {
-      return errorToast(
-        'You have reached the limit of content creations for the trial period.',
-        'Limit Exceeded'
-      );
+      errorToast('You have reached the limit of content creations for the trial period.', 'Limit Exceeded');
+      return;
     }
 
     setIsLoading(true);
@@ -106,7 +104,8 @@ const FormInput = () => {
     const isYouTubeUrl = url.includes('youtube.com');
 
     if (!isYouTubeUrl) {
-      return errorToast('Please provide a valid YouTube video URL.');
+      errorToast('Please provide a valid YouTube video URL.');
+      return;
     }
 
     try {

@@ -90,10 +90,11 @@ const FormInput: FC<FormInputProps> = () => {
   // Function to initiate the image generation process by calling generateImageFn from server actions.
   const handleGeneration = async (data: FormData) => {
     if (hasLimitExceeded) {
-      return toast({
+      toast({
         description: 'You have reached the limit of content creations. Upgrade to continue.',
         variant: 'destructive',
       });
+      return;
     }
     setIsLoading(true);
 

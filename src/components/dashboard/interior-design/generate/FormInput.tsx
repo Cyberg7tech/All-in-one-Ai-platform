@@ -82,10 +82,11 @@ const FormInput: FC<FormInputProps> = ({ data }) => {
   // Function to initiate the design generation process by calling generateDesignFn from server actions.
   const handleGeneration = async (inputFormData: FormData) => {
     if (hasLimitExceeded) {
-      return toast({
+      toast({
         description: 'You have reached the limit of content creations. Please upgrade to continue.',
         variant: 'destructive',
       });
+      return;
     }
     const prompt = inputFormData.get('prompt') as string;
     const roomType = inputFormData.get('roomType') as string;
