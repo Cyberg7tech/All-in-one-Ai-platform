@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         response = await apiService.chatWithTogether(messages, model, { maxTokens, temperature });
       } else if (model.includes('gemini') || model.includes('google/')) {
         // Google models
-        response = await apiService.callGoogleAI(messages, model, { maxTokens, temperature });
+        response = await apiService.callGemini(messages, model, { maxTokens, temperature });
       } else if (model.includes('grok') || model.includes('xai')) {
         // xAI models  
         response = await apiService.callXAI(messages, model, { maxTokens, temperature });
