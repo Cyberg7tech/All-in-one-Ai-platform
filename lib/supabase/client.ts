@@ -1,71 +1,139 @@
-import { createClient } from '@supabase/supabase-js';
-import { Database } from '@/types/supabase';
+import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ttnkomdxbkmfmkaycjao.supabase.co'
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTcwMTgsImV4cCI6MjA2ODczMzAxOH0.ZpedifMgWW0XZzqq-CCkdHeiQb2HnzLZ8wXN03cjh7g'
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzE1NzAxOCwiZXhwIjoyMDY4NzMzMDE4fQ.UOE8fFmFYqnCHKiA-MlfHEfxDxViasspD64trjmsMLI'
 
-// Client-side Supabase client
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+// Client for frontend operations
+export const supabase = createClient(supabaseUrl, supabaseKey)
 
-// Server-side Supabase client with service key
-export const supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey, {
+// Admin client for backend operations
+export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false
   }
-});
+})
 
-// Database helper functions
+// Enhanced database helpers for the One AI platform
 export const dbHelpers = {
-  // Vector similarity search
-  async searchDocuments(
-    query_embedding: number[],
-    match_count: number = 10,
-    filter: Record<string, any> = {}
-  ) {
-    const { data, error } = await supabase.rpc('match_documents', {
-      query_embedding,
-      match_count,
-      filter
-    });
-
-    if (error) throw error;
-    return data;
-  },
-
-  // Insert document with embedding
-  async insertDocument(content: string, metadata: Record<string, any>, embedding: number[]) {
-    const { data, error } = await supabase
-      .from('documents')
-      .insert({
-        content,
-        metadata,
-        embedding
-      })
+  // User Management
+  async createUser(userData: {
+    email: string;
+    name: string;
+    role?: string;
+    subscription_plan?: string;
+  }) {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .insert(userData)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error creating user:', error);
+      throw error;
+    }
     return data;
   },
 
-  // AI Agents CRUD
-  async createAgent(agent: {
+  async getUserById(userId: string) {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching user:', error);
+      return null;
+    }
+    return data;
+  },
+
+  // Chat Sessions
+  async createChatSession(sessionData: {
+    user_id: string;
+    title: string;
+    model_id: string;
+    agent_id?: string;
+  }) {
+    const { data, error } = await supabase
+      .from('chat_sessions')
+      .insert(sessionData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating chat session:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  async getChatSessions(userId: string) {
+    const { data, error } = await supabase
+      .from('chat_sessions')
+      .select(`
+        *,
+        chat_messages (
+          id,
+          role,
+          content,
+          created_at
+        )
+      `)
+      .eq('user_id', userId)
+      .order('updated_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching chat sessions:', error);
+      return [];
+    }
+    return data;
+  },
+
+  // Chat Messages
+  async addChatMessage(messageData: {
+    session_id: string;
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+    metadata?: any;
+  }) {
+    const { data, error } = await supabase
+      .from('chat_messages')
+      .insert(messageData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding chat message:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  // AI Agents
+  async createAgent(agentData: {
+    user_id: string;
     name: string;
     description: string;
+    type: string;
+    model: string;
     system_prompt: string;
-    tools: any[];
-    model_config: Record<string, any>;
-    user_id: string;
+    tools?: string[];
+    model_config?: any;
   }) {
     const { data, error } = await supabase
       .from('ai_agents')
-      .insert(agent)
+      .insert(agentData)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error creating agent:', error);
+      throw error;
+    }
     return data;
   },
 
@@ -76,152 +144,15 @@ export const dbHelpers = {
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching agents:', error);
+      return [];
+    }
     return data;
   },
 
-  async updateAgent(id: string, updates: Partial<{
-    name: string;
-    description: string;
-    system_prompt: string;
-    tools: any[];
-    model_config: Record<string, any>;
-  }>) {
-    const { data, error } = await supabase
-      .from('ai_agents')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
-  },
-
-  async deleteAgent(id: string) {
-    const { error } = await supabase
-      .from('ai_agents')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-  },
-
-  // Forecasting Models CRUD
-  async createForecastingModel(model: {
-    name: string;
-    type: string;
-    config: Record<string, any>;
-    training_data: any;
-    user_id: string;
-  }) {
-    const { data, error } = await supabase
-      .from('forecasting_models')
-      .insert(model)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
-  },
-
-  async getUserForecastingModels(userId: string) {
-    const { data, error } = await supabase
-      .from('forecasting_models')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return data;
-  },
-
-  // Anomaly Detection CRUD
-  async createAnomalyDetection(detection: {
-    name: string;
-    data_source: string;
-    threshold_config: Record<string, any>;
-    user_id: string;
-  }) {
-    const { data, error } = await supabase
-      .from('anomaly_detections')
-      .insert(detection)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
-  },
-
-  async getUserAnomalyDetections(userId: string) {
-    const { data, error } = await supabase
-      .from('anomaly_detections')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return data;
-  },
-
-  // Chat Sessions CRUD
-  async createChatSession(session: {
-    title: string;
-    agent_id?: string;
-    model_id: string;
-    user_id: string;
-  }) {
-    const { data, error } = await supabase
-      .from('chat_sessions')
-      .insert(session)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
-  },
-
-  async getUserChatSessions(userId: string) {
-    const { data, error } = await supabase
-      .from('chat_sessions')
-      .select('*')
-      .eq('user_id', userId)
-      .order('updated_at', { ascending: false });
-
-    if (error) throw error;
-    return data;
-  },
-
-  // Chat Messages CRUD
-  async addChatMessage(message: {
-    session_id: string;
-    role: 'user' | 'assistant' | 'system';
-    content: string;
-    metadata?: Record<string, any>;
-  }) {
-    const { data, error } = await supabase
-      .from('chat_messages')
-      .insert(message)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
-  },
-
-  async getChatMessages(sessionId: string) {
-    const { data, error } = await supabase
-      .from('chat_messages')
-      .select('*')
-      .eq('session_id', sessionId)
-      .order('created_at', { ascending: true });
-
-    if (error) throw error;
-    return data;
-  },
-
-  // User Usage Tracking
-  async trackUsage(usage: {
+  // Usage Tracking
+  async trackUsage(usageData: {
     user_id: string;
     model_id: string;
     tokens_used: number;
@@ -230,30 +161,67 @@ export const dbHelpers = {
   }) {
     const { data, error } = await supabase
       .from('usage_tracking')
-      .insert(usage)
+      .insert(usageData)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error tracking usage:', error);
+      // Don't throw error for usage tracking to avoid breaking main flow
+      return null;
+    }
     return data;
   },
 
-  async getUserUsage(userId: string, startDate?: string, endDate?: string) {
-    let query = supabase
+  async getUserUsage(userId: string, timeframe: 'day' | 'week' | 'month' = 'month') {
+    const now = new Date();
+    let startDate: Date;
+
+    switch (timeframe) {
+      case 'day':
+        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case 'week':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'month':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+    }
+
+    const { data, error } = await supabase
       .from('usage_tracking')
       .select('*')
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .gte('created_at', startDate.toISOString());
 
-    if (startDate) {
-      query = query.gte('created_at', startDate);
+    if (error) {
+      console.error('Error fetching usage:', error);
+      return [];
     }
-    if (endDate) {
-      query = query.lte('created_at', endDate);
-    }
-
-    const { data, error } = await query.order('created_at', { ascending: false });
-
-    if (error) throw error;
     return data;
+  },
+
+  // Initialize Database Schema (run once)
+  async initializeSchema() {
+    try {
+      console.log('Initializing database schema...');
+      
+      // This would be better handled through Supabase migrations
+      // For now, we'll create tables if they don't exist
+      
+      // Enable Row Level Security and create policies through Supabase dashboard
+      // The actual table creation should be done through Supabase SQL Editor
+      
+      console.log('Schema initialization requires manual setup through Supabase dashboard');
+      console.log('Please run the SQL in supabase/schema.sql through your Supabase SQL Editor');
+      
+      return true;
+    } catch (error) {
+      console.error('Error initializing schema:', error);
+      return false;
+    }
   }
-}; 
+}
+
+export default supabase 

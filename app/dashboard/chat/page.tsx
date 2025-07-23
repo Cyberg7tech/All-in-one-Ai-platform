@@ -366,6 +366,62 @@ const AI_MODELS = [
     consumption: '0.1x',
     category: 'Kimi',
     premium: false
+  },
+
+  // Together.ai Models (High-performance open-source models)
+  {
+    id: 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo',
+    name: 'Llama 3.1 8B Turbo',
+    provider: 'together',
+    description: 'Fast and efficient Llama model for general conversations',
+    consumption: 'Unlimited',
+    category: 'Together.ai',
+    premium: false
+  },
+  {
+    id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+    name: 'Llama 3.1 70B Turbo',
+    provider: 'together',
+    description: 'Large context Llama model with superior reasoning',
+    consumption: '0.5x',
+    category: 'Together.ai',
+    premium: true
+  },
+  {
+    id: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',
+    name: 'Llama 3.3 70B Turbo',
+    provider: 'together',
+    description: 'Latest Llama model with enhanced capabilities',
+    consumption: '0.5x',
+    category: 'Together.ai',
+    premium: true
+  },
+  {
+    id: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
+    name: 'Mixtral 8x7B Instruct',
+    provider: 'together',
+    description: 'Mixture of experts model with excellent performance',
+    consumption: '0.75x',
+    category: 'Together.ai',
+    premium: true
+  },
+  {
+    id: 'deepseek-ai/DeepSeek-R1',
+    name: 'DeepSeek R1',
+    provider: 'together',
+    description: 'Advanced reasoning model optimized for complex tasks',
+    consumption: '0.5x',
+    category: 'Together.ai',
+    premium: true
+  },
+  {
+    id: 'Qwen/Qwen2.5-72B-Instruct-Turbo',
+    name: 'Qwen 2.5 72B Turbo',
+    provider: 'together',
+    description: 'Alibaba\'s flagship model with multilingual capabilities',
+    consumption: '0.5x',
+    category: 'Together.ai',
+    premium: true
   }
 ]
 

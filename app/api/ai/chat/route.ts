@@ -33,153 +33,113 @@ export async function POST(request: NextRequest) {
     let response: any;
     let cost = 0;
 
-    // Route to appropriate API based on model
-    if (model.startsWith('gpt-') || model.startsWith('o1') || model.startsWith('o3') || model.startsWith('o4')) {
-      console.log('Chat API: Calling OpenAI');
-      response = await apiService.callOpenAI(messages, model, {
-        maxTokens,
-        temperature
+    // Route to appropriate provider based on model or provider field
+    try {
+      if (model.includes('gpt-') || model.includes('o1-')) {
+        // OpenAI models
+        response = await apiService.chatWithOpenAI(messages, model, { maxTokens, temperature });
+      } else if (model.includes('claude-')) {
+        // Anthropic models
+        response = await apiService.chatWithAnthropic(messages, model, { maxTokens, temperature });
+      } else if (model.startsWith('meta-llama/') || model.startsWith('mistralai/') || model.startsWith('deepseek-ai/') || model.startsWith('Qwen/')) {
+        // Together.ai models
+        response = await apiService.chatWithTogether(messages, model, { maxTokens, temperature });
+      } else if (model.includes('gemini') || model.includes('google/')) {
+        // Google models
+        response = await apiService.callGoogleAI(messages, model, { maxTokens, temperature });
+      } else if (model.includes('grok') || model.includes('xai')) {
+        // xAI models  
+        response = await apiService.callXAI(messages, model, { maxTokens, temperature });
+      } else if (model.includes('deepseek')) {
+        // DeepSeek models
+        response = await apiService.callDeepSeek(messages, model, { maxTokens, temperature });
+      } else if (model.includes('kimi')) {
+        // Kimi models
+        response = await apiService.callKimi(messages, model, { maxTokens, temperature });
+      } else {
+        // Default to Together.ai for unknown models (many open-source models)
+        response = await apiService.chatWithTogether(messages, model, { maxTokens, temperature });
+      }
+
+      // Ensure we have a valid response
+      if (!response || !response.content) {
+        throw new Error('Invalid response from AI service');
+      }
+
+      // Calculate approximate cost (simplified)
+      const inputTokens = response.usage?.input_tokens || response.usage?.prompt_tokens || 0;
+      const outputTokens = response.usage?.output_tokens || response.usage?.completion_tokens || 0;
+      
+      // Simplified cost calculation (actual rates vary by provider and model)
+      cost = (inputTokens * 0.0001) + (outputTokens * 0.0002);
+
+      console.log('Chat API: Success', {
+        model: response.model || model,
+        contentLength: response.content?.length || 0,
+        hasError: !!response.error,
+        cost
       });
-      
-      // Calculate cost for OpenAI
-      const tokensUsed = response.usage?.total_tokens || 0;
-      const costPerToken = getCostPerToken(model, 'openai');
-      cost = tokensUsed * costPerToken;
 
-    } else if (model.startsWith('claude-')) {
-      console.log('Chat API: Calling Anthropic');
-      response = await apiService.callAnthropic(messages, model, {
-        maxTokens,
-        temperature
+      return NextResponse.json({
+        success: true,
+        content: response.content,
+        model: response.model || model,
+        usage: response.usage || {
+          prompt_tokens: inputTokens,
+          completion_tokens: outputTokens,
+          total_tokens: inputTokens + outputTokens
+        },
+        cost,
+        provider: getProviderFromModel(model)
       });
-      
-      // Calculate cost for Anthropic
-      const inputTokens = response.usage?.input_tokens || 0;
-      const outputTokens = response.usage?.output_tokens || 0;
-      cost = (inputTokens * 0.003 / 1000) + (outputTokens * 0.015 / 1000);
 
-    } else if (model.startsWith('grok-')) {
-      console.log('Chat API: Calling xAI');
-      response = await apiService.callXAI(messages, model, {
-        maxTokens,
-        temperature
+    } catch (apiError) {
+      console.error('AI API Error:', apiError);
+      
+      // Return a user-friendly error message
+      return NextResponse.json({
+        success: false,
+        content: `I apologize, but I'm experiencing technical difficulties. This could be due to:
+
+• **API Configuration**: Missing or invalid API keys
+• **Network Issues**: Temporary connectivity problems  
+• **Rate Limits**: API usage limits reached
+• **Model Availability**: Selected model may be temporarily unavailable
+
+**Suggested Actions:**
+1. Try a different model from the dropdown
+2. Check your internet connection
+3. Verify API keys are configured correctly
+4. Try again in a few moments
+
+*Error details have been logged for troubleshooting.*`,
+        model,
+        usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+        cost: 0,
+        error: true,
+        provider: getProviderFromModel(model)
       });
-      
-      const tokensUsed = response.usage?.total_tokens || 0;
-      cost = tokensUsed * 0.001; // Estimated cost
-
-    } else if (model.startsWith('gemini-')) {
-      console.log('Chat API: Calling Google Gemini');
-      response = await apiService.callGemini(messages, model, {
-        maxTokens,
-        temperature
-      });
-      
-      const tokensUsed = response.usage?.totalTokenCount || 0;
-      cost = tokensUsed * 0.002; // Estimated cost
-
-    } else if (model.startsWith('deepseek-')) {
-      console.log('Chat API: Calling DeepSeek');
-      response = await apiService.callDeepSeek(messages, model, {
-        maxTokens,
-        temperature
-      });
-      
-      const tokensUsed = response.usage?.total_tokens || 0;
-      cost = tokensUsed * 0.0005; // Estimated cost
-
-    } else if (model.startsWith('kimi-')) {
-      console.log('Chat API: Calling Kimi');
-      response = await apiService.callKimi(messages, model, {
-        maxTokens,
-        temperature
-      });
-      
-      const tokensUsed = response.usage?.total_tokens || 0;
-      cost = tokensUsed * 0.0001; // Estimated cost
-
-    } else if (model.startsWith('llama-') || model.startsWith('mixtral-')) {
-      console.log('Chat API: Calling Replicate');
-      const prompt = messages.map((msg: any) => `${msg.role}: ${msg.content}`).join('\n');
-      const output = await apiService.callReplicate(
-        getReplicateModel(model),
-        {
-          prompt,
-          max_new_tokens: maxTokens,
-          temperature,
-          repetition_penalty: 1.1
-        }
-      );
-      
-      response = {
-        content: Array.isArray(output) ? output.join('') : output,
-        usage: { total_tokens: 0 },
-        model
-      };
-      cost = 0.001; // Estimated cost for Replicate
-
-    } else {
-      return NextResponse.json(
-        { error: 'Unsupported model' },
-        { status: 400 }
-      );
     }
 
-    console.log('Chat API: Success');
-    return NextResponse.json({
-      success: true,
-      content: response.content,
-      usage: response.usage,
-      cost,
-      model: response.model || model,
-      timestamp: new Date().toISOString()
-    });
-
   } catch (error) {
-    console.error('Chat API error:', error);
-    console.error('Error details:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
-    });
+    console.error('Chat API: General error:', error);
     
-    return NextResponse.json(
-      { 
-        error: 'Chat request failed',
-        message: error instanceof Error ? error.message : 'Unknown error',
-        details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : undefined) : undefined
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: false,
+      message: 'Internal server error',
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    }, { status: 500 });
   }
 }
 
-function getCostPerToken(model: string, provider: string): number {
-  // Cost mapping for different models (per 1000 tokens)
-  const costs: Record<string, number> = {
-    'gpt-4.1': 0.03,
-    'gpt-4.1-mini': 0.015,
-    'gpt-4.1-nano': 0,
-    'gpt-4o-mini': 0,
-    'gpt-4o': 0.03,
-    'gpt-4-turbo': 0.03,
-    'gpt-3.5-turbo': 0,
-    'o1-mini': 0.015,
-    'o1': 0.03,
-    'o3-mini': 0.015,
-    'o3': 0.03,
-    'o4-mini': 0.0075
-  };
-  
-  return (costs[model] || 0.002) / 1000;
-}
-
-function getReplicateModel(model: string): string {
-  const replicateModels: Record<string, string> = {
-    'llama-3.3-70b': 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    'llama-3.1-405b': 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    'llama-4-maverick': 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    'mixtral-8x7b': 'mistralai/mixtral-8x7b-instruct-v0.1:25b2bad42625e001c7e88fbc7c97d5f7e924f93a8bdd5c38cfaa9c85d41bb5e2'
-  };
-  
-  return replicateModels[model] || replicateModels['llama-3.3-70b'];
+// Helper function to determine provider from model name
+function getProviderFromModel(model: string): string {
+  if (model.includes('gpt-') || model.includes('o1-')) return 'openai';
+  if (model.includes('claude-')) return 'anthropic';
+  if (model.includes('gemini') || model.includes('google/')) return 'google';
+  if (model.includes('grok') || model.includes('xai')) return 'xai';
+  if (model.includes('deepseek')) return 'deepseek';
+  if (model.includes('kimi')) return 'kimi';
+  if (model.startsWith('meta-llama/') || model.startsWith('mistralai/') || model.startsWith('Qwen/')) return 'together';
+  return 'together'; // Default to Together.ai for open-source models
 } 
