@@ -470,9 +470,12 @@ Return JSON format: {"anomalies": [{"index": 45, "score": 0.8, "explanation": "s
   ) {
     return await dbHelpers.createAnomalyDetection({
       user_id: userId,
-      name,
-      data_source: dataSource,
-      threshold_config: config as any
+      dataset_name: name,
+      algorithm: 'threshold',
+      config: {
+        data_source: dataSource,
+        threshold_config: config
+      }
     });
   }
 

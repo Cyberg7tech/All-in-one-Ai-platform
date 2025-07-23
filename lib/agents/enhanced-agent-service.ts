@@ -152,10 +152,11 @@ export class EnhancedAgentService {
       },
       execute: async (params: { prompt: string; duration?: number; genre?: string }) => {
         try {
-          const result = await this.apiService.generateMusicWithSuno(params.prompt, {
-            duration: params.duration || 30,
-            genre: params.genre
-          });
+          const result = await this.apiService.generateMusicWithSuno(
+            params.prompt, 
+            params.genre || 'pop', 
+            params.duration || 30
+          );
           
           return {
             success: true,

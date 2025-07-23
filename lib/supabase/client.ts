@@ -137,6 +137,44 @@ export const dbHelpers = {
     return data;
   },
 
+  async updateAgent(agentId: string, agentData: Partial<{
+    name: string;
+    description: string;
+    type: string;
+    model: string;
+    system_prompt: string;
+    tools: string[];
+    model_config: any;
+  }>) {
+    const { data, error } = await supabase
+      .from('ai_agents')
+      .update(agentData)
+      .eq('id', agentId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating agent:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  async deleteAgent(agentId: string) {
+    const { data, error } = await supabase
+      .from('ai_agents')
+      .delete()
+      .eq('id', agentId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error deleting agent:', error);
+      throw error;
+    }
+    return data;
+  },
+
   async getUserAgents(userId: string) {
     const { data, error } = await supabase
       .from('ai_agents')
@@ -146,6 +184,153 @@ export const dbHelpers = {
 
     if (error) {
       console.error('Error fetching agents:', error);
+      return [];
+    }
+    return data;
+  },
+
+  // Document Embeddings Management
+  async insertDocument(docData: {
+    user_id: string;
+    title: string;
+    content: string;
+    embedding: number[];
+    metadata?: any;
+  }) {
+    // Note: This would require a documents table in the database
+    // For now, we'll use generated_content table as a placeholder
+    const { data, error } = await supabase
+      .from('generated_content')
+      .insert({
+        user_id: docData.user_id,
+        type: 'document',
+        title: docData.title,
+        metadata: {
+          content: docData.content,
+          embedding: docData.embedding,
+          ...docData.metadata
+        }
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error inserting document:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  async searchDocuments(userId: string, query: string, embedding: number[], limit: number = 10) {
+    // This is a simplified implementation
+    // In a real scenario, you'd use vector similarity search
+    const { data, error } = await supabase
+      .from('generated_content')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('type', 'document')
+      .textSearch('title', query)
+      .limit(limit);
+
+    if (error) {
+      console.error('Error searching documents:', error);
+      return [];
+    }
+    return data;
+  },
+
+  // Anomaly Detection
+  async createAnomalyDetection(anomalyData: {
+    user_id: string;
+    dataset_name: string;
+    algorithm: string;
+    config: any;
+    results?: any;
+  }) {
+    // Store anomaly detection data in analytics_data table
+    const { data, error } = await supabase
+      .from('analytics_data')
+      .insert({
+        user_id: anomalyData.user_id,
+        metric_name: 'anomaly_detection',
+        metric_value: 1,
+        metric_type: 'detection',
+        time_period: 'custom',
+        metadata: {
+          dataset_name: anomalyData.dataset_name,
+          algorithm: anomalyData.algorithm,
+          config: anomalyData.config,
+          results: anomalyData.results
+        }
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating anomaly detection:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  async getAnomalyDetections(userId: string) {
+    const { data, error } = await supabase
+      .from('analytics_data')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('metric_name', 'anomaly_detection')
+      .order('recorded_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching anomaly detections:', error);
+      return [];
+    }
+    return data;
+  },
+
+  // Forecasting
+  async createForecast(forecastData: {
+    user_id: string;
+    dataset_name: string;
+    model_type: string;
+    config: any;
+    predictions?: any;
+  }) {
+    const { data, error } = await supabase
+      .from('analytics_data')
+      .insert({
+        user_id: forecastData.user_id,
+        metric_name: 'forecast',
+        metric_value: 1,
+        metric_type: 'prediction',
+        time_period: 'future',
+        metadata: {
+          dataset_name: forecastData.dataset_name,
+          model_type: forecastData.model_type,
+          config: forecastData.config,
+          predictions: forecastData.predictions
+        }
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating forecast:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  async getForecasts(userId: string) {
+    const { data, error } = await supabase
+      .from('analytics_data')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('metric_name', 'forecast')
+      .order('recorded_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching forecasts:', error);
       return [];
     }
     return data;

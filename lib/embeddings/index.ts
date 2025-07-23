@@ -68,11 +68,13 @@ class EmbeddingService {
         };
 
         // Store in database
-        const document = await dbHelpers.insertDocument(
-          chunkContent,
-          chunkMetadata,
-          embedding
-        );
+        const document = await dbHelpers.insertDocument({
+          user_id: userId,
+          title: chunkMetadata.title || `Document chunk ${i + 1}`,
+          content: chunkContent,
+          embedding: embedding,
+          metadata: chunkMetadata
+        });
 
         documentIds.push(document.id);
       }
@@ -108,9 +110,10 @@ class EmbeddingService {
 
       // Search in database
       const results = await dbHelpers.searchDocuments(
+        userId,
+        query,
         queryEmbedding,
-        limit,
-        searchFilter
+        limit
       );
 
       // Filter by similarity threshold

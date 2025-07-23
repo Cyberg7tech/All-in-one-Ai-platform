@@ -407,6 +407,8 @@ class AgentService {
       user_id: userId,
       name: request.name,
       description: request.description,
+      type: request.personality?.expertise[0] || 'general', // Use first expertise as type or default to 'general'
+      model: request.modelConfig.modelId,
       system_prompt: systemPrompt,
       tools: request.tools,
       model_config: request.modelConfig
