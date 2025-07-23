@@ -1,0 +1,17 @@
+{
+  "name": "One Ai",
+  "short_name": "One Ai",
+  "description": "Comprehensive One Ai platform with chat, agents, analytics, and creative tools",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#3B82F6",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+} 
