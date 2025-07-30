@@ -24,7 +24,7 @@ function TimeoutLoading() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowTimeout(true);
-    }, 5000); // Show timeout message after 5 seconds
+    }, 3000); // Show timeout message after 3 seconds (reduced from 5)
     
     return () => clearTimeout(timer);
   }, []);
@@ -34,13 +34,22 @@ function TimeoutLoading() {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading is taking longer than expected...</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="mt-2 text-sm text-primary hover:underline"
-          >
-            Refresh page
-          </button>
+          <p className="text-muted-foreground mb-2">Loading is taking longer than expected...</p>
+          <p className="text-sm text-muted-foreground mb-4">This might be due to authentication or network issues.</p>
+          <div className="space-x-2">
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90"
+            >
+              Refresh Page
+            </button>
+            <button 
+              onClick={() => window.location.href = '/login'} 
+              className="px-4 py-2 text-sm border border-input bg-background rounded hover:bg-accent"
+            >
+              Go to Login
+            </button>
+          </div>
         </div>
       </div>
     );

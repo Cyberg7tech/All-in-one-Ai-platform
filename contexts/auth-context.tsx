@@ -61,20 +61,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     let mounted = true;
     let timeoutId: NodeJS.Timeout;
+    let sessionCheckAttempted = false;
     
     // Check for existing session on mount
     const getSession = async () => {
-      if (!mounted) return;
+      if (!mounted || sessionCheckAttempted) return;
+      sessionCheckAttempted = true;
       setIsLoading(true);
       
-      // Add a timeout to prevent infinite loading
+      // Add a timeout to prevent infinite loading (10 minutes)
       timeoutId = setTimeout(() => {
         if (mounted) {
-          console.warn('Auth session check timed out, setting user to null');
+          console.warn('Auth session check timed out after 10 minutes, setting user to null');
           setUser(null);
           setIsLoading(false);
         }
-      }, 10000); // 10 second timeout
+      }, 600000); // 10 minute timeout
       
       try {
         const { data, error } = await supabase.auth.getUser();
@@ -100,7 +102,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     };
     
-    getSession();
+    // Use requestIdleCallback for better performance during hot reloads
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(() => getSession(), { timeout: 1000 });
+    } else {
+      // Fallback for browsers that don't support requestIdleCallback
+      setTimeout(getSession, 100);
+    }
     
     // Listen for auth state changes
     const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -109,15 +117,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (session?.user) {
         const userProfile = await fetchUserProfile(session.user);
         setUser(userProfile);
+        setIsLoading(false);
       } else {
         setUser(null);
+        setIsLoading(false);
       }
     });
+    
+    // Handle tab visibility changes to prevent unnecessary loading
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && !sessionCheckAttempted) {
+        sessionCheckAttempted = false; // Reset to allow retry
+        getSession();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     
     return () => {
       mounted = false;
       clearTimeout(timeoutId);
       listener?.subscription.unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
