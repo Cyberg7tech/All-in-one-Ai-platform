@@ -102,9 +102,8 @@
    # ElevenLabs (Optional - for text-to-speech)
    ELEVENLABS_API_KEY=your_elevenlabs_api_key
 
-   # App Settings
-   NEXTAUTH_SECRET=your_nextauth_secret
-   NEXTAUTH_URL=http://localhost:3000
+   # App Settings (Optional)
+   # Add any additional app configuration here
    ```
 
 4. **Database Setup**
@@ -142,7 +141,7 @@
 - **Styling**: Tailwind CSS, Radix UI Components
 - **Database**: Supabase (PostgreSQL)
 - **AI Models**: Together AI (Llama, Qwen, DeepSeek, Mixtral)
-- **Authentication**: Supabase Auth
+- **Authentication**: Supabase Auth (Built-in)
 - **Deployment**: Vercel-ready
 
 ## 📁 **Project Structure**

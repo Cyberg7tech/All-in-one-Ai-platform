@@ -35,9 +35,8 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 # Together AI (Required for AI features)
 TOGETHER_API_KEY=your_together_api_key
 
-# App Settings (Required)
-NEXTAUTH_SECRET=your_random_secret_string
-NEXTAUTH_URL=https://your-vercel-domain.vercel.app
+# App Settings (Optional)
+# Add any additional app configuration here
 ```
 
 **Optional Variables:**
@@ -68,21 +67,8 @@ Click **"Deploy"** and wait for build completion (~2-3 minutes)
 3. Go to **API Keys**
 4. Create new key → `TOGETHER_API_KEY`
 
-### **3. Authentication Secret**
-Generate a random secret:
-```bash
-# Option 1: Use online generator
-https://generate-secret.vercel.app/32
-
-# Option 2: Use Node.js
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-
-### **4. NextAuth URL**
-Set to your Vercel domain:
-```
-https://your-project-name.vercel.app
-```
+### **3. Authentication**
+This project uses **Supabase Auth** which is automatically configured with your Supabase project. No additional authentication setup is required.
 
 ---
 
@@ -163,11 +149,11 @@ Error: Together AI API key not configured
 
 #### **4. Authentication Issues**
 ```bash
-Error: NextAuth configuration error
+Error: Supabase authentication error
 ```
 **Solution:** 
-- Set `NEXTAUTH_SECRET` (random 32-character string)
-- Set `NEXTAUTH_URL` to your Vercel domain
+- Verify `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are correct
+- Check Supabase project settings and enable the authentication providers you want to use
 
 ### **Debug Steps**
 1. Check **Vercel Dashboard → Functions → Logs**
