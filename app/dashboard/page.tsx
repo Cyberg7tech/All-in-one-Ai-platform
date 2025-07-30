@@ -115,12 +115,30 @@ export default function DashboardPage() {
 
   const handleSaveName = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!displayName.trim()) return;
+    if (!displayName.trim() || !user?.id) return;
+    
     setIsSaving(true);
-    await supabase.from('users').update({ name: displayName.trim() }).eq('id', user?.id);
-    await refreshUser(); // Refresh user data from context
-    setIsSaving(false);
-    setShowNameModal(false);
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ name: displayName.trim() })
+        .eq('id', user.id);
+      
+      if (error) {
+        console.error('Error updating user name:', error);
+        toast.error('Failed to update name. Please try again.');
+        return;
+      }
+      
+      await refreshUser(); // Refresh user data from context
+      setShowNameModal(false);
+      toast.success('Name updated successfully!');
+    } catch (error) {
+      console.error('Error updating user name:', error);
+      toast.error('Failed to update name. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleLogout = () => {

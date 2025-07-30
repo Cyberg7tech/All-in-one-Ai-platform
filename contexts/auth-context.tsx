@@ -60,22 +60,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     let mounted = true;
+    let timeoutId: NodeJS.Timeout;
     
     // Check for existing session on mount
     const getSession = async () => {
       if (!mounted) return;
       setIsLoading(true);
+      
+      // Add a timeout to prevent infinite loading
+      timeoutId = setTimeout(() => {
+        if (mounted) {
+          console.warn('Auth session check timed out, setting user to null');
+          setUser(null);
+          setIsLoading(false);
+        }
+      }, 10000); // 10 second timeout
+      
       try {
         const { data, error } = await supabase.auth.getUser();
-        if (mounted && data?.user) {
-          const userProfile = await fetchUserProfile(data.user);
-          setUser(userProfile);
-        } else if (mounted) {
-          setUser(null);
+        if (mounted) {
+          clearTimeout(timeoutId);
+          if (data?.user) {
+            const userProfile = await fetchUserProfile(data.user);
+            setUser(userProfile);
+          } else {
+            setUser(null);
+          }
         }
       } catch (error) {
         console.error('Error getting session:', error);
         if (mounted) {
+          clearTimeout(timeoutId);
           setUser(null);
         }
       } finally {
@@ -101,6 +116,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     return () => {
       mounted = false;
+      clearTimeout(timeoutId);
       listener?.subscription.unsubscribe();
     };
   }, []);
