@@ -98,42 +98,48 @@ export const dbHelpers = {
   },
 
   async getChatSessions(userId: string) {
-    const { data, error } = await supabase
-      .from('chat_sessions')
-      .select(`
-        *,
-        users!chat_sessions_user_id_fkey (
-          id,
-          name,
-          email
-        ),
-        chat_messages (
-          id,
-          role,
-          content,
-          created_at,
-          tokens_used,
-          model_used
-        )
-      `)
-      .eq('user_id', userId)
-      .order('updated_at', { ascending: false })
-      .order('created_at', { foreignTable: 'chat_messages', ascending: true });
+    try {
+      // First get the chat sessions
+      const { data: sessions, error: sessionsError } = await supabase
+        .from('chat_sessions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching chat sessions:', error);
+      if (sessionsError) {
+        console.error('Error fetching chat sessions:', sessionsError);
+        return [];
+      }
+
+      // Then get messages for each session
+      const sessionsWithMessages = await Promise.all(
+        (sessions || []).map(async (session) => {
+          const { data: messages, error: messagesError } = await supabase
+            .from('chat_messages')
+            .select('*')
+            .eq('session_id', session.id)
+            .order('created_at', { ascending: true });
+
+          if (messagesError) {
+            console.error('Error fetching messages for session:', session.id, messagesError);
+            return {
+              ...session,
+              chat_messages: []
+            };
+          }
+
+          return {
+            ...session,
+            chat_messages: messages || []
+          };
+        })
+      );
+
+      return sessionsWithMessages;
+    } catch (error) {
+      console.error('Error in getChatSessions:', error);
       return [];
     }
-
-    // Order messages within each session by creation time
-    const sessionsWithOrderedMessages = data?.map(session => ({
-      ...session,
-      chat_messages: session.chat_messages?.sort((a: any, b: any) => 
-        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      ) || []
-    })) || [];
-
-    return sessionsWithOrderedMessages;
   },
 
   async deleteChatSession(sessionId: string) {
