@@ -94,7 +94,16 @@
     "Headshots",
     "NEXTAUTH",
     "nextauth",
-    "Signup"
+    "Signup",
+    "Vercel",
+    "vercel",
+    "ehthumbs",
+    "pids",
+    "jspm",
+    "eslintcache",
+    "dotenv",
+    "nuxt",
+    "vuepress"
   ],
   "flagWords": [],
   "overrides": [

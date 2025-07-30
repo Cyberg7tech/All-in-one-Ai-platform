@@ -1,6 +1,5 @@
 'use client'
 
-import { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Bot, Brain, TrendingUp, Shield, Sparkles, Plus, LogOut, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -10,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { dbHelpers } from '@/lib/supabase/client';
 import { toast } from 'sonner';
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { formatDate } from '@/lib/utils'
 
 // Remove metadata export since this is now a client component
