@@ -200,17 +200,17 @@ export default function ChatPage() {
         
         if (dbSessions && dbSessions.length > 0) {
           const mappedSessions = dbSessions.map((s: any) => ({
-            id: s.id,
-            title: s.title || 'New Chat',
-            model: s.model_id || 'gpt-4o-mini',
-            lastActivity: new Date(s.updated_at || s.created_at),
+            id: String(s.id),
+            title: String(s.title || 'New Chat'),
+            model: String(s.model_id || 'gpt-4o-mini'),
+            lastActivity: new Date(String(s.updated_at || s.created_at)),
             messages: (s.chat_messages || []).map((m: any) => ({
-              id: m.id,
+              id: String(m.id),
               role: m.role as 'user' | 'assistant',
-              content: m.content,
-              timestamp: new Date(m.created_at),
-              user_name: m.user_name,
-              user_email: m.user_email
+              content: String(m.content),
+              timestamp: new Date(String(m.created_at)),
+              user_name: m.user_name ? String(m.user_name) : undefined,
+              user_email: m.user_email ? String(m.user_email) : undefined,
             }))
           }));
           console.log('Mapped sessions:', mappedSessions);
@@ -275,13 +275,13 @@ export default function ChatPage() {
       model_id: selectedModel
     })
     setSessions(prev => [{
-      id: session.id,
-      title: session.title,
-      model: session.model_id,
-      lastActivity: new Date(session.updated_at),
+      id: String(session.id),
+      title: String(session.title),
+      model: String(session.model_id),
+      lastActivity: new Date(String(session.updated_at)),
       messages: []
     }, ...prev])
-    setCurrentSessionId(session.id)
+    setCurrentSessionId(String(session.id))
   }
 
   // Generate smart chat title based on message content
@@ -348,18 +348,18 @@ export default function ChatPage() {
           title: 'New Chat',
           model_id: selectedModel
         })
-        sessionId = session.id
+        sessionId = String(session.id)
         setSessions(prev => [
           {
-            id: session.id,
-            title: session.title,
-            model: session.model_id,
-            lastActivity: new Date(session.updated_at),
+            id: String(session.id),
+            title: String(session.title),
+            model: String(session.model_id),
+            lastActivity: new Date(String(session.updated_at)),
             messages: []
           },
           ...prev
         ])
-        setCurrentSessionId(session.id)
+        setCurrentSessionId(String(session.id))
       }
       
       // Store user message
@@ -381,12 +381,12 @@ export default function ChatPage() {
               messages: [
                 ...session.messages,
                 {
-                  id: userMsg.id,
+                  id: String(userMsg.id),
                   role: 'user' as 'user',
-                  content: userMsg.content,
-                  timestamp: new Date(userMsg.created_at),
-                  user_name: user.name || user.email,
-                  user_email: user.email
+                  content: String(userMsg.content),
+                  timestamp: new Date(String(userMsg.created_at)),
+                  user_name: user.name ? String(user.name) : user.email,
+                  user_email: user.email ? String(user.email) : undefined,
                 }
               ],
               lastActivity: new Date()
@@ -458,12 +458,12 @@ export default function ChatPage() {
                 messages: [
                   ...session.messages,
                   {
-                    id: assistantMsg.id,
+                    id: String(assistantMsg.id),
                     role: 'assistant' as 'assistant',
-                    content: assistantMsg.content,
-                    timestamp: new Date(assistantMsg.created_at),
-                    user_name: user.name || user.email,
-                    user_email: user.email
+                    content: String(assistantMsg.content),
+                    timestamp: new Date(String(assistantMsg.created_at)),
+                    user_name: user.name ? String(user.name) : user.email,
+                    user_email: user.email ? String(user.email) : undefined,
                   }
                 ],
                 lastActivity: new Date()
