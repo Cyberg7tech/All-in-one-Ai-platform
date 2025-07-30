@@ -1,3 +1,5 @@
+"use client"
+
 import ProtectedRoute from '@/components/auth/protected-route';
 import { TopNavigation } from '@/components/top-navigation';
 import { SideNavigation } from '@/components/side-navigation';
