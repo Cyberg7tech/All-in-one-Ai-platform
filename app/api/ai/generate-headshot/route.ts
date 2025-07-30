@@ -96,7 +96,7 @@ Focus on creating professional, industry-appropriate headshots that enhance the 
 
     try {
       // Use Together AI for intelligent headshot prompt generation
-      const response = await aiService.callTogetherAI([
+      const response = await aiService.chatWithTogether([
         { role: 'user', content: headshotPrompt }
       ], 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo', {
         maxTokens: 2000,

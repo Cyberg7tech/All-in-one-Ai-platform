@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { TrendingUp, TrendingDown, Users, Bot, Brain, Zap, AlertTriangle, CheckCircle, Clock, DollarSign } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -34,7 +34,7 @@ export default function AnalyticsPage() {
     if (user) {
       loadAnalyticsData()
     }
-  }, [user, timeRange])
+  }, [user, timeRange]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadAnalyticsData = () => {
     // Generate analytics based on user data

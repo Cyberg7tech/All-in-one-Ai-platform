@@ -76,7 +76,7 @@ Focus on practical, achievable recommendations that match the user's budget and 
 
     try {
       // Use Together AI for intelligent design generation
-      const response = await aiService.callTogetherAI([
+      const response = await aiService.chatWithTogether([
         { role: 'user', content: designPrompt }
       ], 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo', {
         maxTokens: 2000,

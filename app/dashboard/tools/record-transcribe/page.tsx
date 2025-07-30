@@ -65,7 +65,7 @@ export default function RecordTranscribePage() {
         setCurrentAudio(null)
       }
     }
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const startRecording = async () => {
     try {

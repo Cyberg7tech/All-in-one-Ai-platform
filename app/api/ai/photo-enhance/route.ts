@@ -84,7 +84,7 @@ Focus on practical, achievable edits that enhance the photo naturally while main
 
     try {
       // Use Together AI for intelligent photo editing analysis
-      const response = await aiService.callTogetherAI([
+      const response = await aiService.chatWithTogether([
         { role: 'user', content: photoPrompt }
       ], 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo', {
         maxTokens: 1500,
