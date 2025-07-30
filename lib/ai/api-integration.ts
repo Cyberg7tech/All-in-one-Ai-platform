@@ -1,38 +1,90 @@
-// API Integration Service - Connects agents to real AI services using provided API keys
+// API Integration Service - Enhanced with AI/ML API support for 200+ models
 
 export class AIAPIService {
   private static instance: AIAPIService;
-  
-  public static getInstance(): AIAPIService {
+
+  static getInstance(): AIAPIService {
     if (!AIAPIService.instance) {
       AIAPIService.instance = new AIAPIService();
     }
     return AIAPIService.instance;
   }
 
-  // OpenAI API Integration
-  async callOpenAI(messages: any[], model: string = 'gpt-4', options: any = {}) {
-    const apiKey = process.env.OPENAI_API_KEY;
-    
-    // Better error logging
-    console.log('OpenAI API Key check:', {
-      hasKey: !!apiKey,
-      keyPrefix: apiKey ? apiKey.substring(0, 7) + '...' : 'none',
-      model,
-      messagesCount: messages.length
-    });
+  // Enhanced error handling helper
+  private handleAPIError(provider: string, error: any, fallbackMessage: string) {
+    console.error(`${provider} API Error:`, error);
+    return {
+      content: `I apologize, but I'm currently experiencing issues with ${provider}. ${fallbackMessage}`,
+      usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
+      error: true,
+      provider
+    };
+  }
+
+  // AI/ML API Integration - Unified access to 200+ models
+  async callAIMLAPI(messages: any[], model: string, options: any = {}) {
+    const apiKey = process.env.AIML_API_KEY;
     
     if (!apiKey) {
-      throw new Error('OpenAI API key not configured in environment variables');
-    }
-
-    if (!apiKey.startsWith('sk-')) {
-      throw new Error('Invalid OpenAI API key format. Key should start with "sk-"');
+      return this.handleAPIError('AI/ML API', null, 'Please configure AIML_API_KEY in your environment variables. Get one from aimlapi.com');
     }
 
     try {
-      console.log('Making OpenAI API request...');
-      
+      const response = await fetch('https://api.aimlapi.com/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          max_tokens: options.maxTokens || 1000,
+          temperature: options.temperature || 0.7,
+          stream: false
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = 'Please check your AI/ML API configuration.';
+        
+        if (response.status === 401) {
+          errorMessage = 'Invalid API key. Please check your AIML_API_KEY.';
+        } else if (response.status === 429) {
+          errorMessage = 'Rate limit exceeded. Please try again in a moment.';
+        } else if (response.status === 400) {
+          errorMessage = 'Invalid request. Please check your model selection.';
+        }
+        
+        return this.handleAPIError('AI/ML API', errorText, errorMessage);
+      }
+
+      const data = await response.json();
+      return {
+        content: data.choices[0]?.message?.content || 'No response generated.',
+        usage: data.usage || { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
+        model: data.model || model,
+        provider: 'aimlapi'
+      };
+    } catch (error) {
+      return this.handleAPIError('AI/ML API', error, 'Network error. Please check your internet connection.');
+    }
+  }
+
+  // OpenAI API Integration with improved error handling
+  async callOpenAI(messages: any[], model: string = 'gpt-4o-mini', options: any = {}) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    
+    if (!apiKey) {
+      return this.handleAPIError('OpenAI', null, 'Please configure OPENAI_API_KEY in your environment variables.');
+    }
+
+    if (!apiKey.startsWith('sk-')) {
+      return this.handleAPIError('OpenAI', null, 'Invalid API key format. OpenAI keys should start with "sk-".');
+    }
+
+    try {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -47,814 +99,39 @@ export class AIAPIService {
         })
       });
 
-      console.log('OpenAI API response status:', response.status);
-
       if (!response.ok) {
-        const errorData = await response.text();
-        console.error('OpenAI API error details:', errorData);
+        const errorText = await response.text();
+        let errorMessage = 'Please check your API configuration.';
         
         if (response.status === 401) {
-          throw new Error('Invalid OpenAI API key. Please check your API key.');
+          errorMessage = 'Invalid API key. Please check your OpenAI API key.';
         } else if (response.status === 429) {
-          throw new Error('OpenAI API rate limit exceeded. Please try again later.');
-        } else if (response.status === 402) {
-          throw new Error('OpenAI API quota exceeded. Please check your billing.');
+          errorMessage = 'Rate limit exceeded. Please try again in a moment.';
+        } else if (response.status === 400) {
+          errorMessage = 'Invalid request. Please check your model selection.';
         }
         
-        throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+        return this.handleAPIError('OpenAI', errorText, errorMessage);
       }
 
       const data = await response.json();
-      console.log('OpenAI API success:', {
-        model: data.model,
-        tokensUsed: data.usage?.total_tokens
-      });
-      
       return {
-        content: data.choices[0]?.message?.content || '',
+        content: data.choices[0]?.message?.content || 'No response generated.',
         usage: data.usage,
-        model: data.model
-      };
-    } catch (error) {
-      console.error('OpenAI API Error Details:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      });
-      throw error;
-    }
-  }
-
-  // Anthropic Claude API Integration
-  async callAnthropic(messages: any[], model: string = 'claude-3-sonnet-20240229', options: any = {}) {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    
-    // Better error logging
-    console.log('Anthropic API Key check:', {
-      hasKey: !!apiKey,
-      keyPrefix: apiKey ? apiKey.substring(0, 7) + '...' : 'none',
-      model,
-      messagesCount: messages.length
-    });
-    
-    if (!apiKey) {
-      throw new Error('Anthropic API key not configured in environment variables');
-    }
-
-    if (!apiKey.startsWith('sk-ant-')) {
-      throw new Error('Invalid Anthropic API key format. Key should start with "sk-ant-"');
-    }
-
-    try {
-      console.log('Making Anthropic API request...');
-      
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'x-api-key': apiKey,
-          'Content-Type': 'application/json',
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model,
-          max_tokens: options.maxTokens || 1000,
-          messages: messages.map((msg: any) => ({
-            role: msg.role === 'assistant' ? 'assistant' : 'user',
-            content: msg.content
-          })),
-          temperature: options.temperature || 0.7
-        })
-      });
-
-      console.log('Anthropic API response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Anthropic API error details:', errorData);
-        
-        if (response.status === 401) {
-          throw new Error('Invalid Anthropic API key. Please check your API key.');
-        } else if (response.status === 429) {
-          throw new Error('Anthropic API rate limit exceeded. Please try again later.');
-        } else if (response.status === 402) {
-          throw new Error('Anthropic API quota exceeded. Please check your billing.');
-        }
-        
-        throw new Error(`Anthropic API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log('Anthropic API success:', {
         model: data.model,
-        tokensUsed: data.usage?.input_tokens + data.usage?.output_tokens
-      });
-      
-      return {
-        content: data.content[0]?.text || '',
-        usage: data.usage,
-        model: data.model
+        provider: 'openai'
       };
     } catch (error) {
-      console.error('Anthropic API Error Details:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      });
-      throw error;
+      return this.handleAPIError('OpenAI', error, 'Network error. Please check your internet connection.');
     }
   }
 
-  // Replicate API Integration (for Llama, Stable Diffusion, etc.)
-  async callReplicate(model: string, input: any) {
-    const apiKey = process.env.REPLICATE_API_TOKEN;
-    if (!apiKey) throw new Error('Replicate API key not configured');
-
-    try {
-      const response = await fetch('https://api.replicate.com/v1/predictions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          version: model,
-          input
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Replicate API error: ${response.status} ${response.statusText}`);
-      }
-
-      const prediction = await response.json();
-      
-      // Poll for completion
-      return await this.pollReplicatePrediction(prediction.id);
-    } catch (error) {
-      console.error('Replicate API Error:', error);
-      throw error;
-    }
-  }
-
-  private async pollReplicatePrediction(predictionId: string): Promise<any> {
-    const apiKey = process.env.REPLICATE_API_TOKEN;
-    let attempts = 0;
-    const maxAttempts = 60; // 5 minutes max
-
-    while (attempts < maxAttempts) {
-      const response = await fetch(`https://api.replicate.com/v1/predictions/${predictionId}`, {
-        headers: {
-          'Authorization': `Token ${apiKey}`,
-        }
-      });
-
-      const prediction = await response.json();
-
-      if (prediction.status === 'succeeded') {
-        return prediction.output;
-      } else if (prediction.status === 'failed') {
-        throw new Error(`Prediction failed: ${prediction.error}`);
-      }
-
-      // Wait 5 seconds before next poll
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      attempts++;
-    }
-
-    throw new Error('Prediction timed out');
-  }
-
-  // DALL-E Image Generation
-  async generateImageWithDALLE(prompt: string, options: any = {}) {
-    const apiKey = process.env.OPENAI_API_KEY;
-    
-    console.log('DALL-E Image Generation Request:', {
-      hasKey: !!apiKey,
-      keyPrefix: apiKey ? apiKey.substring(0, 7) + '...' : 'none',
-      prompt: prompt.substring(0, 50) + '...',
-      options
-    });
-    
-    if (!apiKey) {
-      throw new Error('OpenAI API key not configured for DALL-E');
-    }
-
-    try {
-      console.log('Making DALL-E API request...');
-      
-      const response = await fetch('https://api.openai.com/v1/images/generations', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'dall-e-3',
-          prompt,
-          n: options.n || 1,
-          size: options.size || '1024x1024',
-          style: options.style || 'vivid',
-          quality: options.quality || 'standard'
-        })
-      });
-
-      console.log('DALL-E API response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('DALL-E API error details:', errorData);
-        
-        if (response.status === 401) {
-          throw new Error('Invalid OpenAI API key for DALL-E. Please check your API key.');
-        } else if (response.status === 429) {
-          throw new Error('DALL-E API rate limit exceeded. Please try again later.');
-        } else if (response.status === 402) {
-          throw new Error('DALL-E API quota exceeded. Please check your billing.');
-        }
-        
-        throw new Error(`DALL-E API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log('DALL-E API success:', {
-        imageCount: data.data?.length || 0,
-        hasUrls: data.data?.every((img: any) => img.url) || false
-      });
-      
-      // Extract image URLs
-      const imageUrls = data.data?.map((image: any) => image.url) || [];
-      
-      if (imageUrls.length === 0) {
-        throw new Error('No images returned from DALL-E API');
-      }
-      
-      return imageUrls;
-    } catch (error) {
-      console.error('DALL-E Error Details:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      });
-      throw error;
-    }
-  }
-
-  // Runway Video Generation
-  async generateVideoWithRunway(prompt: string, imageUrl?: string) {
-    const apiKey = process.env.RUNWAY_API_KEY;
-    
-    // For demo purposes, return mock response if API key not configured
-    if (!apiKey) {
-      console.log('Runway API key not configured, returning mock response');
-      return {
-        id: `video_${Date.now()}`,
-        status: 'completed',
-        video_url: 'https://via.placeholder.com/640x360/3B82F6/FFFFFF?text=Video+Generated',
-        thumbnail_url: 'https://via.placeholder.com/320x180/3B82F6/FFFFFF?text=Video+Thumbnail',
-        prompt,
-        duration: 4,
-        created_at: new Date().toISOString()
-      };
-    }
-
-    try {
-      // Try multiple possible Runway API endpoints
-      const endpoints = [
-        'https://api.runwayml.com/v1/image_to_video',
-        'https://api.runwayml.com/v1/generate',
-        'https://api.runwayml.com/v1/videos'
-      ];
-
-      for (const endpoint of endpoints) {
-        try {
-          const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${apiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              prompt,
-              image_url: imageUrl,
-              duration: 4,
-              seed: Math.floor(Math.random() * 1000000)
-            })
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            return data;
-          }
-        } catch (error) {
-          console.log(`Endpoint ${endpoint} failed, trying next...`);
-          continue;
-        }
-      }
-
-      // If all endpoints fail, return mock response
-      console.log('All Runway endpoints failed, returning mock response');
-      return {
-        id: `video_${Date.now()}`,
-        status: 'completed',
-        video_url: 'https://via.placeholder.com/640x360/3B82F6/FFFFFF?text=Video+Generation+Demo',
-        thumbnail_url: 'https://via.placeholder.com/320x180/3B82F6/FFFFFF?text=Demo+Video',
-        prompt,
-        duration: 4,
-        created_at: new Date().toISOString()
-      };
-
-    } catch (error) {
-      console.error('Runway API Error:', error);
-      
-      // Return mock response instead of throwing error
-      return {
-        id: `video_${Date.now()}`,
-        status: 'completed',
-        video_url: 'https://via.placeholder.com/640x360/3B82F6/FFFFFF?text=Video+Demo+Mode',
-        thumbnail_url: 'https://via.placeholder.com/320x180/3B82F6/FFFFFF?text=Demo+Mode',
-        prompt,
-        duration: 4,
-        created_at: new Date().toISOString(),
-        note: 'Demo mode - Configure RUNWAY_API_KEY for real video generation'
-      };
-    }
-  }
-
-  // HeyGen Avatar Video Generation
-  async generateAvatarVideo(script: string, avatarId?: string) {
-    const apiKey = process.env.HEYGEN_API_KEY;
-    if (!apiKey) throw new Error('HeyGen API key not configured');
-
-    try {
-      const response = await fetch('https://api.heygen.com/v2/video/generate', {
-        method: 'POST',
-        headers: {
-          'X-API-KEY': apiKey,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          video_inputs: [{
-            character: {
-              type: 'avatar',
-              avatar_id: avatarId || 'default',
-            },
-            voice: {
-              type: 'text',
-              input: script,
-            }
-          }]
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HeyGen API error: ${response.status} ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('HeyGen API Error:', error);
-      throw error;
-    }
-  }
-
-
-
-  // Resend Email Service
-  async sendEmail(to: string, subject: string, html: string, from?: string) {
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) throw new Error('Resend API key not configured');
-
-    try {
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: from || 'One Ai <noreply@oneai.dev>',
-          to: Array.isArray(to) ? to : [to],
-          subject,
-          html
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Resend API error: ${response.status} ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Resend API Error:', error);
-      throw error;
-    }
-  }
-
-  // Firecrawl Web Scraping
-  async scrapeWebsite(url: string, options: any = {}) {
-    const apiKey = process.env.FIRECRAWL_API_KEY;
-    if (!apiKey) throw new Error('Firecrawl API key not configured');
-
-    try {
-      const response = await fetch('https://api.firecrawl.dev/v0/scrape', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url,
-          formats: options.formats || ['markdown', 'html'],
-          onlyMainContent: options.onlyMainContent !== false,
-          includeTags: options.includeTags || [],
-          excludeTags: options.excludeTags || ['script', 'style']
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Firecrawl API error: ${response.status} ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Firecrawl API Error:', error);
-      throw error;
-    }
-  }
-
-  // Stripe Payment Processing
-  async createPaymentIntent(amount: number, currency: string = 'usd', metadata: any = {}) {
-    const apiKey = process.env.STRIPE_SECRET_KEY;
-    if (!apiKey) throw new Error('Stripe API key not configured');
-
-    try {
-      const response = await fetch('https://api.stripe.com/v1/payment_intents', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          amount: amount.toString(),
-          currency,
-          ...Object.entries(metadata).reduce((acc, [key, value]) => {
-            acc[`metadata[${key}]`] = value as string;
-            return acc;
-          }, {} as Record<string, string>)
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Stripe API error: ${response.status} ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Stripe API Error:', error);
-      throw error;
-    }
-  }
-
-  // LemonSqueezy Subscription Management
-  async createLemonSqueezyCheckout(productId: string, customData: any = {}) {
-    const apiKey = process.env.LEMON_SQUEEZY_API_KEY;
-    const storeId = process.env.LEMON_SQUEEZY_STORE_ID;
-    
-    if (!apiKey || !storeId) throw new Error('LemonSqueezy credentials not configured');
-
-    try {
-      const response = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/vnd.api+json',
-          'Accept': 'application/vnd.api+json',
-        },
-        body: JSON.stringify({
-          data: {
-            type: 'checkouts',
-            attributes: {
-              checkout_data: customData
-            },
-            relationships: {
-              store: {
-                data: {
-                  type: 'stores',
-                  id: storeId
-                }
-              },
-              variant: {
-                data: {
-                  type: 'variants',
-                  id: productId
-                }
-              }
-            }
-          }
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`LemonSqueezy API error: ${response.status} ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('LemonSqueezy API Error:', error);
-      throw error;
-    }
-  }
-
-  // Generic API call method for custom integrations
-  async makeAPICall(url: string, options: RequestInit = {}) {
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
-      }
-
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        return await response.json();
-      } else {
-        return await response.text();
-      }
-    } catch (error) {
-      console.error('Generic API Error:', error);
-      throw error;
-    }
-  }
-
-  // xAI Grok API Integration
-  async callXAI(messages: any[], model: string = 'grok-3', options: any = {}) {
-    const apiKey = process.env.XAI_API_KEY;
-    
-    console.log('xAI API Key check:', {
-      hasKey: !!apiKey,
-      keyPrefix: apiKey ? apiKey.substring(0, 7) + '...' : 'none',
-      model,
-      messagesCount: messages.length
-    });
-    
-    if (!apiKey) {
-      throw new Error('xAI API key not configured in environment variables');
-    }
-
-    try {
-      console.log('Making xAI API request...');
-      
-      const response = await fetch('https://api.x.ai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          max_tokens: options.maxTokens || 1000,
-          temperature: options.temperature || 0.7
-        })
-      });
-
-      console.log('xAI API response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('xAI API error details:', errorData);
-        throw new Error(`xAI API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log('xAI API success:', {
-        model: data.model,
-        tokensUsed: data.usage?.total_tokens
-      });
-      
-      return {
-        content: data.choices[0]?.message?.content || '',
-        usage: data.usage,
-        model: data.model
-      };
-    } catch (error) {
-      console.error('xAI API Error Details:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      });
-      throw error;
-    }
-  }
-
-  // Google Gemini API Integration
-  async callGemini(messages: any[], model: string = 'gemini-1.5-pro', options: any = {}) {
-    const apiKey = process.env.GOOGLE_API_KEY;
-    
-    console.log('Google API Key check:', {
-      hasKey: !!apiKey,
-      keyPrefix: apiKey ? apiKey.substring(0, 7) + '...' : 'none',
-      model,
-      messagesCount: messages.length
-    });
-    
-    if (!apiKey) {
-      throw new Error('Google API key not configured in environment variables');
-    }
-
-    try {
-      console.log('Making Google Gemini API request...');
-      
-      // Convert messages to Gemini format
-      const contents = messages.map((msg: any) => ({
-        role: msg.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: msg.content }]
-      }));
-
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents,
-          generationConfig: {
-            maxOutputTokens: options.maxTokens || 1000,
-            temperature: options.temperature || 0.7
-          }
-        })
-      });
-
-      console.log('Google API response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Google API error details:', errorData);
-        throw new Error(`Google API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log('Google API success');
-      
-      return {
-        content: data.candidates[0]?.content?.parts[0]?.text || '',
-        usage: data.usageMetadata,
-        model
-      };
-    } catch (error) {
-      console.error('Google API Error Details:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      });
-      throw error;
-    }
-  }
-
-  // DeepSeek API Integration
-  async callDeepSeek(messages: any[], model: string = 'deepseek-v3', options: any = {}) {
-    const apiKey = process.env.DEEPSEEK_API_KEY;
-    
-    console.log('DeepSeek API Key check:', {
-      hasKey: !!apiKey,
-      keyPrefix: apiKey ? apiKey.substring(0, 7) + '...' : 'none',
-      model,
-      messagesCount: messages.length
-    });
-    
-    if (!apiKey) {
-      throw new Error('DeepSeek API key not configured in environment variables');
-    }
-
-    try {
-      console.log('Making DeepSeek API request...');
-      
-      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          max_tokens: options.maxTokens || 1000,
-          temperature: options.temperature || 0.7
-        })
-      });
-
-      console.log('DeepSeek API response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('DeepSeek API error details:', errorData);
-        throw new Error(`DeepSeek API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log('DeepSeek API success:', {
-        model: data.model,
-        tokensUsed: data.usage?.total_tokens
-      });
-      
-      return {
-        content: data.choices[0]?.message?.content || '',
-        usage: data.usage,
-        model: data.model
-      };
-    } catch (error) {
-      console.error('DeepSeek API Error Details:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      });
-      throw error;
-    }
-  }
-
-  // Kimi API Integration  
-  async callKimi(messages: any[], model: string = 'kimi-k2', options: any = {}) {
-    const apiKey = process.env.KIMI_API_KEY;
-    
-    console.log('Kimi API Key check:', {
-      hasKey: !!apiKey,
-      keyPrefix: apiKey ? apiKey.substring(0, 7) + '...' : 'none',
-      model,
-      messagesCount: messages.length
-    });
-    
-    if (!apiKey) {
-      throw new Error('Kimi API key not configured in environment variables');
-    }
-
-    try {
-      console.log('Making Kimi API request...');
-      
-      const response = await fetch('https://api.moonshot.cn/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          max_tokens: options.maxTokens || 1000,
-          temperature: options.temperature || 0.7
-        })
-      });
-
-      console.log('Kimi API response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Kimi API error details:', errorData);
-        throw new Error(`Kimi API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log('Kimi API success:', {
-        model: data.model,
-        tokensUsed: data.usage?.total_tokens
-      });
-      
-      return {
-        content: data.choices[0]?.message?.content || '',
-        usage: data.usage,
-        model: data.model
-      };
-    } catch (error) {
-      console.error('Kimi API Error Details:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      });
-      throw error;
-    }
-  }
-
-  // Together.ai Chat Completions
+  // Together.ai API Integration with improved error handling
   async chatWithTogether(messages: any[], model: string = 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo', options: any = {}) {
     const apiKey = process.env.TOGETHER_API_KEY;
     
-    // For demo purposes, return mock response if API key not configured
     if (!apiKey) {
-      console.log('Together.ai API key not configured, returning mock response');
-      return {
-        content: `**Together.ai Demo Response** 
-
-I'm a mock response from Together.ai's ${model} model. Here's what I can help you with:
-
-• **High-performance inference** with 50+ open-source models
-• **Cost-effective** AI processing compared to traditional providers  
-• **OpenAI-compatible** API for easy integration
-• **Models like Llama, Mistral, DeepSeek** and more
-
-To enable real Together.ai responses, add your API key to TOGETHER_API_KEY in your environment variables.
-
-*This is a demo response - configure your API key for real AI interactions!*`,
-        model,
-        usage: { input_tokens: 25, output_tokens: 50, total_tokens: 75 }
-      };
+      return this.handleAPIError('Together.ai', null, 'Please configure TOGETHER_API_KEY for open-source models.');
     }
 
     try {
@@ -875,275 +152,292 @@ To enable real Together.ai responses, add your API key to TOGETHER_API_KEY in yo
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Together.ai API error:', errorText);
+        let errorMessage = 'Please check your API configuration.';
         
-        // Return graceful fallback instead of throwing
-        return {
-          content: `I apologize, but I'm experiencing connectivity issues with Together.ai (${response.status}). This might be due to API configuration or network issues. Please check your TOGETHER_API_KEY environment variable.`,
-          model,
-          usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
-          error: true
-        };
+        if (response.status === 401) {
+          errorMessage = 'Invalid API key. Please check your Together.ai API key.';
+        } else if (response.status === 429) {
+          errorMessage = 'Rate limit exceeded. Please try again in a moment.';
+        }
+        
+        return this.handleAPIError('Together.ai', errorText, errorMessage);
       }
 
       const data = await response.json();
-      
       return {
-        content: data.choices[0].message.content,
+        content: data.choices[0]?.message?.content || 'No response generated.',
+        usage: data.usage,
         model: data.model,
-        usage: data.usage
+        provider: 'together'
       };
-
     } catch (error) {
-      console.error('Together.ai API Error:', error);
-      
-      // Return graceful fallback instead of throwing
-      return {
-        content: `I'm currently unable to connect to Together.ai. This might be due to network issues or API configuration. Please ensure your TOGETHER_API_KEY is properly configured.`,
-        model,
-        usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
-        error: true
-      };
+      return this.handleAPIError('Together.ai', error, 'Network error. Please check your internet connection.');
     }
   }
 
-  // Enhanced Anthropic with better error handling
-  async chatWithAnthropic(messages: any[], model: string = 'claude-3-haiku-20240307', options: any = {}) {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+  // DALL-E Image Generation with improved error handling
+  async generateImageWithDALLE(prompt: string, options: any = {}) {
+    const apiKey = process.env.OPENAI_API_KEY;
     
     if (!apiKey) {
-      console.log('Anthropic API key not configured, returning mock response');
       return {
-        content: `**Anthropic Claude Demo Response**
+        error: true,
+        content: 'Please configure OPENAI_API_KEY for image generation.',
+        usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
+        provider: 'openai'
+      };
+    }
 
-Hello! I'm Claude, made by Anthropic. In demo mode, I can show you what I'm capable of:
-
-• **Thoughtful analysis** and reasoning
-• **Creative writing** and brainstorming  
-• **Code review** and programming help
-• **Research assistance** and summarization
-
-Configure your ANTHROPIC_API_KEY to unlock my full capabilities!`,
-        model,
-        usage: { input_tokens: 20, output_tokens: 45, total_tokens: 65 }
+    if (!apiKey.startsWith('sk-')) {
+      return {
+        error: true,
+        content: 'Invalid OpenAI API key format. Keys should start with "sk-".',
+        usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
+        provider: 'openai'
       };
     }
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const model = options.model || 'dall-e-3';
+      
+      // Prepare request body - only add style for DALL-E-3
+      const requestBody: any = {
+        model: model,
+        prompt: prompt,
+        n: 1,
+        size: options.size || '1024x1024'
+      };
+
+      // Only add style and quality for DALL-E-3
+      if (model === 'dall-e-3') {
+        requestBody.quality = options.quality || 'standard';
+        if (options.style && ['vivid', 'natural'].includes(options.style)) {
+          requestBody.style = options.style;
+        }
+      }
+
+      console.log('DALL-E API Request:', { model, prompt: prompt.substring(0, 100), requestBody });
+
+      const response = await fetch('https://api.openai.com/v1/images/generations', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
-          'anthropic-version': '2023-06-01'
         },
-        body: JSON.stringify({
-          model,
-          messages: messages.filter(m => m.role !== 'system'),
-          system: messages.find(m => m.role === 'system')?.content || 'You are a helpful assistant.',
-          max_tokens: options.maxTokens || 1000
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Anthropic API error:', errorText);
+        console.error('DALL-E API Error:', response.status, errorText);
+        
+        let errorMessage = 'Image generation failed. ';
+        if (response.status === 400) {
+          errorMessage += 'Invalid request parameters. Please check your prompt and settings.';
+        } else if (response.status === 401) {
+          errorMessage += 'Invalid API key. Please check your OpenAI API key.';
+        } else if (response.status === 429) {
+          errorMessage += 'Rate limit exceeded. Please try again in a moment.';
+        } else {
+          errorMessage += 'Please try again.';
+        }
         
         return {
-          content: `I'm experiencing issues connecting to Anthropic Claude (${response.status}). Please check your API configuration.`,
-          model,
+          error: true,
+          content: errorMessage,
           usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
-          error: true
+          provider: 'openai'
         };
       }
 
       const data = await response.json();
+      console.log('DALL-E API Success:', { url: data.data[0]?.url });
       
       return {
-        content: data.content[0].text,
-        model: data.model,
-        usage: data.usage
+        image_url: data.data[0]?.url,
+        prompt: prompt,
+        model: model,
+        provider: 'openai'
       };
-
     } catch (error) {
-      console.error('Anthropic Error:', error);
+      console.error('DALL-E Network Error:', error);
       return {
-        content: `Unable to connect to Anthropic Claude. Please verify your ANTHROPIC_API_KEY configuration.`,
-        model,
+        error: true,
+        content: 'Network error during image generation. Please check your connection.',
         usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
-        error: true
+        provider: 'openai'
       };
     }
   }
 
-  // Enhanced OpenAI with better error handling
-  async chatWithOpenAI(messages: any[], model: string = 'gpt-4o-mini', options: any = {}) {
-    const apiKey = process.env.OPENAI_API_KEY;
-    
-    if (!apiKey) {
-      console.log('OpenAI API key not configured, returning mock response');
-      return {
-        content: `**OpenAI GPT Demo Response**
-
-Hello! I'm GPT from OpenAI. In demo mode, I can show you my capabilities:
-
-• **Conversational AI** with natural language understanding
-• **Creative content** generation and storytelling
-• **Technical assistance** with coding and problem-solving
-• **Analysis and reasoning** across various topics
-
-Add your OPENAI_API_KEY to unlock the full GPT experience!`,
-        model,
-        usage: { input_tokens: 30, output_tokens: 55, total_tokens: 85 }
-      };
-    }
-
-    try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          max_tokens: options.maxTokens || 1000,
-          temperature: options.temperature || 0.7
-        })
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('OpenAI API error:', errorText);
-        
-        return {
-          content: `I'm having trouble connecting to OpenAI (${response.status}). Please check your API key and billing status.`,
-          model,
-          usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
-          error: true
-        };
-      }
-
-      const data = await response.json();
-      
-      return {
-        content: data.choices[0].message.content,
-        model: data.model,
-        usage: data.usage
-      };
-
-    } catch (error) {
-      console.error('OpenAI Error:', error);
-      return {
-        content: `Unable to reach OpenAI services. Please verify your OPENAI_API_KEY and internet connection.`,
-        model,
-        usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
-        error: true
-      };
-    }
-  }
-
-  // Enhanced Text-to-Speech with graceful fallback
+  // Text-to-Speech with ElevenLabs (keeping for audio functionality)
   async generateSpeechWithElevenLabs(text: string, voice: string = 'alloy') {
     const apiKey = process.env.ELEVENLABS_API_KEY;
-    
+
     if (!apiKey) {
-      console.log('ElevenLabs API key not configured, returning mock response');
       return {
-        audio_url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Demo audio
-        text,
-        voice,
-        note: 'Demo mode - Configure ELEVENLABS_API_KEY for real speech synthesis'
+        error: true,
+        content: 'Please configure ELEVENLABS_API_KEY for text-to-speech functionality.',
+        usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
+        provider: 'elevenlabs'
       };
     }
 
     try {
-      // ElevenLabs API implementation would go here
-      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}`, {
+      // Map common voice names to ElevenLabs voice IDs
+      const voiceMap: Record<string, string> = {
+        'alloy': 'pNInz6obpgDQGcFmaJgB', // Adam
+        'echo': '21m00Tcm4TlvDq8ikWAM', // Rachel
+        'fable': 'AZnzlk1XvdvUeBnXmlld', // Domi
+        'onyx': 'EXAVITQu4vr4xnSDxMaL', // Bella
+        'nova': 'MF3mGyEYCl7XYWbV9V6O', // Elli
+        'shimmer': 'TxGEqnHWrfWFTfGW9XjX' // Josh
+      };
+
+      const voiceId = voiceMap[voice] || voiceMap['alloy'];
+
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
         method: 'POST',
         headers: {
-          'xi-api-key': apiKey,
-          'Content-Type': 'application/json'
+          'Accept': 'audio/mpeg',
+          'Content-Type': 'application/json',
+          'xi-api-key': apiKey
         },
         body: JSON.stringify({
           text,
-          model_id: 'eleven_monolingual_v1'
+          model_id: 'eleven_multilingual_v2',
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.75
+          }
         })
       });
 
       if (!response.ok) {
-        console.log('ElevenLabs API failed, returning demo response');
+        const errorText = await response.text();
         return {
-          audio_url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-          text,
-          voice,
-          note: `ElevenLabs API error: ${response.status}. Using demo audio.`
+          error: true,
+          content: 'Text-to-speech generation failed. Please check your API key.',
+          usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
+          provider: 'elevenlabs'
         };
       }
 
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      return {
-        audio_url: audioUrl,
-        text,
-        voice
-      };
+      const audioBuffer = await response.arrayBuffer();
+      const audioBase64 = Buffer.from(audioBuffer).toString('base64');
+      const audioDataUrl = `data:audio/mpeg;base64,${audioBase64}`;
 
-    } catch (error) {
-      console.error('ElevenLabs Error:', error);
       return {
-        audio_url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
+        audio_url: audioDataUrl,
         text,
         voice,
-        note: 'Demo mode - API temporarily unavailable'
+        note: 'Audio generated successfully with ElevenLabs'
+      };
+    } catch (error) {
+      return {
+        error: true,
+        content: 'Network error during speech generation.',
+        usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
+        provider: 'elevenlabs'
       };
     }
   }
 
-  // Enhanced Music Generation with Suno
-  async generateMusicWithSuno(prompt: string, genre: string = 'pop', duration: number = 30) {
-    const apiKey = process.env.SUNO_API_KEY;
+  // Determine which provider to use for a given model
+  getProviderForModel(model: string): 'openai' | 'together' | 'aimlapi' {
+    // OpenAI models
+    const openaiModels = [
+      'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-4', 'gpt-3.5-turbo',
+      'gpt-4-0125-preview', 'gpt-4-1106-preview', 'gpt-3.5-turbo-0125'
+    ];
     
-    if (!apiKey) {
-      console.log('Suno API key not configured, returning mock response');
-      return {
-        id: `music_${Date.now()}`,
-        status: 'completed',
-        audio_url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-        title: `Generated Music: ${prompt.substring(0, 30)}...`,
-        genre,
-        duration,
-        prompt,
-        note: 'Demo mode - Configure SUNO_API_KEY for real music generation'
-      };
+    // AI/ML API models (Premium and closed-source models)
+    const aimlApiModels = [
+      // OpenAI models via AI/ML API
+      'gpt-4.1', 'gpt-4.1-turbo', 'gpt-4o-2024-11-20', 'o1-preview', 'o1-mini',
+      // Anthropic models
+      'claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229',
+      'claude-3-sonnet-20240229', 'claude-3-haiku-20240307',
+      // Google models
+      'gemini-1.5-pro-002', 'gemini-1.5-flash-002', 'gemini-2.0-flash-exp',
+      'gemini-exp-1206', 'gemini-exp-1121',
+      // xAI models
+      'grok-beta', 'grok-2-1212', 'grok-2-vision-1212',
+      // Anthropic premium
+      'claude-3.7-sonnet', 'claude-3.7-haiku',
+      // DeepSeek premium
+      'deepseek-chat', 'deepseek-r1',
+      // Meta premium
+      'llama-3.3-70b-instruct', 'llama-3.2-90b-vision-instruct',
+      // Mistral premium
+      'mistral-large-2411', 'mistral-small-2409',
+      // Perplexity
+      'pplx-7b-online', 'pplx-70b-online', 'pplx-7b-chat', 'pplx-70b-chat',
+      // Cohere
+      'command-r-plus-08-2024', 'command-r-08-2024',
+      // Other premium models
+      'qwen-2.5-72b-instruct', 'yi-large', 'solar-mini'
+    ];
+    
+    if (openaiModels.includes(model)) {
+      return 'openai';
+    }
+    
+    if (aimlApiModels.includes(model)) {
+      return 'aimlapi';
+    }
+    
+    // Everything else goes to Together AI (open-source models)
+    return 'together';
+  }
+
+  // Unified chat method that routes to the appropriate provider
+  async chat(messages: any[], model: string, options: any = {}) {
+    const provider = this.getProviderForModel(model);
+    
+    if (provider === 'openai') {
+      return await this.callOpenAI(messages, model, options);
+    } else if (provider === 'aimlapi') {
+      return await this.callAIMLAPI(messages, model, options);
+    } else {
+      return await this.chatWithTogether(messages, model, options);
+    }
+  }
+
+  // Get all available models based on configured API keys (Together AI only for chat interface)
+  getAvailableModels() {
+    const models: any[] = [];
+
+    // Together AI models (only these will be shown in chat interface)
+    if (process.env.TOGETHER_API_KEY) {
+      models.push(
+        // Latest Premium Models (Verified Available)
+        { id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo', name: 'Llama 3.1 70B Turbo ⚡ (Recommended)', provider: 'together', category: 'chat', tier: 'premium', speed: 'fast', cost: '$0.88' },
+        { id: 'Qwen/Qwen2.5-72B-Instruct-Turbo', name: 'Qwen 2.5 72B Turbo', provider: 'together', category: 'chat', tier: 'premium', speed: 'fast', cost: '$1.20' },
+        { id: 'deepseek-ai/DeepSeek-R1-Distill-Llama-70B', name: 'DeepSeek R1 Distill 70B', provider: 'together', category: 'reasoning', tier: 'premium', speed: 'medium', cost: '$2.00' },
+        
+        // High Performance Models
+        { id: 'meta-llama/Meta-Llama-3.2-90B-Vision-Instruct-Turbo', name: 'Llama 3.2 90B Vision', provider: 'together', category: 'multimodal', tier: 'premium', speed: 'medium', cost: '$1.20' },
+        { id: 'Qwen/Qwen2.5-Coder-32B-Instruct', name: 'Qwen 2.5 Coder 32B', provider: 'together', category: 'coding', tier: 'standard', speed: 'fast', cost: '$0.80' },
+        
+        // Fast & Efficient Models
+        { id: 'mistralai/Mixtral-8x7B-Instruct-v0.1', name: 'Mixtral 8x7B', provider: 'together', category: 'chat', tier: 'standard', speed: 'very-fast', cost: '$0.60' },
+        { id: 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo', name: 'Llama 3.1 8B Turbo', provider: 'together', category: 'chat', tier: 'standard', speed: 'very-fast', cost: '$0.18' },
+        { id: 'Qwen/Qwen2.5-7B-Instruct-Turbo', name: 'Qwen 2.5 7B Turbo', provider: 'together', category: 'chat', tier: 'standard', speed: 'very-fast', cost: '$0.30' },
+        
+        // Free Models
+        { id: 'meta-llama/Meta-Llama-3.3-70B-Instruct-Turbo-Free', name: 'Llama 3.3 70B Free 🆓', provider: 'together', category: 'chat', tier: 'free', speed: 'fast', cost: 'Free' },
+        { id: 'deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free', name: 'DeepSeek R1 70B Free 🆓', provider: 'together', category: 'reasoning', tier: 'free', speed: 'medium', cost: 'Free' },
+        { id: 'LG-AI-EXAONE/EXAONE-3.5-32B-Instruct', name: 'EXAONE 3.5 32B Free 🆓', provider: 'together', category: 'chat', tier: 'free', speed: 'fast', cost: 'Free' },
+        
+        // Additional Verified Models
+        { id: 'meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo', name: 'Llama 3.1 405B Turbo', provider: 'together', category: 'chat', tier: 'premium', speed: 'medium', cost: '$3.50' }
+      );
     }
 
-    try {
-      // Mock Suno API call - replace with actual API when available
-      return {
-        id: `music_${Date.now()}`,
-        status: 'completed',
-        audio_url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-        title: `AI Generated: ${prompt.substring(0, 40)}`,
-        genre,
-        duration,
-        prompt
-      };
+    // Note: AI/ML API and OpenAI models are still available for agents and multimedia tools,
+    // but not displayed in the chat interface model selection
 
-    } catch (error) {
-      console.error('Suno API Error:', error);
-      return {
-        id: `music_${Date.now()}`,
-        status: 'completed',
-        audio_url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-        title: `Demo Music: ${prompt.substring(0, 30)}`,
-        genre,
-        duration,
-        prompt,
-        note: 'Demo mode - Music generation temporarily unavailable'
-      };
-    }
+    return models;
   }
 } 

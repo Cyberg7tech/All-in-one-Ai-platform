@@ -7,6 +7,10 @@ import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Download, Share, Heart, Copy, Sparkles, Image as ImageIcon, Wand2, Palette, Camera } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { downloadFromUrl, downloadMultipleFiles, copyToClipboard, shareContent, generateUniqueFilename } from '@/lib/utils/download'
+import { toast } from 'sonner'
+import { dbHelpers } from '@/lib/supabase/client'
+import { useAuth } from '@/contexts/auth-context'
 
 interface GeneratedImage {
   id: string
@@ -76,6 +80,7 @@ const SAMPLE_IMAGES: GeneratedImage[] = [
 ]
 
 export default function ImageGeneratorPage() {
+  const { user } = useAuth()
   const [prompt, setPrompt] = useState('')
   const [selectedModel, setSelectedModel] = useState('dall-e-3')
   const [selectedStyle, setSelectedStyle] = useState('vivid')
@@ -104,11 +109,16 @@ export default function ImageGeneratorPage() {
         })
       })
 
+      console.log('Image generation response status:', response.status)
+      
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`)
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('Image generation API error:', errorData)
+        throw new Error(`API error (${response.status}): ${errorData.error || response.statusText}`)
       }
 
       const data = await response.json()
+      console.log('Image generation response data:', data)
 
       if (data.success && data.images && data.images.length > 0) {
         const newImage: GeneratedImage = {
@@ -123,28 +133,138 @@ export default function ImageGeneratorPage() {
         
         setGeneratedImages(prev => [newImage, ...prev])
         setActiveTab('gallery')
+        
+        // Track activity
+        if (user) {
+          try {
+            await dbHelpers.addActivity(
+              user.id,
+              'Image Generation',
+              'Generated Image',
+              `Created image with ${selectedModel}: "${prompt.trim().substring(0, 50)}${prompt.trim().length > 50 ? '...' : ''}"`,
+              '🖼️',
+              { model: selectedModel, style: selectedStyle }
+            )
+          } catch (activityError) {
+            console.log('Activity tracking failed (non-critical):', activityError)
+          }
+        }
       } else {
-        throw new Error(data.message || 'Image generation failed')
+        const errorMsg = data.error || data.message || 'Image generation failed'
+        console.error('Image generation failed:', data)
+        throw new Error(errorMsg)
       }
 
     } catch (error) {
       console.error('Image generation error:', error)
-      alert(`Image generation failed: ${error instanceof Error ? error.message : 'Unknown error'}. Please check your API configuration and ensure your API keys are properly set.`)
+      
+      // Provide specific error messages based on the error type
+      let errorMessage = 'Image generation failed. Please try again.'
+      
+      if (error instanceof Error) {
+        if (error.message.includes('401')) {
+          errorMessage = 'API authentication failed. Please check your OpenAI API key configuration.'
+        } else if (error.message.includes('429')) {
+          errorMessage = 'Rate limit exceeded. Please wait a moment and try again.'
+        } else if (error.message.includes('400')) {
+          errorMessage = 'Invalid request. Please check your prompt and try again.'
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your internet connection.'
+        } else if (error.message.length > 0) {
+          errorMessage = error.message
+        }
+      }
+      
+      toast.error(errorMessage)
     } finally {
       setIsGenerating(false)
     }
   }
 
-  const toggleLike = (id: string) => {
+  const toggleLike = (imageId: string) => {
     setGeneratedImages(prev => 
       prev.map(img => 
-        img.id === id ? { ...img, liked: !img.liked } : img
+        img.id === imageId ? { ...img, liked: !img.liked } : img
       )
     )
   }
 
-  const copyPrompt = (promptText: string) => {
-    navigator.clipboard.writeText(promptText)
+  const copyPrompt = async (prompt: string) => {
+    try {
+      await copyToClipboard(prompt)
+      toast.success('Prompt copied to clipboard!')
+    } catch (error) {
+      toast.error('Failed to copy prompt')
+    }
+  }
+
+  // Download functionality
+  const downloadImage = async (image: GeneratedImage) => {
+    try {
+      const filename = generateUniqueFilename(
+        `oneai_${image.model}`, 
+        'png'
+      )
+      await downloadFromUrl(image.url, filename)
+      toast.success('Image downloaded successfully!')
+    } catch (error) {
+      toast.error('Failed to download image')
+      console.error('Download error:', error)
+    }
+  }
+
+  const downloadAllImages = async () => {
+    try {
+      if (generatedImages.length === 0) {
+        toast.error('No images to download')
+        return
+      }
+
+      toast.info('Starting download of all images...')
+      
+      const files = generatedImages.map((image, index) => ({
+        url: image.url,
+        name: generateUniqueFilename(`oneai_${image.model}_${index + 1}`, 'png')
+      }))
+
+      await downloadMultipleFiles(files)
+      toast.success(`Downloaded ${files.length} images successfully!`)
+    } catch (error) {
+      toast.error('Failed to download images')
+      console.error('Bulk download error:', error)
+    }
+  }
+
+  const shareImage = async (image: GeneratedImage) => {
+    try {
+      await shareContent({
+        title: 'AI Generated Image',
+        text: `Check out this AI-generated image: "${image.prompt}"`,
+        url: image.url
+      })
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('copied')) {
+        toast.success(error.message)
+      } else {
+        toast.error('Failed to share image')
+      }
+    }
+  }
+
+  const shareGallery = async () => {
+    try {
+      await shareContent({
+        title: 'My AI Image Gallery',
+        text: `Check out my AI-generated images from One AI!`,
+        url: window.location.href
+      })
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('copied')) {
+        toast.success(error.message)
+      } else {
+        toast.error('Failed to share gallery')
+      }
+    }
   }
 
   const loadTemplate = (template: string) => {
@@ -337,11 +457,11 @@ export default function ImageGeneratorPage() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-semibold">Your Generated Images</h2>
             <div className="flex space-x-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={downloadAllImages}>
                 <Download className="w-4 h-4 mr-2" />
                 Download All
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={shareGallery}>
                 <Share className="w-4 h-4 mr-2" />
                 Share Gallery
               </Button>
@@ -387,7 +507,7 @@ export default function ImageGeneratorPage() {
                   </div>
                   
                   <div className="flex space-x-2">
-                    <Button size="sm" variant="outline" className="flex-1">
+                    <Button size="sm" variant="outline" onClick={() => downloadImage(image)}>
                       <Download className="w-3 h-3 mr-1" />
                       Download
                     </Button>
@@ -398,7 +518,7 @@ export default function ImageGeneratorPage() {
                     >
                       <Copy className="w-3 h-3" />
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" onClick={() => shareImage(image)}>
                       <Share className="w-3 h-3" />
                     </Button>
                   </div>

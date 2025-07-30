@@ -85,16 +85,29 @@ CREATE TABLE IF NOT EXISTS chat_sessions (
 -- CHAT MESSAGES TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS chat_messages (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    session_id UUID REFERENCES chat_sessions(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id UUID NOT NULL REFERENCES chat_sessions(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     role VARCHAR(20) NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
     content TEXT NOT NULL,
     tokens_used INTEGER DEFAULT 0,
-    cost DECIMAL(10, 6) DEFAULT 0,
-    model_used VARCHAR(255),
+    model_used VARCHAR(100),
+    cost DECIMAL(10, 8) DEFAULT 0,
     metadata JSONB DEFAULT '{}',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
+
+-- Create a view for chat messages with user information
+CREATE OR REPLACE VIEW chat_messages_with_user AS
+SELECT 
+    cm.*,
+    u.name as user_name,
+    u.email as user_email,
+    cs.title as session_title
+FROM chat_messages cm
+LEFT JOIN auth.users au ON cm.user_id = au.id
+LEFT JOIN users u ON au.id = u.id
+LEFT JOIN chat_sessions cs ON cm.session_id = cs.id;
 
 -- =====================================================
 -- USAGE TRACKING TABLE
@@ -179,6 +192,21 @@ CREATE TABLE IF NOT EXISTS analytics_data (
 );
 
 -- =====================================================
+-- USER ACTIVITIES TABLE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS activities (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    type VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    icon VARCHAR(50),
+    metadata JSONB DEFAULT '{}',
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+-- =====================================================
 -- INDEXES FOR PERFORMANCE
 -- =====================================================
 
@@ -210,6 +238,16 @@ CREATE INDEX IF NOT EXISTS idx_usage_tracking_feature_type ON usage_tracking(fea
 CREATE INDEX IF NOT EXISTS idx_generated_content_user_id ON generated_content(user_id);
 CREATE INDEX IF NOT EXISTS idx_generated_content_type ON generated_content(type);
 CREATE INDEX IF NOT EXISTS idx_generated_content_created_at ON generated_content(created_at);
+
+-- Activities indexes
+CREATE INDEX IF NOT EXISTS idx_activities_user_id ON activities(user_id);
+CREATE INDEX IF NOT EXISTS idx_activities_timestamp ON activities(timestamp);
+CREATE INDEX IF NOT EXISTS idx_activities_type ON activities(type);
+
+-- Analytics data indexes
+CREATE INDEX IF NOT EXISTS idx_analytics_data_user_id ON analytics_data(user_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_data_recorded_at ON analytics_data(recorded_at);
+CREATE INDEX IF NOT EXISTS idx_analytics_data_metric_name ON analytics_data(metric_name);
 
 -- =====================================================
 -- TRIGGERS FOR UPDATED_AT TIMESTAMPS
@@ -254,6 +292,7 @@ ALTER TABLE generated_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_api_keys ENABLE ROW LEVEL SECURITY;
 ALTER TABLE workspace_projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE analytics_data ENABLE ROW LEVEL SECURITY;
+ALTER TABLE activities ENABLE ROW LEVEL SECURITY;
 
 -- Users can only see their own data
 CREATE POLICY "Users can view own profile" ON users
@@ -355,6 +394,19 @@ CREATE POLICY "Users can view own analytics" ON analytics_data
 
 CREATE POLICY "Users can insert own analytics" ON analytics_data
     FOR INSERT WITH CHECK (user_id = auth.uid());
+
+-- Activities policies
+CREATE POLICY "Users can view own activities" ON activities
+    FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "Users can create own activities" ON activities
+    FOR INSERT WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "Users can update own activities" ON activities
+    FOR UPDATE USING (user_id = auth.uid());
+
+CREATE POLICY "Users can delete own activities" ON activities
+    FOR DELETE USING (user_id = auth.uid());
 
 -- =====================================================
 -- SEED DATA - POPULAR AI MODELS

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { Mic, Square, Play, Pause, Download, Copy, Loader2, FileAudio, Clock, Volume2 } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
+import { toast } from 'sonner'
 
 interface Recording {
   id: string
@@ -25,13 +26,15 @@ interface Recording {
 export default function RecordTranscribePage() {
   const { user } = useAuth()
   const [isRecording, setIsRecording] = useState(false)
-  const [recordingTime, setRecordingTime] = useState(0)
-  const [selectedLanguage, setSelectedLanguage] = useState('en-US')
   const [isPlaying, setIsPlaying] = useState<string | null>(null)
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null)
+  const [recordingTime, setRecordingTime] = useState(0)
   const [recordings, setRecordings] = useState<Recording[]>([])
-  
+  const [selectedLanguage, setSelectedLanguage] = useState('en-US')
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioStreamRef = useRef<MediaStream | null>(null)
+  const chunksRef = useRef<Blob[]>([])
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
@@ -56,6 +59,10 @@ export default function RecordTranscribePage() {
       }
       if (audioStreamRef.current) {
         audioStreamRef.current.getTracks().forEach(track => track.stop())
+      }
+      if (currentAudio) {
+        currentAudio.pause()
+        setCurrentAudio(null)
       }
     }
   }, [])
@@ -201,10 +208,69 @@ export default function RecordTranscribePage() {
   const handlePlayPause = (recordingId: string, audioUrl: string) => {
     if (isPlaying === recordingId) {
       setIsPlaying(null)
-      // Pause audio logic
+      // Pause current audio
+      if (currentAudio) {
+        currentAudio.pause()
+        setCurrentAudio(null)
+      }
     } else {
-      setIsPlaying(recordingId)
-      // Play audio logic
+      // Stop any currently playing audio
+      if (currentAudio) {
+        currentAudio.pause()
+      }
+      
+      // Play new audio
+      if (audioUrl) {
+        const audio = new Audio(audioUrl)
+        audio.onended = () => setIsPlaying(null)
+        audio.onerror = () => {
+          setIsPlaying(null)
+          toast.error('Failed to play audio')
+        }
+        audio.play().then(() => {
+          setIsPlaying(recordingId)
+          setCurrentAudio(audio)
+        }).catch(() => {
+          toast.error('Failed to play audio')
+        })
+      } else {
+        toast.error('No audio URL available')
+      }
+    }
+  }
+
+  const downloadRecording = (recording: Recording) => {
+    try {
+      if (recording.audioUrl) {
+        const link = document.createElement('a')
+        link.href = recording.audioUrl
+        link.download = `recording_${recording.id}.webm`
+        link.click()
+        toast.success('Recording downloaded!')
+      } else {
+        toast.error('No audio file available for download')
+      }
+    } catch (error) {
+      toast.error('Failed to download recording')
+    }
+  }
+
+  const downloadTranscription = (recording: Recording) => {
+    try {
+      if (recording.transcript) {
+        const blob = new Blob([recording.transcript], { type: 'text/plain' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `transcription_${recording.id}.txt`
+        link.click()
+        URL.revokeObjectURL(url)
+        toast.success('Transcription downloaded!')
+      } else {
+        toast.error('No transcription available for download')
+      }
+    } catch (error) {
+      toast.error('Failed to download transcription')
     }
   }
 
@@ -484,7 +550,10 @@ export default function RecordTranscribePage() {
                           >
                             <Copy className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => downloadTranscription(recording)}>
+                            <Download className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => downloadRecording(recording)}>
                             <Download className="w-4 h-4" />
                           </Button>
                         </>

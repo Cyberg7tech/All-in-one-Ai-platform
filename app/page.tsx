@@ -123,7 +123,7 @@ export default function HomePage() {
               <Link href="/test">Test Platform</Link>
             </Button>
             <Button asChild>
-              <Link href="/login">Demo Login</Link>
+              <Link href="/login">Login</Link>
             </Button>
           </div>
         </div>
@@ -151,7 +151,7 @@ export default function HomePage() {
             <Button size="lg" className="text-lg px-8" asChild>
               <Link href="/login">
                 <LogIn className="mr-2 w-5 h-5" />
-                Try Demo Login <ArrowRight className="ml-2 w-5 h-5" />
+                Try Login
               </Link>
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8" asChild>
@@ -297,14 +297,14 @@ export default function HomePage() {
               Ready to Explore the AI Platform?
             </h2>
             <p className="text-xl text-muted-foreground mb-8">
-              Experience our comprehensive AI platform with demo accounts. 
-              No registration required - start exploring immediately!
+              Experience our comprehensive AI platform. 
+              Register or sign in to start exploring immediately!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="text-lg px-8" asChild>
                 <Link href="/login">
                   <LogIn className="mr-2 w-5 h-5" />
-                  Demo Login <ArrowRight className="ml-2 w-5 h-5" />
+                  Login <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="text-lg px-8" asChild>

@@ -6,8 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { Mic, Upload, Play, Pause, Download, Copy, Loader2, FileAudio, Clock } from 'lucide-react'
+import { Mic, MicOff, Upload, Download, Copy, Clock, FileAudio, Play, Pause, RotateCcw, Loader2 } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
+import { downloadAsTextFile, copyToClipboard, generateUniqueFilename } from '@/lib/utils/download'
+import { toast } from 'sonner'
 
 interface TranscriptionResult {
   id: string
@@ -170,9 +172,42 @@ export default function SpeechToTextPage() {
     }
   }
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    // Could add a toast notification here
+  const downloadTranscription = (transcription: TranscriptionResult) => {
+    try {
+      const filename = generateUniqueFilename(
+        `transcription_${transcription.language}`,
+        'txt'
+      )
+      
+      const content = `Transcription Results
+Language: ${transcription.language}
+Confidence: ${transcription.confidence}%
+Duration: ${transcription.duration}s
+Created: ${transcription.createdAt.toLocaleString()}
+
+Transcript:
+${transcription.transcript}
+
+Segments:
+${transcription.segments?.map((seg, i) => 
+  `[${seg.start}s - ${seg.end}s] ${seg.text}`
+).join('\n') || 'No segments available'}`
+
+      downloadAsTextFile(content, filename)
+      toast.success('Transcription downloaded successfully!')
+    } catch (error) {
+      toast.error('Failed to download transcription')
+      console.error('Download error:', error)
+    }
+  }
+
+  const copyTranscript = async (transcript: string) => {
+    try {
+      await copyToClipboard(transcript)
+      toast.success('Transcript copied to clipboard!')
+    } catch (error) {
+      toast.error('Failed to copy transcript')
+    }
   }
 
   const formatTime = (seconds: number) => {
@@ -424,11 +459,11 @@ export default function SpeechToTextPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => copyToClipboard(transcription.transcript)}
+                            onClick={() => copyTranscript(transcription.transcript)}
                           >
                             <Copy className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => downloadTranscription(transcription)}>
                             <Download className="w-4 h-4" />
                           </Button>
                         </>

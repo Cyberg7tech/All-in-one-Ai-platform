@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Volume2, Play, Pause, Download, Loader2, Copy, RotateCcw } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
+import { downloadAudioData, generateUniqueFilename } from '@/lib/utils/download'
+import { toast } from 'sonner'
 
 interface Voice {
   id: string
@@ -125,23 +127,75 @@ export default function TextToSpeechPage() {
     }
   }
 
-  const handlePlayPause = (audioUrl: string) => {
-    if (currentAudio) {
-      currentAudio.pause()
-      setCurrentAudio(null)
-      setIsPlaying(false)
-    }
-
-    if (!isPlaying) {
-      const audio = new Audio(audioUrl)
-      audio.play()
-      setCurrentAudio(audio)
-      setIsPlaying(true)
-      
-      audio.onended = () => {
-        setIsPlaying(false)
-        setCurrentAudio(null)
+  const handlePlayPause = async (audioUrl: string) => {
+    try {
+      if (!audioUrl) {
+        toast.error('No audio available to play')
+        return
       }
+
+      if (currentAudio) {
+        currentAudio.pause()
+        setCurrentAudio(null)
+        setIsPlaying(false)
+        return
+      }
+
+      if (!isPlaying) {
+        const audio = new Audio(audioUrl)
+        
+        // Add error handling for audio loading
+        audio.onerror = () => {
+          toast.error('Failed to load audio file')
+          setIsPlaying(false)
+          setCurrentAudio(null)
+        }
+
+        audio.onended = () => {
+          setIsPlaying(false)
+          setCurrentAudio(null)
+        }
+
+        audio.onloadstart = () => {
+          toast.info('Loading audio...')
+        }
+
+        audio.oncanplay = () => {
+          toast.success('Audio ready!')
+        }
+        
+        try {
+          await audio.play()
+          setCurrentAudio(audio)
+          setIsPlaying(true)
+        } catch (playError) {
+          console.error('Audio play failed:', playError)
+          toast.error('Failed to play audio. This might be a demo audio file.')
+          setIsPlaying(false)
+          setCurrentAudio(null)
+        }
+      }
+    } catch (error) {
+      console.error('Play/pause error:', error)
+      toast.error('Audio playback failed')
+      setIsPlaying(false)
+      setCurrentAudio(null)
+    }
+  }
+
+  const handleDownload = async (audioUrl: string, text: string) => {
+    try {
+      if (!audioUrl) {
+        toast.error('No audio available to download')
+        return
+      }
+      
+      const filename = generateUniqueFilename(text.replace(/[^a-zA-Z0-9]/g, '_'), 'mp3')
+      await downloadAudioData(audioUrl, filename)
+      toast.success('Audio downloaded successfully!')
+    } catch (error) {
+      console.error('Download failed:', error)
+      toast.error('Failed to download audio file')
     }
   }
 
@@ -406,7 +460,7 @@ export default function TextToSpeechPage() {
                               <Play className="w-4 h-4" />
                             )}
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleDownload(audio.audioUrl, audio.text)}>
                             <Download className="w-4 h-4" />
                           </Button>
                         </>

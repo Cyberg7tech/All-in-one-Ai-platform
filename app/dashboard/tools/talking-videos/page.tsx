@@ -7,7 +7,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { Upload, Play, Download, Loader2, UserCheck, Mic, Volume2, Wand2 } from 'lucide-react'
+import { Video, Play, Pause, Download, Loader2, User, Mic } from 'lucide-react'
+import { downloadFromUrl, generateUniqueFilename } from '@/lib/utils/download'
+import { toast } from 'sonner'
 import { useAuth } from '@/contexts/auth-context'
 
 interface Avatar {
@@ -90,13 +92,25 @@ export default function TalkingVideosPage() {
       const data = await response.json()
 
       if (data.success) {
+        const updatedVideo = {
+          ...newVideo,
+          videoUrl: data.video_url,
+          status: data.status || 'completed',
+          note: data.note,
+          provider: data.provider,
+          heygenVideoId: data.metadata?.heygen_video_id
+        };
+
         setGeneratedVideos(prev => 
-          prev.map(video => 
-            video.id === newVideo.id 
-              ? { ...video, videoUrl: data.videoUrl, status: 'completed' }
-              : video
+          prev.map(v => 
+            v.id === newVideo.id ? updatedVideo : v
           )
-        )
+        );
+
+        // If HeyGen video is processing, start polling for status
+        if (data.provider === 'heygen' && data.status === 'processing' && data.metadata?.heygen_video_id) {
+          pollHeyGenStatus(newVideo.id, data.metadata.heygen_video_id);
+        }
       } else {
         throw new Error(data.message || 'Video generation failed')
       }
@@ -115,6 +129,134 @@ export default function TalkingVideosPage() {
     }
   }
 
+  const downloadVideo = async (videoUrl: string, script: string) => {
+    try {
+      if (!videoUrl || videoUrl === 'null' || videoUrl === null) {
+        toast.error('No video URL available for download')
+        return
+      }
+      
+      const filename = generateUniqueFilename(script.replace(/[^a-zA-Z0-9]/g, '_'), 'mp4')
+      await downloadFromUrl(videoUrl, filename)
+      toast.success('Video downloaded successfully!')
+    } catch (error) {
+      console.error('Download error:', error)
+      toast.error('Failed to download video')
+    }
+  }
+
+  // Poll HeyGen video status
+  const pollHeyGenStatus = async (videoId: string, heygenVideoId: string) => {
+    const maxAttempts = 30; // Poll for up to 5 minutes (10s intervals)
+    let attempts = 0;
+
+    const checkStatus = async () => {
+      try {
+        attempts++;
+        console.log(`Polling HeyGen status (${attempts}/${maxAttempts}):`, heygenVideoId);
+
+        const statusResponse = await fetch(`/api/ai/heygen-status?video_id=${heygenVideoId}`);
+        
+        if (!statusResponse.ok) {
+          throw new Error(`Status check failed: ${statusResponse.status}`);
+        }
+
+        const statusData = await statusResponse.json();
+        console.log('HeyGen status data:', statusData);
+
+        if (statusData.status === 'completed' && statusData.video_url) {
+          // Update video with final URL
+          setGeneratedVideos(prev => 
+            prev.map(video => 
+              video.id === videoId 
+                ? { 
+                    ...video, 
+                    videoUrl: statusData.video_url,
+                    status: 'completed',
+                    note: `✅ HeyGen video generation completed! Your talking video is ready to download.`
+                  }
+                : video
+            )
+          );
+          toast.success('Talking video generation completed!');
+          return; // Stop polling
+        } 
+        
+        if (statusData.status === 'failed') {
+          // Update video status to failed
+          setGeneratedVideos(prev => 
+            prev.map(video => 
+              video.id === videoId 
+                ? { 
+                    ...video, 
+                    status: 'failed',
+                    note: `❌ Video generation failed: ${statusData.error_message || 'Unknown error'}`
+                  }
+                : video
+            )
+          );
+          toast.error('Video generation failed');
+          return; // Stop polling
+        }
+
+        // Continue polling if still processing
+        if (statusData.status === 'processing' && attempts < maxAttempts) {
+          // Update progress if available
+          setGeneratedVideos(prev => 
+            prev.map(video => 
+              video.id === videoId 
+                ? { 
+                    ...video,
+                    note: `🔄 Generating video... ${statusData.progress || 0}% complete`
+                  }
+                : video
+            )
+          );
+          
+          setTimeout(checkStatus, 10000); // Check again in 10 seconds
+        } else if (attempts >= maxAttempts) {
+          // Timeout
+          setGeneratedVideos(prev => 
+            prev.map(video => 
+              video.id === videoId 
+                ? { 
+                    ...video, 
+                    status: 'failed',
+                    note: '⏰ Video generation timed out. Please try again.'
+                  }
+                : video
+            )
+          );
+          toast.error('Video generation timed out');
+        }
+
+      } catch (error) {
+        console.error('Status polling error:', error);
+        
+        if (attempts >= maxAttempts) {
+          setGeneratedVideos(prev => 
+            prev.map(video => 
+              video.id === videoId 
+                ? { 
+                    ...video, 
+                    status: 'failed',
+                    note: '❌ Failed to check video status'
+                  }
+                : video
+            )
+          );
+          toast.error('Failed to check video status');
+        } else {
+          // Retry on error
+          setTimeout(checkStatus, 10000);
+        }
+      }
+    };
+
+    // Start polling
+    setTimeout(checkStatus, 5000); // Wait 5 seconds before first check
+  }
+
   const estimatedDuration = script.trim() ? Math.ceil(script.trim().split(' ').length / 150 * 60) : 0
 
   return (
@@ -123,7 +265,7 @@ export default function TalkingVideosPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <UserCheck className="w-8 h-8" />
+            <User className="w-8 h-8" />
             AI Talking Videos
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -131,7 +273,7 @@ export default function TalkingVideosPage() {
           </p>
         </div>
         <Badge variant="secondary" className="px-3 py-1">
-          <Wand2 className="w-4 h-4 mr-1" />
+          <Video className="w-4 h-4 mr-1" />
           New
         </Badge>
       </div>
@@ -188,7 +330,7 @@ export default function TalkingVideosPage() {
                     onClick={() => setSelectedAvatar(avatar)}
                   >
                     <div className="aspect-square bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg mb-2 flex items-center justify-center">
-                      <UserCheck className="w-8 h-8 text-blue-600" />
+                      <User className="w-8 h-8 text-blue-600" />
                     </div>
                     <div className="text-center">
                       <h3 className="font-medium text-sm">{avatar.name}</h3>
@@ -272,7 +414,7 @@ export default function TalkingVideosPage() {
               {selectedAvatar ? (
                 <div className="space-y-3">
                   <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
-                    <UserCheck className="w-12 h-12 text-blue-600" />
+                    <User className="w-12 h-12 text-blue-600" />
                   </div>
                   <div className="text-center">
                     <h3 className="font-medium">{selectedAvatar.name}</h3>
@@ -296,7 +438,7 @@ export default function TalkingVideosPage() {
               ) : (
                 <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
                   <div className="text-center">
-                    <UserCheck className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                    <User className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
                     <p className="text-sm text-muted-foreground">Select an avatar to preview</p>
                   </div>
                 </div>
@@ -350,7 +492,7 @@ export default function TalkingVideosPage() {
                       </video>
                     ) : (
                       <div className="text-center">
-                        <UserCheck className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                        <User className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
                         <p className="text-sm text-red-500">Generation failed</p>
                       </div>
                     )}
@@ -366,10 +508,32 @@ export default function TalkingVideosPage() {
 
                   {video.status === 'completed' && (
                     <div className="space-y-2">
-                      <Button variant="outline" size="sm" className="w-full">
-                        <Download className="w-4 h-4 mr-2" />
-                        Download
-                      </Button>
+                      {video.videoUrl ? (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full" 
+                          onClick={() => downloadVideo(video.videoUrl, video.script)}
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Download
+                        </Button>
+                      ) : (
+                        <div className="text-center">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full" 
+                            disabled
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Demo Mode - No Download
+                          </Button>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Configure talking video API for real downloads
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

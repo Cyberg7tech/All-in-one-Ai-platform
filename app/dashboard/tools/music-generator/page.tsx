@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
@@ -8,7 +8,9 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
-import { Music, Play, Pause, Download, Loader2, Volume2, Clock, Wand2 } from 'lucide-react'
+import { Music, Play, Pause, Download, Loader2, Copy, RotateCcw, Clock, Volume2, Wand2 } from 'lucide-react'
+import { downloadAudioData, copyToClipboard, generateUniqueFilename } from '@/lib/utils/download'
+import { toast } from 'sonner'
 import { useAuth } from '@/contexts/auth-context'
 
 interface GeneratedMusic {
@@ -135,6 +137,26 @@ export default function MusicGeneratorPage() {
     } else {
       setIsPlaying(musicId)
       // Play audio logic here
+    }
+  }
+
+  const downloadAudio = async (audioUrl: string, title: string) => {
+    try {
+      const filename = generateUniqueFilename(title.replace(/[^a-zA-Z0-9]/g, '_'), 'mp3')
+      await downloadAudioData(audioUrl, filename)
+      toast.success('Music downloaded successfully!')
+    } catch (error) {
+      toast.error('Failed to download music')
+      console.error('Download error:', error)
+    }
+  }
+
+  const copyPrompt = async (prompt: string) => {
+    try {
+      await copyToClipboard(prompt)
+      toast.success('Prompt copied to clipboard!')
+    } catch (error) {
+      toast.error('Failed to copy prompt')
     }
   }
 
@@ -420,8 +442,11 @@ export default function MusicGeneratorPage() {
                               <Play className="w-4 h-4" />
                             )}
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => downloadAudio(music.audioUrl, music.prompt)}>
                             <Download className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => copyPrompt(music.prompt)}>
+                            <Copy className="w-4 h-4" />
                           </Button>
                         </>
                       ) : (

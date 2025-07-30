@@ -11,6 +11,8 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Play, Download, Loader2, Video, Clock, Settings, Wand2 } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
+import { downloadFromUrl, generateUniqueFilename } from '@/lib/utils/download'
+import { toast } from 'sonner'
 
 interface GeneratedVideo {
   id: string
@@ -81,7 +83,12 @@ export default function VideoGeneratorPage() {
         setGeneratedVideos(prev => 
           prev.map(video => 
             video.id === newVideo.id 
-              ? { ...video, videoUrl: data.videoUrl, status: 'completed' }
+              ? { 
+                  ...video, 
+                  videoUrl: data.video_url, // Fix property name from API response
+                  status: 'completed',
+                  note: data.note // Add note for demo responses
+                }
               : video
           )
         )
@@ -100,6 +107,22 @@ export default function VideoGeneratorPage() {
       )
     } finally {
       setIsGenerating(false)
+    }
+  }
+
+  const downloadVideo = async (videoUrl: string, prompt: string) => {
+    try {
+      if (!videoUrl || videoUrl === 'null' || videoUrl === null) {
+        toast.error('No video URL available for download')
+        return
+      }
+      
+      const filename = generateUniqueFilename(prompt.replace(/[^a-zA-Z0-9]/g, '_'), 'mp4')
+      await downloadFromUrl(videoUrl, filename)
+      toast.success('Video downloaded successfully!')
+    } catch (error) {
+      console.error('Download error:', error)
+      toast.error('Failed to download video')
     }
   }
 
@@ -338,10 +361,34 @@ export default function VideoGeneratorPage() {
                   </div>
 
                   {video.status === 'completed' && (
-                    <Button variant="outline" size="sm" className="w-full">
-                      <Download className="w-4 h-4 mr-2" />
-                      Download
-                    </Button>
+                    <div className="space-y-2">
+                      {video.videoUrl ? (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full" 
+                          onClick={() => downloadVideo(video.videoUrl, video.prompt)}
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Download
+                        </Button>
+                      ) : (
+                        <div className="text-center">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full" 
+                            disabled
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Demo Mode - No Download
+                          </Button>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Configure video generation API for real downloads
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               ))}

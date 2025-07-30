@@ -6,424 +6,26 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/contexts/auth-context'
+import { dbHelpers } from '@/lib/supabase/client'
 
-interface ChatMessage {
+interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
+  user_name?: string
+  user_email?: string
   model?: string
   tokens?: number
-  attachments?: {
-    type: 'image' | 'file' | 'audio'
-    url: string
-    name: string
-  }[]
 }
 
 interface ChatSession {
   id: string
   title: string
-  messages: ChatMessage[]
+  messages: Message[]
   model: string
   lastActivity: Date
 }
-
-const AI_MODELS = [
-  // OpenAI Models
-  {
-    id: 'gpt-4.1',
-    name: 'GPT-4.1',
-    provider: 'openai',
-    description: 'OpenAI\'s flagship model for complex tasks',
-    consumption: '0.5x',
-    category: 'OpenAI',
-    premium: true
-  },
-  {
-    id: 'gpt-4.1-mini',
-    name: 'GPT-4.1 mini',
-    provider: 'openai', 
-    description: 'Balance between intelligence, speed, and cost',
-    consumption: '0.25x',
-    category: 'OpenAI',
-    premium: true
-  },
-  {
-    id: 'gpt-4.1-nano',
-    name: 'GPT-4.1 nano',
-    provider: 'openai',
-    description: 'Fastest, most cost-effective GPT 4.1 model',
-    consumption: 'Unlimited',
-    category: 'OpenAI',
-    premium: false
-  },
-  {
-    id: 'gpt-4o-mini',
-    name: 'GPT-4o mini',
-    provider: 'openai',
-    description: 'Intelligent small model optimized for fast, lightweight tasks',
-    consumption: 'Unlimited',
-    category: 'OpenAI',
-    premium: false
-  },
-  {
-    id: 'gpt-4o',
-    name: 'GPT-4o',
-    provider: 'openai',
-    description: 'Most advanced system from OpenAI. 2x faster than GPT-4 Turbo',
-    consumption: '0.5x',
-    category: 'OpenAI',
-    premium: true
-  },
-  {
-    id: 'gpt-4-turbo',
-    name: 'GPT-4 Turbo',
-    provider: 'openai',
-    description: 'Latest GPT-4 with improved instruction following and vision',
-    consumption: '1x',
-    category: 'OpenAI',
-    premium: true
-  },
-  {
-    id: 'gpt-3.5-turbo',
-    name: 'GPT-3.5 Turbo',
-    provider: 'openai',
-    description: 'Very fast. Great for most use cases. 16k context length',
-    consumption: 'Unlimited',
-    category: 'OpenAI',
-    premium: false
-  },
-  {
-    id: 'o1-mini',
-    name: 'o1-mini',
-    provider: 'openai',
-    description: 'Faster reasoning model for coding, math, and science',
-    consumption: '0.5x',
-    category: 'OpenAI Reasoning',
-    premium: true
-  },
-  {
-    id: 'o1',
-    name: 'o1',
-    provider: 'openai',
-    description: 'Most powerful reasoning model for hard problems',
-    consumption: '1x',
-    category: 'OpenAI Reasoning',
-    premium: true
-  },
-  {
-    id: 'o3-mini',
-    name: 'o3-mini',
-    provider: 'openai',
-    description: 'Latest reasoning model optimized for math, coding, and science',
-    consumption: '0.5x',
-    category: 'OpenAI Reasoning',
-    premium: true
-  },
-  {
-    id: 'o3',
-    name: 'o3',
-    provider: 'openai',
-    description: 'Well-rounded model setting new standards across domains',
-    consumption: '1x',
-    category: 'OpenAI Reasoning',
-    premium: true
-  },
-  {
-    id: 'o4-mini',
-    name: 'o4-mini',
-    provider: 'openai',
-    description: 'Latest small o-series model optimized for fast reasoning',
-    consumption: '0.25x',
-    category: 'OpenAI Reasoning',
-    premium: true
-  },
-
-  // Anthropic Models
-  {
-    id: 'claude-3.5-haiku',
-    name: 'Claude 3.5 Haiku',
-    provider: 'anthropic',
-    description: 'Next generation fastest model from Anthropic',
-    consumption: '0.25x',
-    category: 'Anthropic',
-    premium: false
-  },
-  {
-    id: 'claude-3.5-sonnet',
-    name: 'Claude 3.5 Sonnet',
-    provider: 'anthropic',
-    description: 'Most intelligent model from Anthropic. 200k context window',
-    consumption: '0.5x',
-    category: 'Anthropic',
-    premium: true
-  },
-  {
-    id: 'claude-3.7-sonnet',
-    name: 'Claude 3.7 Sonnet',
-    provider: 'anthropic',
-    description: 'First hybrid reasoning model and most intelligent to date',
-    consumption: '0.5x',
-    category: 'Anthropic',
-    premium: true
-  },
-  {
-    id: 'claude-3.7-sonnet-reasoning',
-    name: 'Claude 3.7 Sonnet Reasoning',
-    provider: 'anthropic',
-    description: 'First hybrid reasoning model with enhanced reasoning',
-    consumption: '0.5x',
-    category: 'Anthropic',
-    premium: true
-  },
-  {
-    id: 'claude-3-opus',
-    name: 'Claude 3 Opus',
-    provider: 'anthropic',
-    description: 'Most powerful model for highly complex tasks',
-    consumption: '1x',
-    category: 'Anthropic',
-    premium: true
-  },
-  {
-    id: 'claude-sonnet-4',
-    name: 'Claude Sonnet 4',
-    provider: 'anthropic',
-    description: 'Balanced model for enterprise workloads, next generation',
-    consumption: '0.5x',
-    category: 'Anthropic',
-    premium: true
-  },
-  {
-    id: 'claude-sonnet-4-reasoning',
-    name: 'Claude Sonnet 4 Reasoning',
-    provider: 'anthropic',
-    description: 'Balanced reasoning model for enterprise workloads',
-    consumption: '0.5x',
-    category: 'Anthropic',
-    premium: true
-  },
-  {
-    id: 'claude-opus-4',
-    name: 'Claude Opus 4',
-    provider: 'anthropic',
-    description: 'Most powerful model for highly complex tasks, next generation',
-    consumption: '1x',
-    category: 'Anthropic',
-    premium: true
-  },
-  {
-    id: 'claude-opus-4-reasoning',
-    name: 'Claude Opus 4 Reasoning',
-    provider: 'anthropic',
-    description: 'Most powerful reasoning model for complex tasks',
-    consumption: '1x',
-    category: 'Anthropic',
-    premium: true
-  },
-
-  // Open Source Models
-  {
-    id: 'mixtral-8x7b',
-    name: 'Mixtral-8x7B',
-    provider: 'mistral',
-    description: 'Uncensored model from Mistral AI. Most powerful open-source',
-    consumption: 'Unlimited',
-    category: 'Open Source',
-    premium: false
-  },
-  {
-    id: 'llama-3.3-70b',
-    name: 'Llama 3.3 70B',
-    provider: 'meta',
-    description: 'Outperforms many open source chat models on benchmarks',
-    consumption: 'Unlimited',
-    category: 'Open Source',
-    premium: false
-  },
-  {
-    id: 'llama-3.1-405b',
-    name: 'Llama 3.1 405B',
-    provider: 'meta',
-    description: 'Meta\'s biggest open source model, competitive with GPT-4',
-    consumption: '0.25x',
-    category: 'Open Source',
-    premium: true
-  },
-  {
-    id: 'llama-4-maverick',
-    name: 'Llama 4 Maverick',
-    provider: 'meta',
-    description: 'Powerful model excelling at reasoning, coding, and NLP',
-    consumption: '0.25x',
-    category: 'Open Source',
-    premium: true
-  },
-
-  // Google Models
-  {
-    id: 'gemini-1.5-pro',
-    name: 'Gemini 1.5 Pro',
-    provider: 'google',
-    description: 'Google\'s largest and most capable AI model. 1M context window',
-    consumption: '1x',
-    category: 'Google',
-    premium: true
-  },
-  {
-    id: 'gemini-flash-2.0',
-    name: 'Gemini Flash 2.0',
-    provider: 'google',
-    description: 'Fast and versatile multimodal model for diverse tasks',
-    consumption: 'Unlimited',
-    category: 'Google',
-    premium: false
-  },
-  {
-    id: 'gemini-2.5-pro',
-    name: 'Gemini 2.5 Pro',
-    provider: 'google',
-    description: 'State-of-the-art thinking model for complex reasoning',
-    consumption: '0.5x',
-    category: 'Google',
-    premium: true
-  },
-
-  // xAI Models
-  {
-    id: 'grok-2',
-    name: 'Grok 2',
-    provider: 'xai',
-    description: 'xAI\'s witty assistant inspired by Hitchhiker\'s Guide',
-    consumption: '0.5x',
-    category: 'xAI',
-    premium: true
-  },
-  {
-    id: 'grok-3-mini',
-    name: 'Grok 3 Mini',
-    provider: 'xai',
-    description: 'Lightweight model that thinks before responding',
-    consumption: 'Unlimited',
-    category: 'xAI',
-    premium: false
-  },
-  {
-    id: 'grok-3',
-    name: 'Grok 3',
-    provider: 'xai',
-    description: 'Flagship model for enterprise use cases with deep domain knowledge',
-    consumption: '0.5x',
-    category: 'xAI',
-    premium: true
-  },
-  {
-    id: 'grok-4',
-    name: 'Grok 4',
-    provider: 'xai',
-    description: 'Latest flagship model with unparalleled performance',
-    consumption: '0.5x',
-    category: 'xAI',
-    premium: true
-  },
-
-  // DeepSeek Models
-  {
-    id: 'deepseek-v3',
-    name: 'Deepseek V3',
-    provider: 'deepseek',
-    description: 'Chinese open-source model excelling in code generation',
-    consumption: '0.25x',
-    category: 'DeepSeek',
-    premium: false
-  },
-  {
-    id: 'deepseek-r1',
-    name: 'Deepseek R1',
-    provider: 'deepseek',
-    description: 'State-of-the-art model optimized for reasoning, math, and code',
-    consumption: '0.25x',
-    category: 'DeepSeek',
-    premium: false
-  },
-  {
-    id: 'deepseek-r1-0528',
-    name: 'Deepseek R1 0528',
-    provider: 'deepseek',
-    description: 'New version of Deepseek R1 from 05/28/2025. Hosted in USA',
-    consumption: '0.25x',
-    category: 'DeepSeek',
-    premium: false
-  },
-
-  // Kimi Models
-  {
-    id: 'kimi-k2',
-    name: 'Kimi K2',
-    provider: 'kimi',
-    description: 'State-of-the-art MoE model optimized for agentic capabilities',
-    consumption: '0.1x',
-    category: 'Kimi',
-    premium: false
-  },
-
-  // Together.ai Models (High-performance open-source models)
-  {
-    id: 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo',
-    name: 'Llama 3.1 8B Turbo',
-    provider: 'together',
-    description: 'Fast and efficient Llama model for general conversations',
-    consumption: 'Unlimited',
-    category: 'Together.ai',
-    premium: false
-  },
-  {
-    id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
-    name: 'Llama 3.1 70B Turbo',
-    provider: 'together',
-    description: 'Large context Llama model with superior reasoning',
-    consumption: '0.5x',
-    category: 'Together.ai',
-    premium: true
-  },
-  {
-    id: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',
-    name: 'Llama 3.3 70B Turbo',
-    provider: 'together',
-    description: 'Latest Llama model with enhanced capabilities',
-    consumption: '0.5x',
-    category: 'Together.ai',
-    premium: true
-  },
-  {
-    id: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
-    name: 'Mixtral 8x7B Instruct',
-    provider: 'together',
-    description: 'Mixture of experts model with excellent performance',
-    consumption: '0.75x',
-    category: 'Together.ai',
-    premium: true
-  },
-  {
-    id: 'deepseek-ai/DeepSeek-R1',
-    name: 'DeepSeek R1',
-    provider: 'together',
-    description: 'Advanced reasoning model optimized for complex tasks',
-    consumption: '0.5x',
-    category: 'Together.ai',
-    premium: true
-  },
-  {
-    id: 'Qwen/Qwen2.5-72B-Instruct-Turbo',
-    name: 'Qwen 2.5 72B Turbo',
-    provider: 'together',
-    description: 'Alibaba\'s flagship model with multilingual capabilities',
-    consumption: '0.5x',
-    category: 'Together.ai',
-    premium: true
-  }
-]
 
 const CHAT_TEMPLATES = [
   {
@@ -462,25 +64,112 @@ export default function ChatPage() {
   const { user } = useAuth()
   const [sessions, setSessions] = useState<ChatSession[]>([])
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
-  const [selectedModel, setSelectedModel] = useState('gpt-4o-mini')
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [showModelSelector, setShowModelSelector] = useState(false)
+  const [isLoadingSessions, setIsLoadingSessions] = useState(true)
+  const [selectedModel, setSelectedModel] = useState('gpt-4o-mini')
   const [modelSearch, setModelSearch] = useState('')
+  const [showModelPicker, setShowModelPicker] = useState(false)
+  
+  // State for models from API service
+  const [availableModels, setAvailableModels] = useState<Array<{
+    id: string;
+    name: string;
+    provider: string;
+    category: string;
+    tier: string;
+    capabilities: string[];
+    contextWindow: number;
+    speed: string;
+  }>>([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(true);
+  const [modelGroups, setModelGroups] = useState<{
+    reasoning: any[];
+    chat: any[];
+    search: any[];
+    all: any[];
+  }>({ reasoning: [], chat: [], search: [], all: [] });
+
+  // Voice recording states
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
   
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  // Refs
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Fetch models from AI API service
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        setIsLoadingModels(true);
+        const response = await fetch('/api/ai/models');
+        const data = await response.json();
+        
+        if (data.success) {
+          setModelGroups(data.models);
+          setAvailableModels(data.models.all);
+          console.log('Loaded models:', {
+            total: data.total,
+            providers: data.providers,
+            configuration: data.configuration
+          });
+          
+          // Set default model based on what's available (Together AI first)
+          if (data.models.all.length > 0) {
+            // Prefer Together AI models (first one will be Llama 3.1 70B Recommended)
+            const preferredModel = data.models.all.find((m: any) => m.provider === 'together') ||
+                                 data.models.all[0];
+            setSelectedModel(preferredModel.id);
+          }
+        } else {
+          console.error('Failed to load models:', data.error);
+          // Fallback to Together AI model if API fetch fails
+          const fallbackModels = [{
+            id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+            name: 'Llama 3.1 70B Turbo ⚡ (Recommended)',
+            provider: 'together',
+            category: 'chat',
+            tier: 'premium',
+            capabilities: ['chat'],
+            contextWindow: 131072,
+            speed: 'fast'
+          }];
+          setAvailableModels(fallbackModels);
+          setModelGroups({ reasoning: [], chat: fallbackModels, search: [], all: fallbackModels });
+        }
+      } catch (error) {
+        console.error('Error fetching models:', error);
+        // Fallback to Together AI model
+        const fallbackModels = [{
+          id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+          name: 'Llama 3.1 70B Turbo ⚡ (Recommended)', 
+          provider: 'together',
+          category: 'chat',
+          tier: 'premium',
+          capabilities: ['chat'],
+          contextWindow: 131072,
+          speed: 'fast'
+        }];
+        setAvailableModels(fallbackModels);
+        setModelGroups({ reasoning: [], chat: fallbackModels, search: [], all: fallbackModels });
+      } finally {
+        setIsLoadingModels(false);
+      }
+    };
+
+    fetchModels();
+  }, []);
+
   // Filter and group models
-  const filteredModels = AI_MODELS.filter(model => 
+  const filteredModels = availableModels.filter(model => 
     model.name.toLowerCase().includes(modelSearch.toLowerCase()) ||
-    model.description.toLowerCase().includes(modelSearch.toLowerCase())
+    model.provider.toLowerCase().includes(modelSearch.toLowerCase()) ||
+    model.capabilities.some(cap => cap.toLowerCase().includes(modelSearch.toLowerCase()))
   )
 
   const groupedModels = filteredModels.reduce((acc, model) => {
@@ -489,18 +178,61 @@ export default function ChatPage() {
     }
     acc[model.category].push(model)
     return acc
-  }, {} as Record<string, typeof AI_MODELS>)
+  }, {} as Record<string, typeof availableModels>)
 
   const currentSession = sessions.find(s => s.id === currentSessionId)
-  const selectedModelInfo = AI_MODELS.find(m => m.id === selectedModel)
+  const selectedModelInfo = availableModels.find(m => m.id === selectedModel)
 
-  // Remove demo sessions - start with empty chat
-  // useEffect(() => {
-  //   // Load demo sessions
-  //   const demoSessions: ChatSession[] = [...]
-  //   setSessions(demoSessions)
-  //   setCurrentSessionId(demoSessions[0].id)
-  // }, [])
+  // Load chat sessions from DB on mount
+  useEffect(() => {
+    if (!user?.id) {
+      console.log('User not ready yet:', user);
+      setIsLoadingSessions(false);
+      return;
+    }
+    
+    const fetchSessions = async () => {
+      setIsLoadingSessions(true);
+      try {
+        console.log('Fetching chat sessions for user:', user.id);
+        const dbSessions = await dbHelpers.getChatSessions(user.id);
+        console.log('Raw DB sessions:', dbSessions);
+        
+        if (dbSessions && dbSessions.length > 0) {
+          const mappedSessions = dbSessions.map((s: any) => ({
+            id: s.id,
+            title: s.title || 'New Chat',
+            model: s.model_id || 'gpt-4o-mini',
+            lastActivity: new Date(s.updated_at || s.created_at),
+            messages: (s.chat_messages || []).map((m: any) => ({
+              id: m.id,
+              role: m.role as 'user' | 'assistant',
+              content: m.content,
+              timestamp: new Date(m.created_at),
+              user_name: m.user_name,
+              user_email: m.user_email
+            }))
+          }));
+          console.log('Mapped sessions:', mappedSessions);
+          setSessions(mappedSessions);
+          if (mappedSessions.length > 0) {
+            setCurrentSessionId(mappedSessions[0].id);
+          }
+        } else {
+          console.log('No sessions found');
+          setSessions([]);
+          setCurrentSessionId(null);
+        }
+      } catch (error) {
+        console.error('Error fetching sessions:', error);
+        setSessions([]);
+        setCurrentSessionId(null);
+      } finally {
+        setIsLoadingSessions(false);
+      }
+    };
+    fetchSessions();
+  }, [user]); // depend on 'user' instead of 'user?.id'
 
   useEffect(() => {
     scrollToBottom()
@@ -510,66 +242,189 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const createNewSession = () => {
-    const newSession: ChatSession = {
-      id: Date.now().toString(),
-      title: 'New Chat',
-      model: selectedModel,
-      lastActivity: new Date(),
-      messages: []
-    }
-    setSessions(prev => [newSession, ...prev])
-    setCurrentSessionId(newSession.id)
+  // Strip markdown formatting from text
+  const stripMarkdown = (text: string): string => {
+    return text
+      // Remove headers (### text -> text)
+      .replace(/^#{1,6}\s+/gm, '')
+      // Remove bold (**text** -> text)
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      // Remove italic (*text* -> text)
+      .replace(/\*(.*?)\*/g, '$1')
+      // Remove code blocks (```text``` -> text)
+      .replace(/```[\s\S]*?```/g, '')
+      // Remove inline code (`text` -> text)
+      .replace(/`(.*?)`/g, '$1')
+      // Remove links ([text](url) -> text)
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      // Remove bullet points (- text -> text)
+      .replace(/^[\s]*[-*+]\s+/gm, '')
+      // Remove numbered lists (1. text -> text)
+      .replace(/^\d+\.\s+/gm, '')
+      // Clean up extra whitespace
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
   }
 
-  const sendMessage = async () => {
-    if (!message.trim() || isLoading) return
+  // Create new session in DB
+  const createNewSession = async () => {
+    if (!user?.id) return;
+    const session = await dbHelpers.createChatSession({
+      user_id: user.id,
+      title: 'New Chat',
+      model_id: selectedModel
+    })
+    setSessions(prev => [{
+      id: session.id,
+      title: session.title,
+      model: session.model_id,
+      lastActivity: new Date(session.updated_at),
+      messages: []
+    }, ...prev])
+    setCurrentSessionId(session.id)
+  }
 
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: message.trim(),
-      timestamp: new Date()
+  // Generate smart chat title based on message content
+  const generateChatTitle = (messageContent: string): string => {
+    // Remove extra whitespace and limit length
+    const cleanContent = messageContent.trim().substring(0, 50);
+    
+    // If message is short, use it as-is
+    if (cleanContent.length <= 25) {
+      return cleanContent;
     }
+    
+    // For longer messages, try to find a good breaking point
+    const words = cleanContent.split(' ');
+    let title = '';
+    
+    for (const word of words) {
+      if ((title + ' ' + word).length > 30) break;
+      title += (title ? ' ' : '') + word;
+    }
+    
+    return title || cleanContent.substring(0, 30) + '...';
+  };
 
-    // Update session with user message
-    setSessions(prev => prev.map(session => 
-      session.id === currentSessionId 
-        ? { 
-            ...session, 
-            messages: [...session.messages, userMessage],
-            lastActivity: new Date(),
-            title: session.messages.length === 0 ? message.substring(0, 50) + '...' : session.title
-          }
-        : session
-    ))
-
-    setMessage('')
-    setIsLoading(true)
-
+  // Update chat title based on conversation context
+  const updateChatTitle = async (sessionId: string, firstMessage: string) => {
     try {
-      // Get conversation history for current session
-      const currentSessionData = sessions.find(s => s.id === currentSessionId)
-      const conversationHistory = currentSessionData?.messages || []
+      const smartTitle = generateChatTitle(firstMessage);
       
-      // Prepare messages for API
+      // Update in database
+      await dbHelpers.updateChatSession(sessionId, { title: smartTitle });
+      
+      // Update in UI state
+      setSessions(prev => prev.map(session =>
+        session.id === sessionId
+          ? { ...session, title: smartTitle }
+          : session
+      ));
+    } catch (error) {
+      console.error('Error updating chat title:', error);
+    }
+  };
+
+  // Send message and store in DB
+  const sendMessage = async () => {
+    if (!message.trim() || isLoading || !user?.id) return;
+    
+    // Store the message content before clearing the input
+    const messageContent = message.trim();
+    
+    // Clear the input immediately
+    setMessage('');
+    console.log('Input cleared, message content:', messageContent);
+    
+    setIsLoading(true);
+    
+    try {
+      let sessionId: string = currentSessionId || '';
+      
+      // If no session, create one
+      if (!sessionId) {
+        const session = await dbHelpers.createChatSession({
+          user_id: user.id,
+          title: 'New Chat',
+          model_id: selectedModel
+        })
+        sessionId = session.id
+        setSessions(prev => [
+          {
+            id: session.id,
+            title: session.title,
+            model: session.model_id,
+            lastActivity: new Date(session.updated_at),
+            messages: []
+          },
+          ...prev
+        ])
+        setCurrentSessionId(session.id)
+      }
+      
+      // Store user message
+      const userMsg = await dbHelpers.addChatMessage({
+        session_id: sessionId,
+        user_id: user.id,
+        role: 'user' as 'user',
+        content: messageContent,
+        tokens_used: 0, // User messages don't consume tokens
+        model_used: selectedModel,
+        cost: 0
+      })
+      
+      // Immediately add user message to UI state so it shows up right away
+      setSessions(prev => prev.map(session =>
+        session.id === sessionId
+          ? {
+              ...session,
+              messages: [
+                ...session.messages,
+                {
+                  id: userMsg.id,
+                  role: 'user' as 'user',
+                  content: userMsg.content,
+                  timestamp: new Date(userMsg.created_at),
+                  user_name: user.name || user.email,
+                  user_email: user.email
+                }
+              ],
+              lastActivity: new Date()
+            }
+          : session
+      ))
+      
+      // Call AI API
+      const currentSession = sessions.find(s => s.id === sessionId);
+      const conversationHistory = currentSession?.messages || [];
+      
+      // Prepare messages with system context and conversation history
       const messages = [
+        {
+          role: 'system',
+          content: `Current date and time: ${new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })} at ${new Date().toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZoneName: 'short'
+          })}. Always use this as the current date when responding to user questions about time or date. Respond naturally without markdown formatting.`
+        },
+        // Add conversation history
         ...conversationHistory.map(msg => ({
           role: msg.role,
           content: msg.content
         })),
-        {
-          role: 'user',
-          content: userMessage.content
-        }
-      ]
+        // Add current user message
+        { role: 'user', content: messageContent }
+      ];
 
-      // Call the real AI API
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages,
           model: selectedModel,
@@ -577,52 +432,74 @@ export default function ChatPage() {
           temperature: 0.7
         })
       })
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`)
-      }
-
       const data = await response.json()
-
+      
+      // Store assistant message
+      let assistantMsg = null
       if (data.success) {
-        const assistantMessage: ChatMessage = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: data.content,
-          timestamp: new Date(),
-          model: data.model,
-          tokens: data.usage?.total_tokens || data.usage?.input_tokens + data.usage?.output_tokens || 0
-        }
-
-        setSessions(prev => prev.map(session => 
-          session.id === currentSessionId 
-            ? { ...session, messages: [...session.messages, assistantMessage] }
+        const cleanContent = stripMarkdown(data.content)
+        assistantMsg = await dbHelpers.addChatMessage({
+          session_id: sessionId,
+          user_id: user.id,
+          role: 'assistant' as 'assistant',
+          content: cleanContent,
+          tokens_used: data.usage?.total_tokens || 0,
+          model_used: selectedModel,
+          cost: data.cost || 0
+        })
+      }
+      
+      // Update session state with assistant message only (user message already added)
+      if (assistantMsg) {
+        setSessions(prev => prev.map(session =>
+          session.id === sessionId
+            ? {
+                ...session,
+                messages: [
+                  ...session.messages,
+                  {
+                    id: assistantMsg.id,
+                    role: 'assistant' as 'assistant',
+                    content: assistantMsg.content,
+                    timestamp: new Date(assistantMsg.created_at),
+                    user_name: user.name || user.email,
+                    user_email: user.email
+                  }
+                ],
+                lastActivity: new Date()
+              }
             : session
         ))
-      } else {
-        throw new Error(data.message || 'API request failed')
+        
+        // Update chat title if this is the first exchange (total 2 messages after adding assistant message)
+        setSessions(prev => {
+          const updatedSession = prev.find(s => s.id === sessionId);
+          const totalMessages = updatedSession ? updatedSession.messages.length : 0;
+          
+          console.log('Title update check:', {
+            sessionId,
+            totalMessages,
+            shouldUpdate: totalMessages === 2,
+            messageContent: messageContent.substring(0, 30),
+            sessionTitle: updatedSession?.title
+          });
+          
+          // If this is the first exchange (2 total messages) and title is still "New Chat"
+          if (totalMessages === 2 && updatedSession?.title === 'New Chat') {
+            console.log('Updating chat title for first exchange...');
+            updateChatTitle(sessionId, messageContent);
+          }
+          
+          return prev; // Return unchanged since we're just checking
+        });
       }
-
-    } catch (error) {
-      console.error('Chat error:', error)
       
-      // Show error message
-      const errorMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}. This might be due to API configuration or network issues. Please make sure your API keys are properly configured in the environment variables.`,
-        timestamp: new Date(),
-        model: selectedModel,
-        tokens: 0
-      }
-
-      setSessions(prev => prev.map(session => 
-        session.id === currentSessionId 
-          ? { ...session, messages: [...session.messages, errorMessage] }
-          : session
-      ))
+    } catch (error) {
+      console.error('Error in sendMessage:', error);
+      // Optionally show an error message to the user
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
+      console.log('sendMessage completed, isLoading set to false');
     }
   }
 
@@ -719,6 +596,26 @@ export default function ChatPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  // Delete session and its messages
+  const deleteSession = async (sessionId: string) => {
+    try {
+      await dbHelpers.deleteChatSession(sessionId);
+      setSessions(prev => prev.filter(s => s.id !== sessionId));
+      if (currentSessionId === sessionId) {
+        const remainingSessions = sessions.filter(s => s.id !== sessionId);
+        setCurrentSessionId(remainingSessions.length > 0 ? remainingSessions[0].id : null);
+      }
+    } catch (error) {
+      console.error('Error deleting chat session:', error);
+      // Still remove from UI even if DB deletion fails
+      setSessions(prev => prev.filter(s => s.id !== sessionId));
+      if (currentSessionId === sessionId) {
+        const remainingSessions = sessions.filter(s => s.id !== sessionId);
+        setCurrentSessionId(remainingSessions.length > 0 ? remainingSessions[0].id : null);
+      }
+    }
+  };
+
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
@@ -735,16 +632,16 @@ export default function ChatPage() {
         <div className="p-4 border-b">
           <div className="flex space-x-4 mb-6 relative">
             <Button
-              variant={showModelSelector ? 'default' : 'outline'}
-              onClick={() => setShowModelSelector(!showModelSelector)}
+              variant={showModelPicker ? 'default' : 'outline'}
+              onClick={() => setShowModelPicker(!showModelPicker)}
               className="flex items-center space-x-2"
             >
               <Brain className="w-4 h-4" />
-              <span>{AI_MODELS.find(m => m.id === selectedModel)?.name || selectedModel}</span>
+              <span>{availableModels.find(m => m.id === selectedModel)?.name || selectedModel}</span>
               <ChevronDown className="w-4 h-4" />
             </Button>
 
-            {showModelSelector && (
+            {showModelPicker && (
               <div className="absolute top-12 left-0 z-50 w-96 bg-background border border-border rounded-lg shadow-lg p-4 max-h-96 overflow-y-auto">
                 <div className="mb-4">
                   <input
@@ -770,25 +667,27 @@ export default function ChatPage() {
                           }`}
                           onClick={() => {
                             setSelectedModel(model.id)
-                            setShowModelSelector(false)
+                            setShowModelPicker(false)
                           }}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
                               <div className="flex items-center space-x-2">
                                 <span className="font-medium text-sm">{model.name}</span>
-                                {model.premium && (
+                                {model.tier === 'premium' && (
                                   <Badge variant="secondary" className="text-xs">Premium</Badge>
                                 )}
                               </div>
-                              <p className="text-xs text-muted-foreground mt-1">{model.description}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {model.provider} • {model.capabilities.join(', ')} • {model.speed}
+                              </p>
                             </div>
                             <div className="ml-2">
                               <Badge 
-                                variant={model.consumption === 'Unlimited' ? 'default' : 'outline'}
+                                variant={model.tier === 'premium' ? 'default' : 'outline'}
                                 className="text-xs"
                               >
-                                {model.consumption}
+                                {model.tier === 'premium' ? 'Premium' : model.tier === 'standard' ? 'Standard' : 'Open Source'}
                               </Badge>
                             </div>
                           </div>
@@ -806,25 +705,52 @@ export default function ChatPage() {
         <div className="flex-1 overflow-y-auto">
           <div className="p-2">
             <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Recent Chats</h3>
-            {sessions.map((session) => (
-              <div
-                key={session.id}
-                className={`p-3 rounded-lg cursor-pointer transition-colors mb-1 ${
-                  currentSessionId === session.id ? 'bg-primary/10' : 'hover:bg-muted/50'
-                }`}
-                onClick={() => setCurrentSessionId(session.id)}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium truncate">{session.title}</span>
-                  <Badge variant="outline" className="text-xs">
-                    {AI_MODELS.find(m => m.id === session.model)?.name || session.model}
-                  </Badge>
+            {isLoadingSessions ? (
+              <div className="flex justify-center items-center h-full">
+                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : sessions.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                  <Bot className="w-8 h-8 text-primary" />
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {session.messages.length} messages
+                <h2 className="text-2xl font-bold mb-2">No recent chats</h2>
+                <p className="text-muted-foreground mb-8">
+                  Start a new conversation to begin
                 </p>
               </div>
-            ))}
+            ) : (
+              sessions.map((session) => (
+                <div
+                  key={session.id}
+                  className={`p-3 rounded-lg cursor-pointer transition-colors mb-1 ${
+                    currentSessionId === session.id ? 'bg-primary/10' : 'hover:bg-muted/50'
+                  }`}
+                  onClick={() => setCurrentSessionId(session.id)}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium truncate">{session.title}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {availableModels.find(m => m.id === session.model)?.name || session.model}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {session.messages.length} messages
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs text-muted-foreground hover:text-red-500"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteSession(session.id);
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -886,7 +812,7 @@ export default function ChatPage() {
                 </div>
               ) : (
                 <>
-                  {currentSession.messages.map((msg) => (
+                  {currentSession.messages.filter(msg => msg.role === 'user' || msg.role === 'assistant').map((msg) => (
                     <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-[80%] ${msg.role === 'user' ? 'order-2' : 'order-1'}`}>
                         <div className={`flex items-start space-x-3 ${msg.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
@@ -901,36 +827,26 @@ export default function ChatPage() {
                               <Bot className="w-4 h-4" />
                             )}
                           </div>
-                          <div className={`px-4 py-3 rounded-lg ${
-                            msg.role === 'user'
-                              ? 'bg-primary text-primary-foreground ml-auto'
-                              : 'bg-muted'
-                          }`}>
-                            <div className="prose prose-sm max-w-none dark:prose-invert">
-                              {msg.content.split('\n').map((line, i) => (
-                                <p key={i} className="mb-2 last:mb-0">
-                                  {line.startsWith('## ') ? (
-                                    <strong>{line.substring(3)}</strong>
-                                  ) : line.startsWith('**') && line.endsWith('**') ? (
-                                    <strong>{line.substring(2, -2)}</strong>
-                                  ) : (
-                                    line
-                                  )}
-                                </p>
-                              ))}
-                            </div>
-                            {msg.role === 'assistant' && (
-                              <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/20">
-                                <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                                  <span>{msg.model}</span>
-                                  {msg.tokens && <span>• {msg.tokens} tokens</span>}
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                  {msg.timestamp.toLocaleTimeString()}
-                                </div>
-                              </div>
-                            )}
+                          <div
+                            className={`rounded-lg px-4 py-2 text-sm whitespace-pre-line ${
+                              msg.role === 'user'
+                                ? 'bg-primary text-primary-foreground ml-auto'
+                                : 'bg-muted'
+                            }`}
+                          >
+                            {msg.content}
                           </div>
+                          {msg.role === 'assistant' && (
+                            <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/20">
+                              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                                <span>{msg.model}</span>
+                                {msg.tokens && <span>• {msg.tokens} tokens</span>}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {msg.timestamp.toLocaleTimeString()}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

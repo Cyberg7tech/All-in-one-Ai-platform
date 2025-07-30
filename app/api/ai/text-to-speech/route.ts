@@ -6,7 +6,10 @@ const apiService = AIAPIService.getInstance();
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { text, voice = 'alloy', speed = 1.0, pitch = 1.0 } = body;
+    const { text, voice = 'alloy', voiceId, speed = 1.0, pitch = 1.0 } = body;
+
+    // Handle both 'voice' and 'voiceId' parameter names
+    const selectedVoice = voiceId || voice;
 
     if (!text) {
       return NextResponse.json(
@@ -23,11 +26,25 @@ export async function POST(request: NextRequest) {
     });
 
     try {
-      const result = await apiService.generateSpeechWithElevenLabs(text, voice);
+      const result = await apiService.generateSpeechWithElevenLabs(text, selectedVoice);
+
+      // Check if the result is an error response
+      if (result && typeof result === 'object' && 'error' in result && result.error) {
+        // Return demo response instead of error
+        return NextResponse.json({
+          success: true,
+          audioUrl: '/api/demo-audio',
+          text,
+          voice,
+          note: result.content || 'Demo mode - Text-to-speech temporarily unavailable. Configure ELEVENLABS_API_KEY for real synthesis.',
+          duration: Math.ceil(text.length / 10),
+          provider: 'demo'
+        });
+      }
 
       return NextResponse.json({
         success: true,
-        audio_url: result.audio_url,
+        audioUrl: result.audio_url,
         text: result.text,
         voice: result.voice,
         note: result.note,
@@ -41,7 +58,7 @@ export async function POST(request: NextRequest) {
       // Return demo response instead of error
       return NextResponse.json({
         success: true,
-        audio_url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
+        audioUrl: '/api/demo-audio',
         text,
         voice,
         note: 'Demo mode - Text-to-speech temporarily unavailable. Configure ELEVENLABS_API_KEY for real synthesis.',
@@ -60,4 +77,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

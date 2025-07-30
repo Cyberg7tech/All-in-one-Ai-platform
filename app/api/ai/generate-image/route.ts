@@ -3,67 +3,137 @@ import { AIAPIService } from '@/lib/ai/api-integration';
 
 const apiService = AIAPIService.getInstance();
 
+// Handle CORS preflight requests
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { prompt, model = 'dall-e-3', size = '1024x1024', style = 'vivid', quality = 'standard' } = body;
+    const { prompt, model = 'dall-e-3', size = '1024x1024', style = 'vivid', quality = 'standard' } = await request.json();
 
-    if (!prompt) {
+    console.log('Image Generation API: Request received', {
+      promptLength: prompt?.length,
+      model,
+      size,
+      style,
+      quality
+    });
+
+    if (!prompt || typeof prompt !== 'string') {
+      console.error('Image Generation API: Invalid prompt', { prompt });
       return NextResponse.json(
-        { error: 'Prompt is required' },
+        { 
+          success: false,
+          error: 'Prompt is required and must be a string',
+          images: [],
+          metadata: {
+            model,
+            timestamp: new Date().toISOString()
+          }
+        },
         { status: 400 }
       );
     }
 
-    let imageUrls: string[] = [];
-
-    if (model === 'dall-e-3') {
-      // Map frontend styles to DALL-E accepted values
-      const dalleStyle = ['vivid', 'natural'].includes(style) ? style : 'vivid';
-      
-      imageUrls = await apiService.generateImageWithDALLE(prompt, {
-        size,
-        style: dalleStyle,
-        quality,
-        n: 1
-      });
-    } else if (model === 'stable-diffusion') {
-      // Use Replicate for Stable Diffusion
-      const output = await apiService.callReplicate(
-        'stability-ai/stable-diffusion-xl:7762fd07cf82c948538e41f63f77d685e02b063e37e496e96eefd46c929f9bdc',
-        {
-          prompt,
-          width: parseInt(size.split('x')[0]),
-          height: parseInt(size.split('x')[1]),
-          num_outputs: 1,
-          guidance_scale: 7.5,
-          num_inference_steps: 50
-        }
+    if (prompt.length > 4000) {
+      console.error('Image Generation API: Prompt too long', { length: prompt.length });
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Prompt is too long. Please keep it under 4000 characters.',
+          images: [],
+          metadata: {
+            model,
+            prompt: prompt.substring(0, 100) + '...',
+            timestamp: new Date().toISOString()
+          }
+        },
+        { status: 400 }
       );
-      imageUrls = Array.isArray(output) ? output : [output];
     }
 
-    return NextResponse.json({
-      success: true,
-      images: imageUrls,
-      prompt,
-      model,
-      metadata: {
+    let result;
+
+    if (model === 'dall-e-3' || model === 'dall-e-2') {
+      console.log('Image Generation API: Using DALL-E', { model, prompt: prompt.substring(0, 100) });
+      
+      // Use OpenAI DALL-E for image generation
+      const dalleStyle = (model === 'dall-e-3' && ['vivid', 'natural'].includes(style)) ? style : undefined;
+      
+      result = await apiService.generateImageWithDALLE(prompt, {
+        model,
         size,
-        style,
-        quality,
-        timestamp: new Date().toISOString()
+        style: dalleStyle,
+        quality: model === 'dall-e-3' ? quality : undefined
+      });
+
+      console.log('Image Generation API: DALL-E result', { 
+        success: !result.error, 
+        hasImageUrl: !!result.image_url,
+        error: result.error 
+      });
+
+      // Handle the API response format
+      if (result.error) {
+        return NextResponse.json({
+          success: false,
+          error: result.content,
+          images: [],
+          metadata: {
+            model,
+            prompt,
+            provider: 'openai',
+            timestamp: new Date().toISOString()
+          }
+        }, { status: 500 });
       }
-    });
+
+      // Return successful response
+      return NextResponse.json({
+        success: true,
+        images: [result.image_url],
+        metadata: {
+          model: result.model,
+          prompt: result.prompt,
+          provider: result.provider,
+          timestamp: new Date().toISOString()
+        }
+      });
+
+    } else {
+      // Unsupported model
+      console.error('Image Generation API: Unsupported model', { model });
+      return NextResponse.json({
+        success: false,
+        error: `Image generation model "${model}" is not supported. Please use "dall-e-3" or "dall-e-2".`,
+        images: [],
+        availableModels: ['dall-e-3', 'dall-e-2'],
+        metadata: {
+          model,
+          prompt,
+          timestamp: new Date().toISOString()
+        }
+      }, { status: 400 });
+    }
 
   } catch (error) {
-    console.error('Image generation error:', error);
-    return NextResponse.json(
-      { 
-        error: 'Image generation failed',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    );
+    console.error('Image Generation API: Unexpected error', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to generate image. Please try again.',
+      images: [],
+      metadata: {
+        timestamp: new Date().toISOString(),
+        errorMessage: error instanceof Error ? error.message : 'Unknown error'
+      }
+    }, { status: 500 });
   }
 } 

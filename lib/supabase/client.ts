@@ -76,19 +76,82 @@ export const dbHelpers = {
       .from('chat_sessions')
       .select(`
         *,
+        users!chat_sessions_user_id_fkey (
+          id,
+          name,
+          email
+        ),
         chat_messages (
           id,
           role,
           content,
-          created_at
+          created_at,
+          tokens_used,
+          model_used
         )
       `)
       .eq('user_id', userId)
-      .order('updated_at', { ascending: false });
+      .order('updated_at', { ascending: false })
+      .order('created_at', { foreignTable: 'chat_messages', ascending: true });
 
     if (error) {
       console.error('Error fetching chat sessions:', error);
       return [];
+    }
+
+    // Order messages within each session by creation time
+    const sessionsWithOrderedMessages = data?.map(session => ({
+      ...session,
+      chat_messages: session.chat_messages?.sort((a: any, b: any) => 
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      ) || []
+    })) || [];
+
+    return sessionsWithOrderedMessages;
+  },
+
+  async deleteChatSession(sessionId: string) {
+    const { data, error } = await supabase
+      .from('chat_sessions')
+      .delete()
+      .eq('id', sessionId)
+      .select()
+      .single();
+    if (error) {
+      console.error('Error deleting chat session:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  async updateChatSession(sessionId: string, updates: {
+    title?: string;
+    model_id?: string;
+    agent_id?: string;
+  }) {
+    const { data, error } = await supabase
+      .from('chat_sessions')
+      .update(updates)
+      .eq('id', sessionId)
+      .select()
+      .single();
+    if (error) {
+      console.error('Error updating chat session:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  // AI Models
+  async getAIModels() {
+    const { data, error } = await supabase
+      .from('ai_models')
+      .select('*')
+      .order('provider')
+      .order('name');
+    if (error) {
+      console.error('Error fetching AI models:', error);
+      throw error;
     }
     return data;
   },
@@ -96,8 +159,12 @@ export const dbHelpers = {
   // Chat Messages
   async addChatMessage(messageData: {
     session_id: string;
+    user_id: string;
     role: 'user' | 'assistant' | 'system';
     content: string;
+    tokens_used?: number;
+    model_used?: string;
+    cost?: number;
     metadata?: any;
   }) {
     const { data, error } = await supabase
@@ -385,6 +452,93 @@ export const dbHelpers = {
       return [];
     }
     return data;
+  },
+
+  // Get user activities
+  async getUserActivities(userId: string, limit: number = 10) {
+    const { data, error } = await supabase
+      .from('activities')
+      .select('*')
+      .eq('user_id', userId)
+      .order('timestamp', { ascending: false })
+      .limit(limit);
+    
+    if (error) {
+      console.error('Error fetching activities:', error);
+      return [];
+    }
+    return data;
+  },
+
+  // Add activity
+  async addActivity(userId: string, type: string, name: string, description?: string, icon?: string, metadata?: any) {
+    const { data, error } = await supabase
+      .from('activities')
+      .insert({
+        user_id: userId,
+        type,
+        name,
+        description,
+        icon,
+        metadata: metadata || {}
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error adding activity:', error);
+      return null;
+    }
+    return data;
+  },
+
+  // Get analytics data
+  async getAnalyticsData(userId: string, timeRange: string = '7d') {
+    const { data, error } = await supabase
+      .from('analytics_data')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('recorded_at', new Date(Date.now() - this.getTimeRangeMs(timeRange)).toISOString())
+      .order('recorded_at', { ascending: true });
+    
+    if (error) {
+      console.error('Error fetching analytics:', error);
+      return [];
+    }
+    return data;
+  },
+
+  // Add analytics data point
+  async addAnalyticsData(userId: string, metricName: string, metricValue: number, metricType: string, timePeriod: string, metadata?: any) {
+    const { data, error } = await supabase
+      .from('analytics_data')
+      .insert({
+        user_id: userId,
+        metric_name: metricName,
+        metric_value: metricValue,
+        metric_type: metricType,
+        time_period: timePeriod,
+        metadata: metadata || {}
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error adding analytics data:', error);
+      return null;
+    }
+    return data;
+  },
+
+  // Helper function to convert time range to milliseconds
+  getTimeRangeMs(timeRange: string): number {
+    switch (timeRange) {
+      case '7d': return 7 * 24 * 60 * 60 * 1000;
+      case '30d': return 30 * 24 * 60 * 60 * 1000;
+      case '90d': return 90 * 24 * 60 * 60 * 1000;
+      case '1y': return 365 * 24 * 60 * 60 * 1000;
+      default: return 7 * 24 * 60 * 60 * 1000;
+    }
   },
 
   // Initialize Database Schema (run once)

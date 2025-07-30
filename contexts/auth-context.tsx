@@ -1,15 +1,25 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { DemoUser, DemoAuthService } from '@/lib/auth/demo-auth';
+import { supabase } from '@/lib/supabase/client';
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  name?: string;
+  role?: string;
+  subscription_plan?: string;
+  created_at?: string;
+}
 
 interface AuthContextType {
-  user: DemoUser | null;
+  user: AuthUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  refreshSession: () => void;
+  logout: () => Promise<void>;
+  signup: (email: string, password: string, name: string, plan: string) => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,35 +29,111 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<DemoUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const fetchUserProfile = async (authUser: any) => {
+    // Fetch user profile from users table
+    const { data: profile } = await supabase
+      .from('users')
+      .select('name, role, subscription_plan, created_at')
+      .eq('id', authUser.id)
+      .single();
+    
+    return {
+      id: authUser.id,
+      email: authUser.email || '',
+      name: profile?.name,
+      role: profile?.role,
+      subscription_plan: profile?.subscription_plan,
+      created_at: profile?.created_at,
+    };
+  };
+
+  const refreshUser = async () => {
+    const { data } = await supabase.auth.getUser();
+    if (data?.user) {
+      const userProfile = await fetchUserProfile(data.user);
+      setUser(userProfile);
+    }
+  };
 
   useEffect(() => {
     // Check for existing session on mount
-    const currentUser = DemoAuthService.getCurrentUser();
-    setUser(currentUser);
-    setIsLoading(false);
+    const getSession = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase.auth.getUser();
+      if (data?.user) {
+        const userProfile = await fetchUserProfile(data.user);
+        setUser(userProfile);
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    };
+    getSession();
+    // Listen for auth state changes
+    const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const userProfile = await fetchUserProfile(session.user);
+        setUser(userProfile);
+      } else {
+        setUser(null);
+      }
+    });
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const result = await DemoAuthService.login(email, password);
-      if (result) {
-        setUser(result.user);
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error || !data.user) {
+        throw new Error(error?.message || 'Invalid email or password');
       }
+      const userProfile = await fetchUserProfile(data.user);
+      setUser(userProfile);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    DemoAuthService.logout();
+  const logout = async () => {
+    setIsLoading(true);
+    await supabase.auth.signOut();
     setUser(null);
+    setIsLoading(false);
   };
 
-  const refreshSession = () => {
-    DemoAuthService.refreshSession();
+  const signup = async (email: string, password: string, name: string, plan: string) => {
+    setIsLoading(true);
+    try {
+      // 1. Create user in Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name, subscription_plan: plan },
+        },
+      });
+      if (error || !data.user) {
+        throw new Error(error?.message || 'Sign up failed');
+      }
+      // 2. Optionally insert into users table for profile info
+      await supabase.from('users').upsert({
+        id: data.user.id,
+        email,
+        name,
+        subscription_plan: plan,
+        role: 'user',
+      });
+      const userProfile = await fetchUserProfile(data.user);
+      setUser(userProfile);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const value: AuthContextType = {
@@ -56,7 +142,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAuthenticated: !!user,
     login,
     logout,
-    refreshSession,
+    signup,
+    refreshUser,
   };
 
   return (

@@ -3,6 +3,15 @@ import { AIAPIService } from '@/lib/ai/api-integration';
 
 const apiService = AIAPIService.getInstance();
 
+// Helper function to get fallback model if primary fails
+function getFallbackModel(): { model: string; provider: string } | null {
+  // Only use Together AI models - no OpenAI fallback
+  if (process.env.TOGETHER_API_KEY) {
+    return { model: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo', provider: 'together' };
+  }
+  return null;
+}
+
 export async function POST(request: NextRequest) {
   try {
     console.log('Chat API: Received request');
@@ -12,8 +21,7 @@ export async function POST(request: NextRequest) {
       messages, 
       model = 'gpt-4o-mini', 
       maxTokens = 1000, 
-      temperature = 0.7,
-      stream = false 
+      temperature = 0.7
     } = body;
 
     console.log('Chat API: Request details', {
@@ -23,123 +31,141 @@ export async function POST(request: NextRequest) {
       temperature
     });
 
-    if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json(
-        { error: 'Messages array is required' },
-        { status: 400 }
-      );
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return NextResponse.json({
+        success: false,
+        content: 'No messages provided.',
+        error: 'Invalid request'
+      }, { status: 400 });
     }
 
     let response: any;
+    let usedModel = model;
+    let usedProvider: string = apiService.getProviderForModel(model);
     let cost = 0;
 
-    // Route to appropriate provider based on model or provider field
+    // Try primary model first
     try {
-      if (model.includes('gpt-') || model.includes('o1-')) {
-        // OpenAI models
-        response = await apiService.chatWithOpenAI(messages, model, { maxTokens, temperature });
-      } else if (model.includes('claude-')) {
-        // Anthropic models
-        response = await apiService.chatWithAnthropic(messages, model, { maxTokens, temperature });
-      } else if (model.startsWith('meta-llama/') || model.startsWith('mistralai/') || model.startsWith('deepseek-ai/') || model.startsWith('Qwen/')) {
-        // Together.ai models
-        response = await apiService.chatWithTogether(messages, model, { maxTokens, temperature });
-      } else if (model.includes('gemini') || model.includes('google/')) {
-        // Google models
-        response = await apiService.callGemini(messages, model, { maxTokens, temperature });
-      } else if (model.includes('grok') || model.includes('xai')) {
-        // xAI models  
-        response = await apiService.callXAI(messages, model, { maxTokens, temperature });
-      } else if (model.includes('deepseek')) {
-        // DeepSeek models
-        response = await apiService.callDeepSeek(messages, model, { maxTokens, temperature });
-      } else if (model.includes('kimi')) {
-        // Kimi models
-        response = await apiService.callKimi(messages, model, { maxTokens, temperature });
-      } else {
-        // Default to Together.ai for unknown models (many open-source models)
-        response = await apiService.chatWithTogether(messages, model, { maxTokens, temperature });
+      console.log(`Attempting ${usedProvider} with model ${usedModel}`);
+      
+      response = await apiService.chat(messages, usedModel, {
+        maxTokens,
+        temperature
+      });
+
+      // Check if the response indicates an error
+      if (response && 'error' in response && response.error) {
+        throw new Error(`${usedProvider} error: ${response.content}`);
       }
 
-      // Ensure we have a valid response
-      if (!response || !response.content) {
-        throw new Error('Invalid response from AI service');
+    } catch (primaryError) {
+      console.log('Primary model failed, attempting fallback...', primaryError);
+      
+      // Try fallback model
+      const fallback = getFallbackModel();
+      if (fallback) {
+        usedModel = fallback.model;
+        usedProvider = fallback.provider;
+        
+        console.log(`Trying fallback: ${usedModel} (${usedProvider})`);
+        
+        try {
+          response = await apiService.chat(messages, usedModel, {
+            maxTokens,
+            temperature
+          });
+        } catch (fallbackError) {
+          console.error('Fallback also failed:', fallbackError);
+          response = null;
+        }
       }
-
-      // Calculate approximate cost (simplified)
-      const inputTokens = response.usage?.input_tokens || response.usage?.prompt_tokens || 0;
-      const outputTokens = response.usage?.output_tokens || response.usage?.completion_tokens || 0;
-      
-      // Simplified cost calculation (actual rates vary by provider and model)
-      cost = (inputTokens * 0.0001) + (outputTokens * 0.0002);
-
-      console.log('Chat API: Success', {
-        model: response.model || model,
-        contentLength: response.content?.length || 0,
-        hasError: !!response.error,
-        cost
-      });
-
-      return NextResponse.json({
-        success: true,
-        content: response.content,
-        model: response.model || model,
-        usage: response.usage || {
-          prompt_tokens: inputTokens,
-          completion_tokens: outputTokens,
-          total_tokens: inputTokens + outputTokens
-        },
-        cost,
-        provider: getProviderFromModel(model)
-      });
-
-    } catch (apiError) {
-      console.error('AI API Error:', apiError);
-      
-      // Return a user-friendly error message
-      return NextResponse.json({
-        success: false,
-        content: `I apologize, but I'm experiencing technical difficulties. This could be due to:
-
-• **API Configuration**: Missing or invalid API keys
-• **Network Issues**: Temporary connectivity problems  
-• **Rate Limits**: API usage limits reached
-• **Model Availability**: Selected model may be temporarily unavailable
-
-**Suggested Actions:**
-1. Try a different model from the dropdown
-2. Check your internet connection
-3. Verify API keys are configured correctly
-4. Try again in a few moments
-
-*Error details have been logged for troubleshooting.*`,
-        model,
-        usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
-        cost: 0,
-        error: true,
-        provider: getProviderFromModel(model)
-      });
     }
 
+    // If both primary and fallback failed, return helpful error
+    if (!response || (response && 'error' in response && response.error)) {
+      console.error('All models failed, returning error response');
+      
+      const hasOpenAI = process.env.OPENAI_API_KEY?.startsWith('sk-');
+      const hasTogether = process.env.TOGETHER_API_KEY;
+      
+      if (!hasOpenAI && !hasTogether) {
+        return NextResponse.json({
+          success: false,
+          content: `I apologize, but I'm currently unable to process your request. The AI services appear to be unavailable.
+
+**Troubleshooting Steps:**
+1. **Check API Configuration**: Visit /api/health to check API status
+2. **Verify API Keys**: Ensure your API keys are properly configured
+3. **Try Different Model**: Select a different AI model from the dropdown
+4. **Check Network**: Verify your internet connection
+
+**Available Providers:**
+- OpenAI (GPT models): ${hasOpenAI ? '✅ Configured' : '❌ Not configured'}
+- Together.ai (Open models): ${hasTogether ? '✅ Configured' : '❌ Not configured'}
+
+*Please configure at least one API provider to use the chat feature.*`,
+          model: usedModel,
+          usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+          cost: 0,
+          error: true,
+          provider: usedProvider,
+          troubleshooting: {
+            healthCheck: '/api/health',
+            documentation: 'Check README.md for setup instructions'
+          }
+        });
+      }
+    }
+
+    // Ensure we have a valid response
+    if (!response || !response.content) {
+      throw new Error('Invalid response from AI service');
+    }
+
+    // Calculate approximate cost (simplified)
+    const inputTokens = response.usage?.input_tokens || response.usage?.prompt_tokens || 0;
+    const outputTokens = response.usage?.output_tokens || response.usage?.completion_tokens || 0;
+    
+    // Simplified cost calculation (actual rates vary by provider and model)
+    cost = (inputTokens * 0.0001) + (outputTokens * 0.0002);
+
+    console.log('Chat API: Success', {
+      model: usedModel,
+      provider: usedProvider,
+      contentLength: response.content?.length || 0,
+      tokens: inputTokens + outputTokens,
+      cost
+    });
+
+    return NextResponse.json({
+      success: true,
+      content: response.content,
+      model: usedModel,
+      usage: response.usage || {
+        prompt_tokens: inputTokens,
+        completion_tokens: outputTokens,
+        total_tokens: inputTokens + outputTokens
+      },
+      cost,
+      provider: usedProvider,
+      metadata: {
+        originalModel: model,
+        fallbackUsed: usedModel !== model,
+        timestamp: new Date().toISOString()
+      }
+    });
+
   } catch (error) {
-    console.error('Chat API: General error:', error);
+    console.error('Chat API Error:', error);
     
     return NextResponse.json({
       success: false,
-      message: 'Internal server error',
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
+      content: 'I apologize, but I encountered an unexpected error. Please try again or contact support if the issue persists.',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      model: 'unknown',
+      usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+      cost: 0,
+      provider: 'error'
     }, { status: 500 });
   }
-}
-
-// Helper function to determine provider from model name
-function getProviderFromModel(model: string): string {
-  if (model.includes('gpt-') || model.includes('o1-')) return 'openai';
-  if (model.includes('claude-')) return 'anthropic';
-  if (model.includes('gemini') || model.includes('google/')) return 'google';
-  if (model.includes('grok') || model.includes('xai')) return 'xai';
-  if (model.includes('deepseek')) return 'deepseek';
-  if (model.includes('kimi')) return 'kimi';
-  if (model.startsWith('meta-llama/') || model.startsWith('mistralai/') || model.startsWith('Qwen/')) return 'together';
-  return 'together'; // Default to Together.ai for open-source models
 } 
