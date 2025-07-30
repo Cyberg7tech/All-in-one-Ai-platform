@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
-import { Upload, Download, Loader2, Camera, Wand2, Image, Palette, Sparkles } from 'lucide-react'
+import { Upload, Download, Loader2, Camera, Wand2, Image as ImageIcon, Palette, Sparkles } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 
 interface PhotoEdit {
@@ -183,9 +184,11 @@ export default function PhotoStudioPage() {
               <div className="space-y-4">
                 {previewUrl ? (
                   <div className="relative">
-                    <img
+                    <Image
                       src={previewUrl}
                       alt="Uploaded photo"
+                      width={800}
+                      height={384}
                       className="w-full h-96 object-contain rounded-lg bg-muted/50"
                     />
                     <Button
@@ -511,17 +514,21 @@ export default function PhotoStudioPage() {
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <p className="text-xs text-muted-foreground mb-1">Original</p>
-                          <img
+                          <Image
                             src={edit.originalImageUrl}
                             alt="Original"
+                            width={200}
+                            height={200}
                             className="w-full aspect-square object-cover rounded"
                           />
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground mb-1">Enhanced</p>
-                          <img
+                          <Image
                             src={edit.editedImageUrl || '/api/placeholder/200/200'}
                             alt="Enhanced"
+                            width={200}
+                            height={200}
                             className="w-full aspect-square object-cover rounded"
                           />
                         </div>
@@ -538,7 +545,7 @@ export default function PhotoStudioPage() {
                           Download
                         </Button>
                         <Button variant="outline" size="sm" className="flex-1">
-                          <Image className="w-4 h-4 mr-1" />
+                          <ImageIcon className="w-4 h-4 mr-1" />
                           Save
                         </Button>
                       </div>

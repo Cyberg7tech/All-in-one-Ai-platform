@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { Upload, Download, Loader2, PaintBucket, Wand2, Image, Eye, Palette } from 'lucide-react'
+import { Upload, Download, Loader2, PaintBucket, Wand2, Image as ImageIcon, Eye, Palette } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 
 interface DesignProject {
@@ -265,9 +266,11 @@ export default function InteriorDesignPage() {
               <div className="space-y-4">
                 {previewUrl ? (
                   <div className="relative">
-                    <img
+                    <Image
                       src={previewUrl}
                       alt="Uploaded room"
+                      width={800}
+                      height={256}
                       className="w-full h-64 object-cover rounded-lg"
                     />
                     <Button
@@ -445,9 +448,11 @@ export default function InteriorDesignPage() {
                               <Eye className="w-4 h-4" />
                               Current Room
                             </h4>
-                            <img
+                            <Image
                               src={project.originalImageUrl}
                               alt="Original room"
+                              width={400}
+                              height={192}
                               className="w-full h-48 object-cover rounded-lg"
                             />
                           </div>
@@ -457,9 +462,11 @@ export default function InteriorDesignPage() {
                             <Wand2 className="w-4 h-4" />
                             AI Design Suggestion
                           </h4>
-                          <img
+                          <Image
                             src={project.designedImageUrl || '/api/placeholder/400/300'}
                             alt="AI designed room"
+                            width={400}
+                            height={192}
                             className="w-full h-48 object-cover rounded-lg"
                           />
                         </div>
@@ -506,7 +513,7 @@ export default function InteriorDesignPage() {
                           Download Design
                         </Button>
                         <Button variant="outline" size="sm">
-                          <Image className="w-4 h-4 mr-2" />
+                          <ImageIcon className="w-4 h-4 mr-2" />
                           Save to Gallery
                         </Button>
                       </div>

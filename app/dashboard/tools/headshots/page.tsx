@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -161,9 +162,11 @@ export default function HeadshotsPage() {
                 <div className="mt-4">
                   <Label>Preview</Label>
                   <div className="mt-2 border rounded-lg p-4 bg-gray-50">
-                    <img 
+                    <Image 
                       src={imagePreview} 
                       alt="Preview" 
+                      width={128}
+                      height={128}
                       className="w-32 h-32 object-cover rounded-lg mx-auto"
                     />
                   </div>
@@ -285,9 +288,11 @@ export default function HeadshotsPage() {
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
                           <p className="text-sm font-medium mb-2">Original</p>
-                          <img 
+                          <Image 
                             src={headshot.original_image} 
                             alt="Original" 
+                            width={400}
+                            height={128}
                             className="w-full h-32 object-cover rounded border"
                           />
                         </div>
@@ -298,9 +303,11 @@ export default function HeadshotsPage() {
                               <Loader2 className="h-6 w-6 animate-spin" />
                             </div>
                           ) : (
-                            <img 
+                            <Image 
                               src={headshot.headshot_url} 
                               alt="Headshot" 
+                              width={400}
+                              height={128}
                               className="w-full h-32 object-cover rounded border"
                             />
                           )}

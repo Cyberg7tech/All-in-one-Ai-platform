@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Send, Plus, Bot, User, Settings, Image, FileText, Mic, Camera, Code, Brain, Sparkles, ChevronDown, Upload, Square } from 'lucide-react'
+import { Send, Plus, Bot, User, Settings, Image as ImageIcon, FileText, Mic, Camera, Code, Brain, Sparkles, ChevronDown, Upload, Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -896,7 +896,7 @@ export default function ChatPage() {
                           onClick={() => imageInputRef.current?.click()}
                           title="Upload Image"
                         >
-                          <Image className="w-4 h-4" />
+                          <ImageIcon className="w-4 h-4" />
                         </Button>
                         
                         {/* File Upload Button */}
