@@ -103,7 +103,13 @@
     "eslintcache",
     "dotenv",
     "nuxt",
-    "vuepress"
+    "vuepress",
+    "Wayback",
+    "Scrapy",
+    "Apify",
+    "Mailgun",
+    "sendgrid",
+    "MJML"
   ],
   "flagWords": [],
   "overrides": [
