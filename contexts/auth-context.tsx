@@ -69,14 +69,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       sessionCheckAttempted = true;
       setIsLoading(true);
       
-      // Add a timeout to prevent infinite loading (10 seconds for immediate feedback)
+      // Add a timeout to prevent infinite loading (60 seconds - much more reasonable)
       timeoutId = setTimeout(() => {
         if (mounted) {
-          console.warn('Auth session check timed out after 10 seconds, setting user to null');
+          console.warn('Auth session check timed out after 60 seconds, setting user to null');
           setUser(null);
           setIsLoading(false);
         }
-      }, 10000); // 10 second timeout
+      }, 60000); // 60 second timeout
       
       try {
         const { data, error } = await supabase.auth.getUser();

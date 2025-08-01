@@ -4,6 +4,7 @@ import ProtectedRoute from '@/components/auth/protected-route';
 import { TopNavigation } from '@/components/top-navigation';
 import { SideNavigation } from '@/components/side-navigation';
 import { Suspense, useEffect, useState } from 'react';
+import { forceAuthRefresh } from '@/lib/utils/auth-cleanup';
 
 // Force dynamic rendering to prevent static generation issues
 export const dynamic = 'force-dynamic';
@@ -25,13 +26,13 @@ function TimeoutLoading() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowTimeout(true);
-    }, 2000); // Show timeout message after 2 seconds
+    }, 5000); // Show timeout message after 5 seconds (give more time)
     
-    // Force redirect after 8 seconds to prevent infinite loading
+    // Only force redirect after 30 seconds, not 8 seconds
     const forceTimer = setTimeout(() => {
       setForceRedirect(true);
-      window.location.href = '/login';
-    }, 8000);
+      // Don't force redirect to login, just show error
+    }, 30000);
     
     return () => {
       clearTimeout(timer);
@@ -43,7 +44,13 @@ function TimeoutLoading() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <p className="text-muted-foreground">Redirecting to login...</p>
+          <p className="text-red-500 mb-4">Loading timeout - Please try again</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90"
+          >
+            Refresh Page
+          </button>
         </div>
       </div>
     );
@@ -58,14 +65,10 @@ function TimeoutLoading() {
           <p className="text-sm text-muted-foreground mb-4">Authentication issue detected. Clearing cache...</p>
           <div className="space-x-2">
             <button 
-              onClick={() => {
-                localStorage.clear();
-                sessionStorage.clear();
-                window.location.reload();
-              }} 
+              onClick={forceAuthRefresh}
               className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90"
             >
-              Clear Cache & Reload
+              Clear Auth & Reload
             </button>
             <button 
               onClick={() => window.location.href = '/login'} 

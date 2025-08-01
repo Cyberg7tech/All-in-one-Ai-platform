@@ -26,11 +26,11 @@ export const supabase = (() => {
     return _supabaseClient;
   }
   
-  // Create new instance with completely unique storage key
+  // Create new instance with static storage key to persist sessions
   _supabaseClient = createClient(supabaseUrl, supabaseKey, {
     auth: {
       persistSession: true,
-      storageKey: `oneai-auth-${Math.random().toString(36).substring(7)}`, // Truly unique key
+      storageKey: 'oneai-auth-stable', // Static key to persist across refreshes
       autoRefreshToken: true,
       detectSessionInUrl: false, // Disable to prevent conflicts
       flowType: 'pkce'
