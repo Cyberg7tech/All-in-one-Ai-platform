@@ -38,37 +38,6 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <meta name="theme-color" content="#3B82F6" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Clear problematic auth storage on first load
-              (function() {
-                try {
-                  const storageKeys = ['nuclear-oneai-auth', 'oneai-auth-permanent', 'oneai-auth'];
-                  storageKeys.forEach(key => {
-                    localStorage.removeItem(key);
-                    sessionStorage.removeItem(key);
-                  });
-                  
-                  // Clear any other Supabase-related storage
-                  Object.keys(localStorage).forEach(key => {
-                    if (key.includes('supabase') || key.includes('oneai')) {
-                      localStorage.removeItem(key);
-                    }
-                  });
-                  
-                  Object.keys(sessionStorage).forEach(key => {
-                    if (key.includes('supabase') || key.includes('oneai')) {
-                      sessionStorage.removeItem(key);
-                    }
-                  });
-                } catch (e) {
-                  console.warn('Error clearing storage:', e);
-                }
-              })();
-            `,
-          }}
-        />
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider

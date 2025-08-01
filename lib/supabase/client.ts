@@ -14,14 +14,15 @@ export const supabase = (() => {
 
   console.log('Supabase client initialized');
   
-  // Simple, consistent configuration for all browsers
+  // Proper configuration for session persistence
   const clientConfig = {
     auth: {
       persistSession: true,
-      storageKey: 'oneai-auth',
+      storageKey: 'sb-ttnkomdxbkmfmkaycjao-auth-token', // Use the default Supabase key format
       autoRefreshToken: true,
-      detectSessionInUrl: false,
-      flowType: 'pkce' as const
+      detectSessionInUrl: true,
+      flowType: 'pkce' as const,
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined
     },
     realtime: {
       params: {

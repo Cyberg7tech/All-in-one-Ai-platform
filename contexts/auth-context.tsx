@@ -52,9 +52,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const refreshUser = async () => {
-    const { data } = await supabase.auth.getUser();
-    if (data?.user) {
-      const userProfile = await fetchUserProfile(data.user);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      const userProfile = await fetchUserProfile(session.user);
       setUser(userProfile);
     }
   };
@@ -65,11 +65,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Check for existing session on mount
     const getSession = async () => {
       try {
-        const { data, error } = await supabase.auth.getUser();
+        // Use getSession for better session recovery
+        const { data: { session }, error } = await supabase.auth.getSession();
         
         if (mounted) {
-          if (data?.user) {
-            const userProfile = await fetchUserProfile(data.user);
+          if (session?.user) {
+            const userProfile = await fetchUserProfile(session.user);
             setUser(userProfile);
           } else {
             setUser(null);
