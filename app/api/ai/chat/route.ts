@@ -16,6 +16,13 @@ export async function POST(request: NextRequest) {
   try {
     console.log('Chat API: Received request');
     
+    // Debug environment variables
+    console.log('Environment check:', {
+      hasTogetherKey: !!process.env.TOGETHER_API_KEY,
+      togetherKeyLength: process.env.TOGETHER_API_KEY?.length || 0,
+      nodeEnv: process.env.NODE_ENV
+    });
+    
     const body = await request.json();
     const { 
       messages, 

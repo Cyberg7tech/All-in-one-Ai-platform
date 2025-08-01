@@ -10,35 +10,47 @@ declare global {
   var __supabaseAdminInstance: ReturnType<typeof createClient> | undefined
 }
 
-// Client for frontend operations with improved singleton
+// Create a more robust singleton that prevents multiple instances
+let _supabaseClient: ReturnType<typeof createClient> | null = null;
+
+// Client for frontend operations with bulletproof singleton
 export const supabase = (() => {
-  // Check if instance already exists
-  if (globalThis.__supabaseInstance) {
-    return globalThis.__supabaseInstance
+  // Return existing instance if available
+  if (_supabaseClient) {
+    return _supabaseClient;
   }
   
-  // Create new instance with unique storage key to prevent conflicts
-  globalThis.__supabaseInstance = createClient(supabaseUrl, supabaseKey, {
+  // Check global instance (for hot reloads)
+  if (globalThis.__supabaseInstance) {
+    _supabaseClient = globalThis.__supabaseInstance;
+    return _supabaseClient;
+  }
+  
+  // Create new instance with completely unique storage key
+  _supabaseClient = createClient(supabaseUrl, supabaseKey, {
     auth: {
       persistSession: true,
-      storageKey: 'oneai-auth-v2', // Unique key to prevent conflicts
+      storageKey: `oneai-auth-${Math.random().toString(36).substring(7)}`, // Truly unique key
       autoRefreshToken: true,
-      detectSessionInUrl: true,
+      detectSessionInUrl: false, // Disable to prevent conflicts
       flowType: 'pkce'
     },
     realtime: {
       params: {
-        eventsPerSecond: 10
+        eventsPerSecond: 5 // Reduce to prevent overload
       }
     }
   })
   
+  // Store in global for hot reload protection
+  globalThis.__supabaseInstance = _supabaseClient;
+  
   // Log only once in development
   if (process.env.NODE_ENV === 'development') {
-    console.log('Supabase client initialized')
+    console.log('Supabase client initialized with unique key');
   }
   
-  return globalThis.__supabaseInstance
+  return _supabaseClient;
 })()
 
 // Admin client for backend operations

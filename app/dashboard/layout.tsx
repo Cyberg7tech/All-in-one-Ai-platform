@@ -20,14 +20,34 @@ function DashboardLoading() {
 // Timeout loading component to prevent infinite loading
 function TimeoutLoading() {
   const [showTimeout, setShowTimeout] = useState(false);
+  const [forceRedirect, setForceRedirect] = useState(false);
   
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowTimeout(true);
-    }, 3000); // Show timeout message after 3 seconds (reduced from 5)
+    }, 2000); // Show timeout message after 2 seconds
     
-    return () => clearTimeout(timer);
+    // Force redirect after 8 seconds to prevent infinite loading
+    const forceTimer = setTimeout(() => {
+      setForceRedirect(true);
+      window.location.href = '/login';
+    }, 8000);
+    
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(forceTimer);
+    };
   }, []);
+  
+  if (forceRedirect) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <p className="text-muted-foreground">Redirecting to login...</p>
+        </div>
+      </div>
+    );
+  }
   
   if (showTimeout) {
     return (
@@ -35,13 +55,17 @@ function TimeoutLoading() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground mb-2">Loading is taking longer than expected...</p>
-          <p className="text-sm text-muted-foreground mb-4">This might be due to authentication or network issues.</p>
+          <p className="text-sm text-muted-foreground mb-4">Authentication issue detected. Clearing cache...</p>
           <div className="space-x-2">
             <button 
-              onClick={() => window.location.reload()} 
+              onClick={() => {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.reload();
+              }} 
               className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90"
             >
-              Refresh Page
+              Clear Cache & Reload
             </button>
             <button 
               onClick={() => window.location.href = '/login'} 
