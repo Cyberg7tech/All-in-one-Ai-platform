@@ -1,59 +1,52 @@
-// Utility to clean up problematic auth state without losing everything
+// Simple auth cleanup utility to clear problematic storage
 
-export function cleanupAuthState() {
+export function clearAuthStorage() {
   if (typeof window === 'undefined') return;
-  
+
   try {
-    // Remove all possible Supabase auth keys that might be causing conflicts
-    const keysToRemove = [
-      'sb-ttnkomdxbkmfmkaycjao-auth-token',
+    // Clear all possible storage keys that might be causing conflicts
+    const storageKeys = [
+      'nuclear-oneai-auth',
+      'oneai-auth-permanent', 
+      'oneai-auth',
       'supabase.auth.token',
-      'oneai-auth-v2',
-      'oneai-auth-stable',
-      'oneai-auth-ultra-stable',
-      // Legacy keys
-      'supabase.session',
-      'supabase.auth.session',
-      // GoTrue client keys
-      'gotrue.session',
-      'gotrue.user'
+      'supabase.auth.refreshToken'
     ];
-    
-    keysToRemove.forEach(key => {
+
+    storageKeys.forEach(key => {
       localStorage.removeItem(key);
       sessionStorage.removeItem(key);
     });
-    
-    // Also clear any remaining Supabase client instances
-    if ((window as any).ONEAI_SUPABASE_CLIENT_INSTANCE) {
-      delete (window as any).ONEAI_SUPABASE_CLIENT_INSTANCE;
-    }
-    
-    // Clear global instances  
-    if ((globalThis as any).__oneai_supabase) {
-      delete (globalThis as any).__oneai_supabase;
-    }
-    
-    console.log('Auth state cleanup completed - removed all potential conflicts');
+
+    // Clear any other Supabase-related storage
+    Object.keys(localStorage).forEach(key => {
+      if (key.includes('supabase') || key.includes('oneai')) {
+        localStorage.removeItem(key);
+      }
+    });
+
+    Object.keys(sessionStorage).forEach(key => {
+      if (key.includes('supabase') || key.includes('oneai')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+
+    console.log('Auth storage cleared successfully');
   } catch (error) {
-    console.error('Error cleaning auth state:', error);
+    console.warn('Error clearing auth storage:', error);
   }
 }
 
-export function forceAuthRefresh() {
-  if (typeof window === 'undefined') return;
-  
-  try {
-    // Clean problematic auth state
-    cleanupAuthState();
-    
-    // Wait a moment then reload
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
-  } catch (error) {
-    console.error('Error forcing auth refresh:', error);
-    // Fallback to normal reload
-    window.location.reload();
+// Auto-clear on page load if there are issues
+if (typeof window !== 'undefined') {
+  // Clear storage if the page has been reloaded multiple times (indicating issues)
+  const reloadCount = sessionStorage.getItem('reloadCount') || '0';
+  const count = parseInt(reloadCount) + 1;
+  sessionStorage.setItem('reloadCount', count.toString());
+
+  if (count > 2) {
+    console.log('Multiple reloads detected, clearing auth storage');
+    clearAuthStorage();
+    sessionStorage.setItem('reloadCount', '0');
   }
 }
