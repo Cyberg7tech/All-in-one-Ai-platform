@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { AuthChangeEvent } from '@supabase/supabase-js';
 
 export interface AuthUser {
   id: string;
@@ -88,7 +89,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     getSession();
     
     // Listen for auth state changes
-    const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session) => {
       if (!mounted) return;
       
       if (session?.user) {
