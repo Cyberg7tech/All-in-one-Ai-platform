@@ -4,34 +4,49 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ttnkomdxbkm
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTcwMTgsImV4cCI6MjA2ODczMzAxOH0.ZpedifMgWW0XZzqq-CCkdHeiQb2HnzLZ8wXN03cjh7g'
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzE1NzAxOCwiZXhwIjoyMDY4NzMzMDE4fQ.UOE8fFmFYqnCHKiA-MlfHEfxDxViasspD64trjmsMLI'
 
-// Simple singleton pattern to prevent multiple instances
-let supabaseClient: any = null;
+// Global singleton to prevent multiple instances across all contexts
+declare global {
+  var __supabase_client: any;
+}
 
 export const supabase = (() => {
-  if (supabaseClient) {
-    return supabaseClient;
+  // Check for existing global instance first
+  if (typeof globalThis !== 'undefined' && globalThis.__supabase_client) {
+    return globalThis.__supabase_client;
   }
 
-  console.log('Supabase client initialized');
+  console.log('Creating new Supabase client');
   
-  // Simple, consistent configuration for all browsers
+  // Browser-optimized configuration that works across all browsers
   const clientConfig = {
     auth: {
       persistSession: true,
-      storageKey: 'oneai-auth',
+      storageKey: 'sb-ttnkomdxbkmfmkaycjao-auth-token',
       autoRefreshToken: true,
       detectSessionInUrl: false,
-      flowType: 'pkce' as const
+      flowType: 'pkce' as const,
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined
     },
     realtime: {
       params: {
-        eventsPerSecond: 5
+        eventsPerSecond: 2 // Conservative setting for stability
+      }
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'oneai-platform@1.0.0'
       }
     }
   };
 
-  supabaseClient = createClient(supabaseUrl, supabaseKey, clientConfig);
-  return supabaseClient;
+  const client = createClient(supabaseUrl, supabaseKey, clientConfig);
+  
+  // Store globally to prevent multiple instances
+  if (typeof globalThis !== 'undefined') {
+    globalThis.__supabase_client = client;
+  }
+  
+  return client;
 })()
 
 // Admin client for backend operations  

@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
+import BrowserDebugger from '@/lib/utils/browser-debugger';
 
 export interface AuthUser {
   id: string;
@@ -32,6 +33,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const debug = BrowserDebugger.getInstance();
 
   const fetchUserProfile = async (authUser: any): Promise<AuthUser> => {
     // Fetch user profile from users table
@@ -61,50 +63,90 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     let mounted = true;
+    let authSubscription: any = null;
     
-    // Check for existing session on mount
-    const getSession = async () => {
+    // Initialize auth state
+    const initializeAuth = async () => {
       try {
-        const { data, error } = await supabase.auth.getUser();
+        // First, try to get the current session
+        const { data: { session }, error } = await supabase.auth.getSession();
         
         if (mounted) {
-          if (data?.user) {
-            const userProfile = await fetchUserProfile(data.user);
-            setUser(userProfile);
+          if (session?.user) {
+            debug.log('Found existing session', 'success');
+            try {
+              const userProfile = await fetchUserProfile(session.user);
+              setUser(userProfile);
+              debug.log('User profile loaded successfully', 'success');
+            } catch (profileError) {
+              debug.log('Error fetching user profile, using basic info', 'warn');
+              // If profile fetch fails, still set basic user info
+              setUser({
+                id: session.user.id,
+                email: session.user.email || '',
+                name: session.user.user_metadata?.name || undefined
+              });
+            }
           } else {
+            debug.log('No existing session found', 'info');
             setUser(null);
           }
           setIsLoading(false);
+          debug.log('Auth initialization complete', 'success');
         }
       } catch (error) {
-        console.error('Error getting session:', error);
+        console.error('Error initializing auth:', error);
         if (mounted) {
           setUser(null);
           setIsLoading(false);
         }
       }
     };
-    
-    // Get initial session
-    getSession();
-    
-    // Listen for auth state changes
-    const { data: listener } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
-      if (!mounted) return;
-      
-      if (session?.user) {
-        const userProfile = await fetchUserProfile(session.user);
-        setUser(userProfile);
-        setIsLoading(false);
-      } else {
-        setUser(null);
-        setIsLoading(false);
-      }
-    });
+
+    // Set up auth state listener
+    const setupAuthListener = () => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event: AuthChangeEvent, session: Session | null) => {
+          if (!mounted) return;
+          
+          debug.log(`Auth state changed: ${event} (session: ${!!session})`, 'info');
+          
+          if (event === 'SIGNED_OUT' || !session) {
+            debug.log('User signed out', 'info');
+            setUser(null);
+            setIsLoading(false);
+          } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            if (session?.user) {
+              debug.log(`Processing ${event} event`, 'info');
+              try {
+                const userProfile = await fetchUserProfile(session.user);
+                setUser(userProfile);
+                debug.log('User profile updated from auth change', 'success');
+              } catch (profileError) {
+                debug.log('Error fetching user profile on auth change', 'warn');
+                setUser({
+                  id: session.user.id,
+                  email: session.user.email || '',
+                  name: session.user.user_metadata?.name || undefined
+                });
+              }
+            }
+            setIsLoading(false);
+          }
+        }
+      );
+      authSubscription = subscription;
+    };
+
+    // Initialize everything
+    initializeAuth();
+    setupAuthListener();
     
     return () => {
       mounted = false;
-      listener?.subscription.unsubscribe();
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+      }
     };
   }, []);
 

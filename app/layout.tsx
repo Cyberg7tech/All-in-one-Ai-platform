@@ -41,31 +41,26 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // Clear problematic auth storage on first load
+              // Only clear problematic legacy storage keys, preserve current auth
               (function() {
                 try {
-                  const storageKeys = ['nuclear-oneai-auth', 'oneai-auth-permanent', 'oneai-auth'];
-                  storageKeys.forEach(key => {
+                  // Only clear specific problematic keys, not current ones
+                  const problematicKeys = ['nuclear-oneai-auth', 'oneai-auth-permanent'];
+                  problematicKeys.forEach(key => {
                     localStorage.removeItem(key);
                     sessionStorage.removeItem(key);
                   });
                   
-                  // Clear any other Supabase-related storage
-                  Object.keys(localStorage).forEach(key => {
-                    if (key.includes('supabase') || key.includes('oneai')) {
-                      localStorage.removeItem(key);
-                    }
-                  });
-                  
-                  Object.keys(sessionStorage).forEach(key => {
-                    if (key.includes('supabase') || key.includes('oneai')) {
-                      sessionStorage.removeItem(key);
-                    }
-                  });
+                  console.log('Legacy storage cleanup completed');
                 } catch (e) {
-                  console.warn('Error clearing storage:', e);
+                  console.warn('Error clearing legacy storage:', e);
                 }
               })();
+              
+              // Initialize browser debugger for development
+              if (typeof window !== 'undefined') {
+                console.log('%c🔧 OneAI Loading Debugger Active', 'color: #00aa00; font-size: 12px;');
+              }
             `,
           }}
         />

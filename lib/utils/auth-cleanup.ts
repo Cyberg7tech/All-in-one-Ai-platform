@@ -1,52 +1,55 @@
-// Simple auth cleanup utility to clear problematic storage
+// Auth cleanup utility to clear only problematic storage
 
-export function clearAuthStorage() {
+export function clearProblematicStorage() {
   if (typeof window === 'undefined') return;
 
   try {
-    // Clear all possible storage keys that might be causing conflicts
-    const storageKeys = [
+    // Only clear specific problematic keys that cause conflicts
+    const problematicKeys = [
       'nuclear-oneai-auth',
-      'oneai-auth-permanent', 
-      'oneai-auth',
-      'supabase.auth.token',
-      'supabase.auth.refreshToken'
+      'oneai-auth-permanent'
     ];
 
-    storageKeys.forEach(key => {
+    problematicKeys.forEach(key => {
       localStorage.removeItem(key);
       sessionStorage.removeItem(key);
     });
 
-    // Clear any other Supabase-related storage
-    Object.keys(localStorage).forEach(key => {
-      if (key.includes('supabase') || key.includes('oneai')) {
-        localStorage.removeItem(key);
-      }
-    });
-
-    Object.keys(sessionStorage).forEach(key => {
-      if (key.includes('supabase') || key.includes('oneai')) {
-        sessionStorage.removeItem(key);
-      }
-    });
-
-    console.log('Auth storage cleared successfully');
+    console.log('Problematic storage keys cleared');
   } catch (error) {
-    console.warn('Error clearing auth storage:', error);
+    console.warn('Error clearing problematic storage:', error);
   }
 }
 
-// Auto-clear on page load if there are issues
-if (typeof window !== 'undefined') {
-  // Clear storage if the page has been reloaded multiple times (indicating issues)
-  const reloadCount = sessionStorage.getItem('reloadCount') || '0';
-  const count = parseInt(reloadCount) + 1;
-  sessionStorage.setItem('reloadCount', count.toString());
+export function emergencyAuthCleanup() {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    // Emergency cleanup - only use when auth is completely broken
+    const allStorageKeys = Object.keys(localStorage);
+    
+    allStorageKeys.forEach(key => {
+      if (key.includes('nuclear') || key.includes('oneai-auth-permanent')) {
+        localStorage.removeItem(key);
+        console.log(`Removed problematic key: ${key}`);
+      }
+    });
 
-  if (count > 2) {
-    console.log('Multiple reloads detected, clearing auth storage');
-    clearAuthStorage();
-    sessionStorage.setItem('reloadCount', '0');
+    console.log('Emergency auth cleanup completed');
+  } catch (error) {
+    console.warn('Error in emergency cleanup:', error);
+  }
+}
+
+// Only run emergency cleanup if there are clear signs of issues
+if (typeof window !== 'undefined') {
+  // Check for known problematic keys
+  const hasProblematicKeys = Object.keys(localStorage).some(key => 
+    key.includes('nuclear-oneai') || key.includes('oneai-auth-permanent')
+  );
+
+  if (hasProblematicKeys) {
+    console.log('Detected problematic storage keys, cleaning up...');
+    clearProblematicStorage();
   }
 }

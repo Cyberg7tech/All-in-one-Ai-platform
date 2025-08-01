@@ -21,14 +21,31 @@ const nextConfig = {
         tls: false,
         crypto: false,
       };
+      
+      // Optimize for browser compatibility
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            supabase: {
+              test: /[\\/]node_modules[\\/]@supabase[\\/]/,
+              name: 'supabase',
+              chunks: 'all',
+              priority: 10,
+            },
+          },
+        },
+      };
     }
     return config;
   },
-  // Add performance optimizations
+  // Performance optimizations
   swcMinify: true,
   compress: true,
   poweredByHeader: false,
-  // Add headers for better caching
+  
+  // Headers for security and performance
   async headers() {
     return [
       {
@@ -46,10 +63,24 @@ const nextConfig = {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
           },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
         ],
       },
     ];
   },
+  
   env: {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
