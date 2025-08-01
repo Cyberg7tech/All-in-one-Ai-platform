@@ -51,7 +51,7 @@ export function SideNavigation() {
   const { logout } = useAuth()
 
   return (
-    <div className="w-64 bg-card border-r border-border flex flex-col md:block hidden">
+    <div className="w-64 bg-card border-r border-border hidden md:flex flex-col">
       {/* Navigation Items */}
       <nav className="flex-1 overflow-y-auto py-4">
         <div className="px-3 space-y-1">

@@ -37,16 +37,6 @@ export function clearAuthStorage() {
   }
 }
 
-// Auto-clear on page load if there are issues
-if (typeof window !== 'undefined') {
-  // Clear storage if the page has been reloaded multiple times (indicating issues)
-  const reloadCount = sessionStorage.getItem('reloadCount') || '0';
-  const count = parseInt(reloadCount) + 1;
-  sessionStorage.setItem('reloadCount', count.toString());
-
-  if (count > 2) {
-    console.log('Multiple reloads detected, clearing auth storage');
-    clearAuthStorage();
-    sessionStorage.setItem('reloadCount', '0');
-  }
-}
+// Export the function for manual use only - do not auto-run
+// This function should only be called when explicitly needed,
+// not automatically on page loads

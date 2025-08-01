@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['@tensorflow/tfjs-node']
-  },
+  serverExternalPackages: ['@tensorflow/tfjs-node'],
   images: {
     domains: ['images.unsplash.com', 'via.placeholder.com', 'api.dicebear.com'],
     remotePatterns: [
@@ -25,7 +23,6 @@ const nextConfig = {
     return config;
   },
   // Add performance optimizations
-  swcMinify: true,
   compress: true,
   poweredByHeader: false,
   // Add headers for better caching
