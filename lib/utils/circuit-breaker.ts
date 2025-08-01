@@ -4,8 +4,8 @@ class CircuitBreaker {
   private failures: number = 0;
   private lastFailureTime: number = 0;
   private state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
-  private readonly failureThreshold: number = 3;
-  private readonly recoveryTimeout: number = 30000; // 30 seconds
+  private readonly failureThreshold: number = 10; // Higher threshold
+  private readonly recoveryTimeout: number = 5000; // Faster recovery
 
   async execute<T>(operation: () => Promise<T>, fallback?: () => T): Promise<T> {
     if (this.state === 'OPEN') {
@@ -66,7 +66,7 @@ export const apiCircuitBreaker = new CircuitBreaker();
 // Loading state manager to prevent infinite loading
 class LoadingStateManager {
   private loadingStates: Map<string, { startTime: number; timeout: NodeJS.Timeout }> = new Map();
-  private readonly defaultTimeout = 15000; // 15 seconds
+  private readonly defaultTimeout = 300000; // 5 minutes - very generous
 
   startLoading(key: string, maxDuration: number = this.defaultTimeout) {
     // Clear any existing timeout for this key

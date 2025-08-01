@@ -30,18 +30,18 @@ export const supabase = (() => {
     }
   }
 
-  // Create new instance with minimal config to prevent conflicts
+  // Create new instance with PERSISTENT session storage
   _globalSupabaseClient = createClient(supabaseUrl, supabaseKey, {
     auth: {
       persistSession: true,
-      storageKey: `oneai-auth-${Date.now()}`, // Unique key to prevent conflicts
+      storageKey: 'oneai-auth-permanent', // PERMANENT key for true persistence
       autoRefreshToken: true,
       detectSessionInUrl: false,
       flowType: 'pkce'
     },
     realtime: {
       params: {
-        eventsPerSecond: 1 // Absolute minimum
+        eventsPerSecond: 10 // Enable real-time updates
       }
     }
   });

@@ -21,20 +21,11 @@ export default function ProtectedRoute({
   const hasRedirected = useRef(false);
 
   useEffect(() => {
-    // Give more time before redirecting - wait for auth to fully load
-    const redirectTimer = setTimeout(() => {
-      if (!isLoading && requireAuth && !isAuthenticated && !hasRedirected.current) {
-        hasRedirected.current = true;
-        router.push(redirectTo);
-      }
-    }, 2000); // Wait 2 seconds before redirecting to give auth time to load
-    
-    // If user is authenticated, clear the timer
-    if (isAuthenticated) {
-      clearTimeout(redirectTimer);
+    // Only redirect when we're sure there's no session AND not loading
+    if (!isLoading && requireAuth && !isAuthenticated && !hasRedirected.current) {
+      hasRedirected.current = true;
+      router.push(redirectTo);
     }
-    
-    return () => clearTimeout(redirectTimer);
   }, [isAuthenticated, isLoading, requireAuth, redirectTo, router]);
 
   // Reset redirect flag when auth state changes

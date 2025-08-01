@@ -61,7 +61,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     let mounted = true;
-    let timeoutId: NodeJS.Timeout;
     let sessionCheckAttempted = false;
     
     // Check for existing session on mount with circuit breaker
@@ -73,20 +72,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Start loading tracking
       loadingManager.startLoading('auth', 30000); // 30 second max
       
-      // Add a timeout to prevent infinite loading (shorter for mobile/Chromium)
-      const isChromium = typeof window !== 'undefined' && 
-        (navigator.userAgent.includes('Chrome') || navigator.userAgent.includes('Chromium') || navigator.userAgent.includes('Edge'));
-      const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-      const timeoutDuration = isChromium || isMobile ? 10000 : 30000; // 10s for Chromium/mobile, 30s for others
-      
-      timeoutId = setTimeout(() => {
-        if (mounted) {
-          console.warn(`Auth session check timed out after ${timeoutDuration/1000}s, setting user to null`);
-          loadingManager.clearLoading('auth');
-          setUser(null);
-          setIsLoading(false);
-        }
-      }, timeoutDuration);
+      // NO TIMEOUT - Sessions persist forever until manually logged out
+      console.log('Auth session check started - will persist until manual logout');
       
       try {
         // Use circuit breaker for auth calls
@@ -100,7 +87,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         );
         
         if (mounted) {
-          clearTimeout(timeoutId);
           loadingManager.clearLoading('auth');
           
           if (result?.user) {
@@ -113,9 +99,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       } catch (error) {
         console.error('Error getting session:', error);
         if (mounted) {
-          clearTimeout(timeoutId);
           loadingManager.clearLoading('auth');
-          setUser(null);
+          // Don't set user to null on error - let them retry
+          console.log('Auth error occurred, but keeping current session state');
         }
       } finally {
         if (mounted) {
@@ -158,7 +144,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     return () => {
       mounted = false;
-      clearTimeout(timeoutId);
       loadingManager.clearLoading('auth');
       listener?.subscription.unsubscribe();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
