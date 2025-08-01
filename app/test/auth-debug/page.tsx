@@ -23,7 +23,7 @@ export default function AuthDebugPage() {
           }
         }
       } catch (e) {
-        storage.localStorageError = e.message
+        storage.localStorageError = e instanceof Error ? e.message : 'Unknown error'
       }
 
       // Check sessionStorage
@@ -35,7 +35,7 @@ export default function AuthDebugPage() {
           }
         }
       } catch (e) {
-        storage.sessionStorageError = e.message
+        storage.sessionStorageError = e instanceof Error ? e.message : 'Unknown error'
       }
 
       setStorageInfo(storage)
