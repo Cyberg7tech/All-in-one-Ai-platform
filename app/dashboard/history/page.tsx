@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, FileText, MessageSquare, Image, Video, Music } from 'lucide-react';
+import { Clock, FileText, MessageSquare, Image as ImageIcon, Video, Music } from 'lucide-react';
 
 export default function HistoryPage() {
   return (
@@ -36,7 +36,7 @@ export default function HistoryPage() {
               
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-3">
-                  <Image className="w-5 h-5 text-green-500" />
+                  <ImageIcon className="w-5 h-5 text-green-500" />
                   <div>
                     <p className="font-medium">Image Generated</p>
                     <p className="text-sm text-muted-foreground">4 hours ago</p>
