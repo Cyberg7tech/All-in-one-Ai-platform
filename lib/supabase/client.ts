@@ -4,88 +4,79 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ttnkomdxbkm
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTcwMTgsImV4cCI6MjA2ODczMzAxOH0.ZpedifMgWW0XZzqq-CCkdHeiQb2HnzLZ8wXN03cjh7g'
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzE1NzAxOCwiZXhwIjoyMDY4NzMzMDE4fQ.UOE8fFmFYqnCHKiA-MlfHEfxDxViasspD64trjmsMLI'
 
-// Ultra-aggressive singleton to completely prevent multiple instances
-const SUPABASE_CLIENT_KEY = 'ONEAI_SUPABASE_CLIENT_INSTANCE';
-const SUPABASE_ADMIN_KEY = 'ONEAI_SUPABASE_ADMIN_INSTANCE';
+// CHROMIUM-SPECIFIC SINGLETON - Completely prevents multiple instances
+let _globalSupabaseClient: any = null;
 
-// Global variables to ensure singleton pattern across module reloads
-declare global {
-  var __oneai_supabase: any | undefined
-  var __oneai_supabase_admin: any | undefined
+// Detect browser type for specific handling
+function isChromiumBrowser() {
+  if (typeof window === 'undefined') return false;
+  const userAgent = navigator.userAgent;
+  return userAgent.includes('Chrome') || userAgent.includes('Chromium') || userAgent.includes('Edge');
 }
 
-// Check all possible storage locations for existing client
-function getExistingSupabaseClient() {
-  // Check global scope
-  if (globalThis.__oneai_supabase) {
-    return globalThis.__oneai_supabase;
+// EMERGENCY: Force single instance for Chromium browsers
+export const supabase = (() => {
+  // Return existing instance if available
+  if (_globalSupabaseClient) {
+    return _globalSupabaseClient;
   }
-  
-  // Check window object (browser only)
-  if (typeof window !== 'undefined') {
-    if ((window as any)[SUPABASE_CLIENT_KEY]) {
-      return (window as any)[SUPABASE_CLIENT_KEY];
+
+  // For Chromium browsers, use extremely aggressive singleton
+  if (typeof window !== 'undefined' && isChromiumBrowser()) {
+    // Check if already exists in window
+    if ((window as any).__ONEAI_SUPABASE_CHROMIUM_SINGLETON) {
+      _globalSupabaseClient = (window as any).__ONEAI_SUPABASE_CHROMIUM_SINGLETON;
+      return _globalSupabaseClient;
     }
   }
-  
-  return null;
-}
 
-// Store client in all possible locations
-function storeSupabaseClient(client: any) {
-  globalThis.__oneai_supabase = client;
-  
-  if (typeof window !== 'undefined') {
-    (window as any)[SUPABASE_CLIENT_KEY] = client;
-  }
-}
-
-// Ultra-safe singleton Supabase client
-export const supabase = (() => {
-  // First, try to get existing client
-  const existingClient = getExistingSupabaseClient();
-  if (existingClient) {
-    return existingClient;
-  }
-  
-  // Create new instance ONLY if absolutely necessary
-  const client = createClient(supabaseUrl, supabaseKey, {
+  // Create new instance with minimal config to prevent conflicts
+  _globalSupabaseClient = createClient(supabaseUrl, supabaseKey, {
     auth: {
       persistSession: true,
-      storageKey: 'oneai-auth-ultra-stable', // Ultra-stable key
+      storageKey: `oneai-auth-${Date.now()}`, // Unique key to prevent conflicts
       autoRefreshToken: true,
-      detectSessionInUrl: false, // Disable to prevent conflicts
+      detectSessionInUrl: false,
       flowType: 'pkce'
     },
     realtime: {
       params: {
-        eventsPerSecond: 2 // Minimal to prevent conflicts
+        eventsPerSecond: 1 // Absolute minimum
       }
     }
   });
-  
-  // Store in all locations
-  storeSupabaseClient(client);
-  
-  // Log only once
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Supabase client initialized - Ultra-Safe Singleton');
+
+  // Store for Chromium browsers
+  if (typeof window !== 'undefined' && isChromiumBrowser()) {
+    (window as any).__ONEAI_SUPABASE_CHROMIUM_SINGLETON = _globalSupabaseClient;
+    
+    // Force cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      delete (window as any).__ONEAI_SUPABASE_CHROMIUM_SINGLETON;
+    });
   }
+
+  console.log(`Supabase client initialized for ${isChromiumBrowser() ? 'Chromium' : 'Other'} browser`);
   
-  return client;
+  return _globalSupabaseClient;
 })()
 
-// Admin client for backend operations
+// Admin client for backend operations  
+let _adminClient: any = null;
+
 export const supabaseAdmin = (() => {
-  if (!globalThis.__oneai_supabase_admin) {
-    globalThis.__oneai_supabase_admin = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    })
+  if (_adminClient) {
+    return _adminClient;
   }
-  return globalThis.__oneai_supabase_admin
+  
+  _adminClient = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+  
+  return _adminClient;
 })()
 
 // Enhanced database helpers for the One AI platform

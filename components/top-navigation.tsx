@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Sparkles, Bell, Settings, User, LogOut, UserCog, CreditCard, Shield } from 'lucide-react'
+import { Sparkles, Bell, Settings, User, LogOut, UserCog, CreditCard, Shield, Menu } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -13,6 +13,7 @@ export function TopNavigation() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showUserProfile, setShowUserProfile] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
   
   const notificationsRef = useRef<HTMLDivElement>(null)
   const settingsRef = useRef<HTMLDivElement>(null)
@@ -49,6 +50,16 @@ export function TopNavigation() {
   return (
     <div className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
       <div className="flex items-center space-x-3">
+        {/* Mobile Menu Button */}
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="md:hidden"
+          onClick={() => setShowMobileMenu(!showMobileMenu)}
+        >
+          <Menu className="w-5 h-5" />
+        </Button>
+        
         <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
           <AIIcon size={20} className="text-primary-foreground" />
         </div>

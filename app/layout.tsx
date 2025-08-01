@@ -12,6 +12,13 @@ export const metadata: Metadata = {
   title: 'One Ai',
   description: 'Comprehensive One Ai platform with chat, agents, analytics, and creative tools',
   manifest: '/manifest.json',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: 'cover'
+  },
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',

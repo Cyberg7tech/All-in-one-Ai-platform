@@ -29,9 +29,9 @@ export function cleanupAuthState() {
       delete (window as any).ONEAI_SUPABASE_CLIENT_INSTANCE;
     }
     
-    // Clear global instances
-    if (globalThis.__oneai_supabase) {
-      delete globalThis.__oneai_supabase;
+    // Clear global instances  
+    if ((globalThis as any).__oneai_supabase) {
+      delete (globalThis as any).__oneai_supabase;
     }
     
     console.log('Auth state cleanup completed - removed all potential conflicts');

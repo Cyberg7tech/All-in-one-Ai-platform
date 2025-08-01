@@ -429,4 +429,63 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Mobile responsiveness fixes */
+body {
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile viewport fixes */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+  
+  body {
+    font-size: 16px; /* Prevent zoom on iOS */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  /* Fix for iOS Safari bottom bar */
+  .min-h-screen {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  /* Mobile navigation fixes */
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  /* Mobile chat interface */
+  .chat-container {
+    height: calc(100vh - 60px);
+    height: calc(100vh - 60px - env(safe-area-inset-bottom));
+  }
+  
+  /* Mobile form elements */
+  input, textarea, select {
+    font-size: 16px; /* Prevent zoom on iOS */
+    border-radius: 0; /* Remove iOS styling */
+    -webkit-appearance: none;
+  }
+  
+  /* Mobile buttons */
+  button {
+    -webkit-appearance: none;
+    touch-action: manipulation;
+  }
 } 

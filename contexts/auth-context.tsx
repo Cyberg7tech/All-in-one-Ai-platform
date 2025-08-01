@@ -73,15 +73,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Start loading tracking
       loadingManager.startLoading('auth', 30000); // 30 second max
       
-      // Add a timeout to prevent infinite loading
+      // Add a timeout to prevent infinite loading (shorter for mobile/Chromium)
+      const isChromium = typeof window !== 'undefined' && 
+        (navigator.userAgent.includes('Chrome') || navigator.userAgent.includes('Chromium') || navigator.userAgent.includes('Edge'));
+      const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+      const timeoutDuration = isChromium || isMobile ? 10000 : 30000; // 10s for Chromium/mobile, 30s for others
+      
       timeoutId = setTimeout(() => {
         if (mounted) {
-          console.warn('Auth session check timed out, setting user to null');
+          console.warn(`Auth session check timed out after ${timeoutDuration/1000}s, setting user to null`);
           loadingManager.clearLoading('auth');
           setUser(null);
           setIsLoading(false);
         }
-      }, 30000); // 30 second timeout
+      }, timeoutDuration);
       
       try {
         // Use circuit breaker for auth calls
