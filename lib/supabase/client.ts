@@ -4,61 +4,106 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ttnkomdxbkm
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTcwMTgsImV4cCI6MjA2ODczMzAxOH0.ZpedifMgWW0XZzqq-CCkdHeiQb2HnzLZ8wXN03cjh7g'
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzE1NzAxOCwiZXhwIjoyMDY4NzMzMDE4fQ.UOE8fFmFYqnCHKiA-MlfHEfxDxViasspD64trjmsMLI'
 
-// CHROMIUM-SPECIFIC SINGLETON - Completely prevents multiple instances
-let _globalSupabaseClient: any = null;
-
-// Detect browser type for specific handling
-function isChromiumBrowser() {
-  if (typeof window === 'undefined') return false;
-  const userAgent = navigator.userAgent;
-  return userAgent.includes('Chrome') || userAgent.includes('Chromium') || userAgent.includes('Edge');
+// NUCLEAR SOLUTION: Global instance that survives all reloads and hot reloads
+declare global {
+  var __ONEAI_NUCLEAR_SUPABASE_CLIENT: any;
 }
 
-// EMERGENCY: Force single instance for Chromium browsers
+// ULTRA-AGGRESSIVE browser detection
+function isChromiumBrowser() {
+  if (typeof window === 'undefined') return false;
+  const userAgent = navigator.userAgent.toLowerCase();
+  return userAgent.includes('chrome') || 
+         userAgent.includes('chromium') || 
+         userAgent.includes('edge') || 
+         userAgent.includes('brave') ||
+         (userAgent.includes('webkit') && !userAgent.includes('firefox'));
+}
+
+// NUCLEAR SINGLETON - Absolutely prevents multiple instances
 export const supabase = (() => {
-  // Return existing instance if available
-  if (_globalSupabaseClient) {
-    return _globalSupabaseClient;
+  // NUCLEAR CHECK: If global exists, return it immediately
+  if (typeof window !== 'undefined' && (window as any).__ONEAI_NUCLEAR_SUPABASE_CLIENT) {
+    console.log('NUCLEAR: Using existing global Supabase client');
+    return (window as any).__ONEAI_NUCLEAR_SUPABASE_CLIENT;
+  }
+  
+  if (globalThis.__ONEAI_NUCLEAR_SUPABASE_CLIENT) {
+    console.log('NUCLEAR: Using existing globalThis Supabase client');
+    return globalThis.__ONEAI_NUCLEAR_SUPABASE_CLIENT;
   }
 
-  // For Chromium browsers, use extremely aggressive singleton
-  if (typeof window !== 'undefined' && isChromiumBrowser()) {
-    // Check if already exists in window
-    if ((window as any).__ONEAI_SUPABASE_CHROMIUM_SINGLETON) {
-      _globalSupabaseClient = (window as any).__ONEAI_SUPABASE_CHROMIUM_SINGLETON;
-      return _globalSupabaseClient;
-    }
-  }
-
-  // Create new instance with PERSISTENT session storage
-  _globalSupabaseClient = createClient(supabaseUrl, supabaseKey, {
+  console.log(`NUCLEAR: Creating new Supabase client for ${isChromiumBrowser() ? 'Chromium' : 'Firefox/Safari'} browser`);
+  
+  // Create new instance with NUCLEAR settings for Chromium
+  const clientConfig = isChromiumBrowser() ? {
     auth: {
       persistSession: true,
-      storageKey: 'oneai-auth-permanent', // PERMANENT key for true persistence
+      storageKey: 'nuclear-oneai-auth', // NUCLEAR key for Chromium
       autoRefreshToken: true,
       detectSessionInUrl: false,
-      flowType: 'pkce'
+      flowType: 'pkce' as const
     },
     realtime: {
       params: {
-        eventsPerSecond: 10 // Enable real-time updates
+        eventsPerSecond: 1 // MINIMAL for Chromium to prevent conflicts
       }
     }
-  });
+  } : {
+    auth: {
+      persistSession: true,
+      storageKey: 'oneai-auth-permanent', // Normal key for Firefox/Safari
+      autoRefreshToken: true,
+      detectSessionInUrl: false,
+      flowType: 'pkce' as const
+    },
+    realtime: {
+      params: {
+        eventsPerSecond: 10 // Normal for non-Chromium
+      }
+    }
+  };
 
-  // Store for Chromium browsers
-  if (typeof window !== 'undefined' && isChromiumBrowser()) {
-    (window as any).__ONEAI_SUPABASE_CHROMIUM_SINGLETON = _globalSupabaseClient;
+  const client = createClient(supabaseUrl, supabaseKey, clientConfig);
+
+  // NUCLEAR STORAGE: Store in ALL possible locations
+  globalThis.__ONEAI_NUCLEAR_SUPABASE_CLIENT = client;
+  
+  if (typeof window !== 'undefined') {
+    (window as any).__ONEAI_NUCLEAR_SUPABASE_CLIENT = client;
     
-    // Force cleanup on page unload
-    window.addEventListener('beforeunload', () => {
-      delete (window as any).__ONEAI_SUPABASE_CHROMIUM_SINGLETON;
-    });
+    // NUCLEAR CLEANUP: Multiple cleanup strategies
+    const cleanup = () => {
+      // Don't delete on unload - keep it persistent!
+      console.log('NUCLEAR: Page unload - keeping client persistent');
+    };
+    
+    window.addEventListener('beforeunload', cleanup);
+    window.addEventListener('unload', cleanup);
+    
+    // NUCLEAR RECOVERY: Force reload if stuck for too long
+    if (isChromiumBrowser()) {
+      let loadingTimer: NodeJS.Timeout;
+      const startNuclearRecovery = () => {
+        loadingTimer = setTimeout(() => {
+          console.warn('NUCLEAR: Chromium browser stuck - forcing recovery');
+          window.location.reload();
+        }, 60000); // 1 minute nuclear timeout
+      };
+      
+      // Cancel recovery if page loads successfully
+      const cancelNuclearRecovery = () => {
+        if (loadingTimer) clearTimeout(loadingTimer);
+      };
+      
+      if (document.readyState === 'loading') {
+        startNuclearRecovery();
+        document.addEventListener('DOMContentLoaded', cancelNuclearRecovery);
+      }
+    }
   }
 
-  console.log(`Supabase client initialized for ${isChromiumBrowser() ? 'Chromium' : 'Other'} browser`);
-  
-  return _globalSupabaseClient;
+  return client;
 })()
 
 // Admin client for backend operations  

@@ -72,8 +72,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Start loading tracking
       loadingManager.startLoading('auth', 30000); // 30 second max
       
-      // NO TIMEOUT - Sessions persist forever until manually logged out
-      console.log('Auth session check started - will persist until manual logout');
+      // CHROMIUM BROWSER SPECIAL HANDLING
+      const isChromium = typeof window !== 'undefined' && 
+        (navigator.userAgent.toLowerCase().includes('chrome') || 
+         navigator.userAgent.toLowerCase().includes('chromium') || 
+         navigator.userAgent.toLowerCase().includes('edge') || 
+         navigator.userAgent.toLowerCase().includes('brave'));
+      
+      if (isChromium) {
+        console.log('CHROMIUM DETECTED: Using enhanced auth recovery');
+        
+        // NUCLEAR RECOVERY: Force reload if completely stuck
+        const nuclearTimer = setTimeout(() => {
+          console.warn('NUCLEAR RECOVERY: Chromium auth completely stuck - forcing reload');
+          window.location.reload();
+        }, 30000); // 30 seconds for Chromium
+        
+        // Cancel nuclear recovery if auth succeeds
+        const cancelNuclear = () => clearTimeout(nuclearTimer);
+        
+        // Store cleanup function
+        (window as any).__cancelNuclearRecovery = cancelNuclear;
+      } else {
+        console.log('NON-CHROMIUM: Using standard auth - will persist until manual logout');
+      }
       
       try {
         // Use circuit breaker for auth calls
@@ -88,6 +110,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         if (mounted) {
           loadingManager.clearLoading('auth');
+          
+          // Cancel nuclear recovery on success
+          if (typeof window !== 'undefined' && (window as any).__cancelNuclearRecovery) {
+            (window as any).__cancelNuclearRecovery();
+          }
           
           if (result?.user) {
             const userProfile = await fetchUserProfile(result.user);
