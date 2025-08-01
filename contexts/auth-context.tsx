@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { authCircuitBreaker, loadingManager } from '@/lib/utils/circuit-breaker';
 
 export interface AuthUser {
   id: string;
@@ -63,27 +64,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let timeoutId: NodeJS.Timeout;
     let sessionCheckAttempted = false;
     
-    // Check for existing session on mount
+    // Check for existing session on mount with circuit breaker
     const getSession = async () => {
       if (!mounted || sessionCheckAttempted) return;
       sessionCheckAttempted = true;
       setIsLoading(true);
       
-      // Add a timeout to prevent infinite loading (60 seconds - much more reasonable)
+      // Start loading tracking
+      loadingManager.startLoading('auth', 30000); // 30 second max
+      
+      // Add a timeout to prevent infinite loading
       timeoutId = setTimeout(() => {
         if (mounted) {
-          console.warn('Auth session check timed out after 60 seconds, setting user to null');
+          console.warn('Auth session check timed out, setting user to null');
+          loadingManager.clearLoading('auth');
           setUser(null);
           setIsLoading(false);
         }
-      }, 60000); // 60 second timeout
+      }, 30000); // 30 second timeout
       
       try {
-        const { data, error } = await supabase.auth.getUser();
+        // Use circuit breaker for auth calls
+        const result = await authCircuitBreaker.execute(
+          async () => {
+            const { data, error } = await supabase.auth.getUser();
+            if (error) throw error;
+            return data;
+          },
+          () => ({ user: null }) // Fallback
+        );
+        
         if (mounted) {
           clearTimeout(timeoutId);
-          if (data?.user) {
-            const userProfile = await fetchUserProfile(data.user);
+          loadingManager.clearLoading('auth');
+          
+          if (result?.user) {
+            const userProfile = await fetchUserProfile(result.user);
             setUser(userProfile);
           } else {
             setUser(null);
@@ -93,6 +109,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.error('Error getting session:', error);
         if (mounted) {
           clearTimeout(timeoutId);
+          loadingManager.clearLoading('auth');
           setUser(null);
         }
       } finally {
@@ -137,8 +154,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       mounted = false;
       clearTimeout(timeoutId);
+      loadingManager.clearLoading('auth');
       listener?.subscription.unsubscribe();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      
+      // Force cleanup on unmount
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          loadingManager.clearAll();
+        }, 100);
+      }
     };
   }, []);
 

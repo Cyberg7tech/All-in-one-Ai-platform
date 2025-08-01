@@ -4,12 +4,19 @@ export function cleanupAuthState() {
   if (typeof window === 'undefined') return;
   
   try {
-    // Only remove Supabase auth keys that might be causing conflicts
+    // Remove all possible Supabase auth keys that might be causing conflicts
     const keysToRemove = [
       'sb-ttnkomdxbkmfmkaycjao-auth-token',
       'supabase.auth.token',
       'oneai-auth-v2',
-      'oneai-auth-stable'
+      'oneai-auth-stable',
+      'oneai-auth-ultra-stable',
+      // Legacy keys
+      'supabase.session',
+      'supabase.auth.session',
+      // GoTrue client keys
+      'gotrue.session',
+      'gotrue.user'
     ];
     
     keysToRemove.forEach(key => {
@@ -17,7 +24,17 @@ export function cleanupAuthState() {
       sessionStorage.removeItem(key);
     });
     
-    console.log('Auth state cleanup completed');
+    // Also clear any remaining Supabase client instances
+    if ((window as any).ONEAI_SUPABASE_CLIENT_INSTANCE) {
+      delete (window as any).ONEAI_SUPABASE_CLIENT_INSTANCE;
+    }
+    
+    // Clear global instances
+    if (globalThis.__oneai_supabase) {
+      delete globalThis.__oneai_supabase;
+    }
+    
+    console.log('Auth state cleanup completed - removed all potential conflicts');
   } catch (error) {
     console.error('Error cleaning auth state:', error);
   }

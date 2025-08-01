@@ -4,41 +4,72 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ttnkomdxbkm
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTcwMTgsImV4cCI6MjA2ODczMzAxOH0.ZpedifMgWW0XZzqq-CCkdHeiQb2HnzLZ8wXN03cjh7g'
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzE1NzAxOCwiZXhwIjoyMDY4NzMzMDE4fQ.UOE8fFmFYqnCHKiA-MlfHEfxDxViasspD64trjmsMLI'
 
+// Ultra-aggressive singleton to completely prevent multiple instances
+const SUPABASE_CLIENT_KEY = 'ONEAI_SUPABASE_CLIENT_INSTANCE';
+const SUPABASE_ADMIN_KEY = 'ONEAI_SUPABASE_ADMIN_INSTANCE';
+
 // Global variables to ensure singleton pattern across module reloads
 declare global {
-  var __supabaseInstance: any | undefined
-  var __supabaseAdminInstance: any | undefined
+  var __oneai_supabase: any | undefined
+  var __oneai_supabase_admin: any | undefined
 }
 
-// Simple but effective singleton to prevent multiple instances
-export const supabase = (() => {
-  // Check global instance first (for hot reloads)
-  if (globalThis.__supabaseInstance) {
-    return globalThis.__supabaseInstance;
+// Check all possible storage locations for existing client
+function getExistingSupabaseClient() {
+  // Check global scope
+  if (globalThis.__oneai_supabase) {
+    return globalThis.__oneai_supabase;
   }
   
-  // Create new instance with static storage key to persist sessions
+  // Check window object (browser only)
+  if (typeof window !== 'undefined') {
+    if ((window as any)[SUPABASE_CLIENT_KEY]) {
+      return (window as any)[SUPABASE_CLIENT_KEY];
+    }
+  }
+  
+  return null;
+}
+
+// Store client in all possible locations
+function storeSupabaseClient(client: any) {
+  globalThis.__oneai_supabase = client;
+  
+  if (typeof window !== 'undefined') {
+    (window as any)[SUPABASE_CLIENT_KEY] = client;
+  }
+}
+
+// Ultra-safe singleton Supabase client
+export const supabase = (() => {
+  // First, try to get existing client
+  const existingClient = getExistingSupabaseClient();
+  if (existingClient) {
+    return existingClient;
+  }
+  
+  // Create new instance ONLY if absolutely necessary
   const client = createClient(supabaseUrl, supabaseKey, {
     auth: {
       persistSession: true,
-      storageKey: 'oneai-auth-stable', // Static key to persist across refreshes
+      storageKey: 'oneai-auth-ultra-stable', // Ultra-stable key
       autoRefreshToken: true,
       detectSessionInUrl: false, // Disable to prevent conflicts
       flowType: 'pkce'
     },
     realtime: {
       params: {
-        eventsPerSecond: 5 // Reduce to prevent overload
+        eventsPerSecond: 2 // Minimal to prevent conflicts
       }
     }
   });
   
-  // Store in global for hot reload protection
-  globalThis.__supabaseInstance = client;
+  // Store in all locations
+  storeSupabaseClient(client);
   
-  // Log only once in development
+  // Log only once
   if (process.env.NODE_ENV === 'development') {
-    console.log('Supabase client initialized with stable key');
+    console.log('Supabase client initialized - Ultra-Safe Singleton');
   }
   
   return client;
@@ -46,26 +77,16 @@ export const supabase = (() => {
 
 // Admin client for backend operations
 export const supabaseAdmin = (() => {
-  if (!globalThis.__supabaseAdminInstance) {
-    globalThis.__supabaseAdminInstance = createClient(supabaseUrl, supabaseServiceKey, {
+  if (!globalThis.__oneai_supabase_admin) {
+    globalThis.__oneai_supabase_admin = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false
       }
     })
   }
-  return globalThis.__supabaseAdminInstance
+  return globalThis.__oneai_supabase_admin
 })()
-
-// Cleanup function for development
-export const clearSupabaseInstances = () => {
-  if (globalThis.__supabaseInstance) {
-    globalThis.__supabaseInstance = undefined
-  }
-  if (globalThis.__supabaseAdminInstance) {
-    globalThis.__supabaseAdminInstance = undefined
-  }
-}
 
 // Enhanced database helpers for the One AI platform
 export const dbHelpers = {
