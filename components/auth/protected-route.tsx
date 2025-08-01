@@ -21,7 +21,6 @@ export default function ProtectedRoute({
   const hasRedirected = useRef(false);
 
   useEffect(() => {
-    // Only redirect when we're sure there's no session AND not loading
     if (!isLoading && requireAuth && !isAuthenticated && !hasRedirected.current) {
       hasRedirected.current = true;
       router.push(redirectTo);
@@ -35,7 +34,7 @@ export default function ProtectedRoute({
     }
   }, [isAuthenticated]);
 
-  // Show loading only for a reasonable time
+  // Show loading while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">

@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { authCircuitBreaker, loadingManager } from '@/lib/utils/circuit-breaker';
 
 export interface AuthUser {
   id: string;
@@ -61,92 +60,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     let mounted = true;
-    let sessionCheckAttempted = false;
     
-    // Check for existing session on mount with circuit breaker
+    // Check for existing session on mount
     const getSession = async () => {
-      if (!mounted || sessionCheckAttempted) return;
-      sessionCheckAttempted = true;
-      setIsLoading(true);
-      
-      // Start loading tracking
-      loadingManager.startLoading('auth', 30000); // 30 second max
-      
-      // CHROMIUM BROWSER SPECIAL HANDLING
-      const isChromium = typeof window !== 'undefined' && 
-        (navigator.userAgent.toLowerCase().includes('chrome') || 
-         navigator.userAgent.toLowerCase().includes('chromium') || 
-         navigator.userAgent.toLowerCase().includes('edge') || 
-         navigator.userAgent.toLowerCase().includes('brave'));
-      
-      if (isChromium) {
-        console.log('CHROMIUM DETECTED: Using enhanced auth recovery');
-        
-        // NUCLEAR RECOVERY: Force reload if completely stuck
-        const nuclearTimer = setTimeout(() => {
-          console.warn('NUCLEAR RECOVERY: Chromium auth completely stuck - forcing reload');
-          window.location.reload();
-        }, 30000); // 30 seconds for Chromium
-        
-        // Cancel nuclear recovery if auth succeeds
-        const cancelNuclear = () => clearTimeout(nuclearTimer);
-        
-        // Store cleanup function
-        (window as any).__cancelNuclearRecovery = cancelNuclear;
-      } else {
-        console.log('NON-CHROMIUM: Using standard auth - will persist until manual logout');
-      }
-      
       try {
-        // Use circuit breaker for auth calls
-        const result = await authCircuitBreaker.execute(
-          async () => {
-            const { data, error } = await supabase.auth.getUser();
-            if (error) throw error;
-            return data;
-          },
-          () => ({ user: null }) // Fallback
-        );
+        const { data, error } = await supabase.auth.getUser();
         
         if (mounted) {
-          loadingManager.clearLoading('auth');
-          
-          // Cancel nuclear recovery on success
-          if (typeof window !== 'undefined' && (window as any).__cancelNuclearRecovery) {
-            (window as any).__cancelNuclearRecovery();
-          }
-          
-          if (result?.user) {
-            const userProfile = await fetchUserProfile(result.user);
+          if (data?.user) {
+            const userProfile = await fetchUserProfile(data.user);
             setUser(userProfile);
           } else {
             setUser(null);
           }
+          setIsLoading(false);
         }
       } catch (error) {
         console.error('Error getting session:', error);
         if (mounted) {
-          loadingManager.clearLoading('auth');
-          // Don't set user to null on error - let them retry
-          console.log('Auth error occurred, but keeping current session state');
-        }
-      } finally {
-        if (mounted) {
+          setUser(null);
           setIsLoading(false);
         }
       }
     };
     
-    // Use requestIdleCallback for better performance during hot reloads
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(() => getSession(), { timeout: 1000 });
-    } else {
-      // Fallback for browsers that don't support requestIdleCallback
-      setTimeout(getSession, 100);
-    }
+    // Get initial session
+    getSession();
     
     // Listen for auth state changes
-    const { data: listener } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
+    const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
       
       if (session?.user) {
@@ -159,28 +101,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     });
     
-    // Handle tab visibility changes to prevent unnecessary loading
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && !sessionCheckAttempted) {
-        sessionCheckAttempted = false; // Reset to allow retry
-        getSession();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
     return () => {
       mounted = false;
-      loadingManager.clearLoading('auth');
       listener?.subscription.unsubscribe();
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      
-      // Force cleanup on unmount
-      if (typeof window !== 'undefined') {
-        setTimeout(() => {
-          loadingManager.clearAll();
-        }, 100);
-      }
     };
   }, []);
 
@@ -199,34 +122,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const logout = async () => {
-    setIsLoading(true);
     await supabase.auth.signOut();
     setUser(null);
-    setIsLoading(false);
   };
 
   const signup = async (email: string, password: string, name: string, plan: string) => {
     setIsLoading(true);
     try {
-      // 1. Create user in Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { name, subscription_plan: plan },
-        },
-      });
+      // Create user account
+      const { data, error } = await supabase.auth.signUp({ email, password });
       if (error || !data.user) {
-        throw new Error(error?.message || 'Sign up failed');
+        throw new Error(error?.message || 'Failed to create account');
       }
-      // 2. Optionally insert into users table for profile info
-      await supabase.from('users').upsert({
-        id: data.user.id,
-        email,
-        name,
-        subscription_plan: plan,
-        role: 'user',
-      });
+
+      // Create user profile
+      const { error: profileError } = await supabase
+        .from('users')
+        .insert({
+          id: data.user.id,
+          email: data.user.email,
+          name,
+          subscription_plan: plan,
+          role: 'user'
+        });
+
+      if (profileError) {
+        console.error('Error creating user profile:', profileError);
+        // Don't throw here as the auth account was created successfully
+      }
+
+      // Set user state
       const userProfile = await fetchUserProfile(data.user);
       setUser(userProfile);
     } finally {
@@ -234,14 +159,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const value: AuthContextType = {
+  const value = {
     user,
     isLoading,
     isAuthenticated: !!user,
     login,
     logout,
     signup,
-    refreshUser,
+    refreshUser
   };
 
   return (

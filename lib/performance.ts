@@ -1,45 +1,48 @@
-// Performance utilities for development optimization
+// Simple performance monitoring utility
 
-// Debounce function to prevent excessive calls during hot reloads
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
+export function initPerformanceMonitoring() {
+  if (typeof window === 'undefined') return;
 
-// Throttle function for performance optimization
-export function throttle<T extends (...args: any[]) => any>(
-  func: T,
-  limit: number
-): (...args: Parameters<T>) => void {
-  let inThrottle: boolean;
-  return (...args: Parameters<T>) => {
-    if (!inThrottle) {
-      func(...args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
+  // Monitor page load performance
+  window.addEventListener('load', () => {
+    const loadTime = performance.now();
+    console.log(`Page loaded in ${loadTime.toFixed(2)}ms`);
+    
+    // Log any performance issues
+    if (loadTime > 5000) {
+      console.warn('Slow page load detected:', loadTime);
     }
-  };
-}
+  });
 
-// Development-only performance logging
-export function devLog(message: string, data?: any) {
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[DEV] ${message}`, data || '');
+  // Monitor for stuck loading states
+  let loadingCheckCount = 0;
+  const loadingCheckInterval = setInterval(() => {
+    loadingCheckCount++;
+    
+    // Check if page is stuck loading for too long
+    if (loadingCheckCount > 30 && document.readyState !== 'complete') {
+      console.warn('Page appears to be stuck loading');
+      clearInterval(loadingCheckInterval);
+    }
+  }, 1000);
+
+  // Clear interval when page loads
+  window.addEventListener('load', () => {
+    clearInterval(loadingCheckInterval);
+  });
+
+  // Monitor for memory leaks
+  if ('memory' in performance) {
+    setInterval(() => {
+      const memory = (performance as any).memory;
+      if (memory.usedJSHeapSize > 100 * 1024 * 1024) { // 100MB
+        console.warn('High memory usage detected:', memory.usedJSHeapSize / 1024 / 1024, 'MB');
+      }
+    }, 30000); // Check every 30 seconds
   }
 }
 
-// Optimize for hot reloads
-export function optimizeForHotReload() {
-  if (process.env.NODE_ENV === 'development') {
-    // Clear any existing timeouts that might be causing delays
-    // Note: This is a simplified approach that doesn't clear all timeouts
-    // as that's not possible in a safe way across different environments
-    devLog('Hot reload optimization applied');
-  }
+// Auto-initialize performance monitoring
+if (typeof window !== 'undefined') {
+  initPerformanceMonitoring();
 } 
