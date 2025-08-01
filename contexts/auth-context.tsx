@@ -54,9 +54,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const refreshUser = async () => {
-    const { data } = await supabase.auth.getUser();
-    if (data?.user) {
-      const userProfile = await fetchUserProfile(data.user);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      const userProfile = await fetchUserProfile(session.user);
       setUser(userProfile);
     }
   };
