@@ -135,15 +135,15 @@ export const dbHelpers = {
 
       // Then get messages for each session
       const sessionsWithMessages = await Promise.all(
-        (sessions || []).map(async (session) => {
+        (sessions || []).map(async (session: any) => {
           const { data: messages, error: messagesError } = await supabase
             .from('chat_messages')
             .select('*')
-            .eq('session_id', session.id)
+            .eq('session_id', String(session.id))
             .order('created_at', { ascending: true });
 
           if (messagesError) {
-            console.error('Error fetching messages for session:', session.id, messagesError);
+            console.error('Error fetching messages for session:', String(session.id), messagesError);
             return {
               ...session,
               chat_messages: []
