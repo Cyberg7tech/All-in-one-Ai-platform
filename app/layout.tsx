@@ -40,48 +40,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <meta name="theme-color" content="#3B82F6" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // NUCLEAR CACHE CLEARING - Force fresh everything
-              (function() {
-                try {
-                  // Clear ALL problematic storage
-                  const problematicKeys = ['nuclear-oneai-auth', 'oneai-auth-permanent', 'oneai-auth'];
-                  problematicKeys.forEach(key => {
-                    localStorage.removeItem(key);
-                    sessionStorage.removeItem(key);
-                  });
-                  
-                  // Force service worker refresh
-                  if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                      for(let registration of registrations) {
-                        registration.unregister();
-                      }
-                    });
-                  }
-                  
-                  // Clear caches
-                  if ('caches' in window) {
-                    caches.keys().then(function(names) {
-                      for (let name of names) {
-                        caches.delete(name);
-                      }
-                    });
-                  }
-                  
-                  // Add cache busting timestamp and force reload flag
-                  window.__CACHE_BUST = Date.now();
-                  window.__FORCE_RELOAD = true;
-                  console.log('🚀 NUCLEAR CACHE CLEAR at:', new Date().toISOString());
-                } catch (e) {
-                  console.warn('Error in nuclear cleanup:', e);
-                }
-              })();
-            `,
-          }}
-        />
+
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider

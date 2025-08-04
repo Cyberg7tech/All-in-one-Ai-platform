@@ -56,14 +56,6 @@ export default function AuthDebugPage() {
 
     checkStorage()
     checkSession()
-
-    // Refresh every 2 seconds
-    const interval = setInterval(() => {
-      checkStorage()
-      checkSession()
-    }, 2000)
-
-    return () => clearInterval(interval)
   }, [])
 
   return (

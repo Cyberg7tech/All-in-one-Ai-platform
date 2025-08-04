@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth-context';
-import { Eye, EyeOff, User, Lock, LogIn, UserPlus, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, User, LogIn } from 'lucide-react';
 import { AIIcon } from '@/components/ui/ai-icon';
 import { getSupabaseClient } from '@/lib/supabase/client';
 
@@ -112,7 +112,7 @@ export default function LoginForm() {
             onClick={handleGoBack}
             className="text-white hover:bg-white/10 p-2"
           >
-            <ArrowLeft className="w-5 h-5 mr-2" />
+            ←
             Back to Home
           </Button>
         </div>
@@ -142,7 +142,7 @@ export default function LoginForm() {
                 onClick={() => setTab('signup')}
                 disabled={tab === 'signup'}
               >
-                <UserPlus className="inline w-4 h-4 mr-1" /> Sign Up
+Sign Up
               </button>
             </div>
 
@@ -189,7 +189,7 @@ export default function LoginForm() {
                 <div className="space-y-2">
                   <label htmlFor="password" className="text-sm font-medium">Password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">🔒</span>
                     <input
                       id="password"
                       type={showPassword ? 'text' : 'password'}

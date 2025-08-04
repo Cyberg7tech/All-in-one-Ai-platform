@@ -37,11 +37,6 @@ export default function TestPage() {
     }
     
     runTests()
-    
-    // Run tests every 2 seconds
-    const interval = setInterval(runTests, 2000)
-    
-    return () => clearInterval(interval)
   }, [user, isAuthenticated])
 
   return (
