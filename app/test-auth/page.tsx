@@ -5,10 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
 export default function TestAuthPage() {
-<<<<<<< HEAD
-  const { user, isAuthenticated, logout } = useAuth();
-=======
->>>>>>> 9fc9c4cfb4188dfdfb529d549129f2d94e14b44a
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuth();
 
@@ -23,28 +19,6 @@ export default function TestAuthPage() {
 
   return (
     <div className="container mx-auto p-8">
-<<<<<<< HEAD
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle>Authentication Test Page</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <strong>Authenticated:</strong> {isAuthenticated ? '✅ Yes' : '❌ No'}
-          </div>
-          <div>
-            <strong>User ID:</strong> {user?.id || 'None'}
-          </div>
-          <div>
-            <strong>User Email:</strong> {user?.email || 'None'}
-          </div>
-          <div>
-            <strong>User Name:</strong> {user?.name || 'None'}
-          </div>
-          <div className="pt-4 space-x-4">
-            <Button onClick={() => router.push('/dashboard')}>
-              Go to Dashboard
-=======
       <h1 className="text-3xl font-bold mb-6">Authentication Test</h1>
       
       <div className="space-y-4">
@@ -62,7 +36,6 @@ export default function TestAuthPage() {
           {isAuthenticated ? (
             <Button onClick={handleLogout} variant="destructive">
               Logout
->>>>>>> 9fc9c4cfb4188dfdfb529d549129f2d94e14b44a
             </Button>
           ) : (
             <Button onClick={() => router.push('/login')}>
