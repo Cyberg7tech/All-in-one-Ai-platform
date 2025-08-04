@@ -1,14 +1,12 @@
-import { createBrowserClient } from '@supabase/ssr'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { type SupabaseClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
 
 let _supabaseClient: SupabaseClient | null = null
 
 export function getSupabaseClient(): SupabaseClient {
   if (!_supabaseClient) {
-    _supabaseClient = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    _supabaseClient = createClientComponentClient()
   }
   return _supabaseClient
 }
