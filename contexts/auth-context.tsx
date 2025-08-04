@@ -28,7 +28,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const supabase = getSupabaseClient();
+
+  // Ensure we're on the client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const fetchUserProfile = useCallback(async (authUser: User): Promise<AuthUser> => {
     // Fetch user profile from users table
@@ -130,6 +136,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase, getUserFromSession]);
 
   useEffect(() => {
+    // Only run auth logic on client side
+    if (!isClient) return;
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -159,7 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     return () => subscription?.unsubscribe();
-  }, [supabase, fetchUserProfile, getUserFromSession]);
+  }, [supabase, fetchUserProfile, getUserFromSession, isClient]);
 
   const value: AuthContextType = {
     user,
