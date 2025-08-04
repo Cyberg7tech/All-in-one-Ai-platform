@@ -8,6 +8,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJ
 declare global {
   var __supabase_client: any;
   var __supabase_client_initialized: boolean;
+  var __supabase_creation_count: number;
 }
 
 // Create Supabase client with enhanced browser compatibility
@@ -24,13 +25,18 @@ function createSupabaseClient() {
 
   // Client-side: Check for existing instance first
   if (globalThis.__supabase_client && globalThis.__supabase_client_initialized) {
+    console.log('🔄 Reusing existing Supabase client instance');
     return globalThis.__supabase_client;
   }
+
+  // Track creation count
+  globalThis.__supabase_creation_count = (globalThis.__supabase_creation_count || 0) + 1;
+  console.log('🚀 Creating Supabase client instance #', globalThis.__supabase_creation_count);
 
   // Detect browser type for specific optimizations
   const userAgent = navigator.userAgent.toLowerCase();
   const isFirefox = userAgent.includes('firefox');
-  const isChromium = userAgent.includes('chrome') || userAgent.includes('chromium') || userAgent.includes('edg');
+  const isChromium = userAgent.includes('chrome') || userAgent.includes('chromium') || userAgent.includes('edg') || userAgent.includes('brave');
   
   // Browser-optimized configuration
   const clientConfig = {
@@ -59,10 +65,22 @@ function createSupabaseClient() {
     db: {
       schema: 'public'
     },
-    // Suppress duplicate client warnings
+    // Enhanced Chromium-specific optimizations
     ...(isChromium && {
       log: {
         level: 'error' // Only log errors, not warnings
+      },
+      // Add retry configuration for Chromium
+      retry: {
+        attempts: 3,
+        backoff: 1000
+      },
+      // Add timeout configuration
+      global: {
+        headers: {
+          'X-Client-Info': 'oneai-platform@1.0.0',
+          'X-Browser-Type': 'chromium'
+        }
       }
     })
   };

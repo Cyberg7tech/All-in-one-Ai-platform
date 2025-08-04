@@ -8,8 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/contexts/auth-context'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { AIIcon } from '@/components/ui/ai-icon'
+import { usePageVisibility } from '@/hooks/usePageVisibility'
 
 // Remove metadata since this is now a client component
 
@@ -87,6 +88,23 @@ const useCases = [
 export default function HomePage() {
   const { isAuthenticated, user } = useAuth();
   const router = useRouter();
+  const lastRefresh = useRef<number>(0);
+
+  // Use the proper page visibility hook instead of problematic useEffect
+  usePageVisibility({
+    onVisible: () => {
+      const now = Date.now();
+      // Prevent refresh if last refresh was < 5 seconds ago
+      if (now - lastRefresh.current > 5000) {
+        lastRefresh.current = now;
+        // Only refresh if authenticated to avoid unnecessary redirects
+        if (isAuthenticated) {
+          router.refresh();
+        }
+      }
+    },
+    throttleMs: 1000
+  });
 
   useEffect(() => {
     if (isAuthenticated) {

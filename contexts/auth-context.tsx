@@ -1,9 +1,8 @@
 "use client"
 
-import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useRef, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
-import BrowserDebugger from '@/lib/utils/browser-debugger';
 
 export interface AuthUser {
   id: string;
@@ -33,14 +32,13 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const debug = BrowserDebugger.getInstance();
   
   // Use refs to prevent multiple simultaneous auth operations
   const isInitializing = useRef(false);
   const authListenerSetup = useRef(false);
   const lastProcessedEvent = useRef<string | null>(null);
 
-  const fetchUserProfile = async (authUser: any): Promise<AuthUser> => {
+  const fetchUserProfile = useCallback(async (authUser: any): Promise<AuthUser> => {
     // Fetch user profile from users table
     const { data: profile } = await supabase
       .from('users')
@@ -56,15 +54,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       subscription_plan: profile?.subscription_plan as string | undefined,
       created_at: profile?.created_at as string | undefined,
     };
-  };
+  }, []);
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
       const userProfile = await fetchUserProfile(session.user);
       setUser(userProfile);
     }
-  };
+  }, [fetchUserProfile]);
 
   useEffect(() => {
     let mounted = true;
@@ -85,13 +83,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         if (mounted && !error) {
           if (session?.user) {
-            debug.log('Found existing session', 'success');
             try {
               const userProfile = await fetchUserProfile(session.user);
               setUser(userProfile);
-              debug.log('User profile loaded successfully', 'success');
             } catch (profileError) {
-              debug.log('Error fetching user profile, using basic info', 'warn');
               // If profile fetch fails, still set basic user info
               setUser({
                 id: session.user.id,
@@ -100,15 +95,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
               });
             }
           } else {
-            debug.log('No existing session found', 'info');
             setUser(null);
           }
+          console.log('🔄 AuthContext: Auth initialization complete');
           setIsLoading(false);
-          debug.log('Auth initialization complete', 'success');
         }
       } catch (error) {
         if (mounted) {
-          debug.log(`Error initializing auth: ${error}`, 'error');
           setUser(null);
           setIsLoading(false);
         }
@@ -137,29 +130,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
           lastProcessedEvent.current = eventKey;
           
-          debug.log(`Auth state changed: ${event} (session: ${!!session})`, 'info');
-          
           if (event === 'SIGNED_OUT' || !session) {
-            debug.log('User signed out', 'info');
             setUser(null);
+            console.log('🔄 AuthContext: User signed out, clearing loading state');
             setIsLoading(false);
           } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-            if (session?.user && user?.id !== session.user.id) {
-              debug.log(`Processing ${event} event`, 'info');
-              try {
-                const userProfile = await fetchUserProfile(session.user);
-                setUser(userProfile);
-                debug.log('User profile updated from auth change', 'success');
-              } catch (profileError) {
-                debug.log('Error fetching user profile on auth change', 'warn');
-                setUser({
-                  id: session.user.id,
-                  email: session.user.email || '',
-                  name: session.user.user_metadata?.name || undefined
-                });
+            if (session?.user) {
+              if (user?.id !== session.user.id) {
+                try {
+                  const userProfile = await fetchUserProfile(session.user);
+                  setUser(userProfile);
+                } catch (profileError) {
+                  setUser({
+                    id: session.user.id,
+                    email: session.user.email || '',
+                    name: session.user.user_metadata?.name || undefined
+                  });
+                }
               }
+              console.log('✅ AuthContext: User authenticated, clearing loading state');
+              setIsLoading(false);
             }
-            setIsLoading(false);
           }
         }
       );
@@ -177,9 +168,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         authSubscription.unsubscribe();
       }
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const login = async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -191,14 +182,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [fetchUserProfile]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
-  };
+  }, []);
 
-  const signup = async (email: string, password: string, name: string, plan: string) => {
+  const signup = useCallback(async (email: string, password: string, name: string, plan: string) => {
     setIsLoading(true);
     try {
       // Create user account
@@ -229,9 +220,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [fetchUserProfile]);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     isLoading,
     isAuthenticated: !!user,
@@ -239,7 +230,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     logout,
     signup,
     refreshUser
-  };
+  }), [user, isLoading, login, logout, signup, refreshUser]);
 
   return (
     <AuthContext.Provider value={value}>

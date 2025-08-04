@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Send, Plus, Bot, User, Settings, Image as ImageIcon, FileText, Mic, Camera, Code, Brain, Sparkles, ChevronDown, Upload, Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -103,47 +103,30 @@ export default function ChatPage() {
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Fetch models from AI API service
-  useEffect(() => {
-    const fetchModels = async () => {
-      try {
-        setIsLoadingModels(true);
-        const response = await fetch('/api/ai/models');
-        const data = await response.json();
+  const fetchModels = useCallback(async () => {
+    try {
+      setIsLoadingModels(true);
+      const response = await fetch('/api/ai/models');
+      const data = await response.json();
+      
+      if (data.success) {
+        setModelGroups(data.models);
+        setAvailableModels(data.models.all);
+        // Models loaded successfully
         
-        if (data.success) {
-          setModelGroups(data.models);
-          setAvailableModels(data.models.all);
-          // Models loaded successfully
-          
-          // Set default model based on what's available (Together AI first)
-          if (data.models.all.length > 0) {
-            // Prefer Together AI models (first one will be Llama 3.1 70B Recommended)
-            const preferredModel = data.models.all.find((m: any) => m.provider === 'together') ||
-                                 data.models.all[0];
-            setSelectedModel(preferredModel.id);
-          }
-        } else {
-          console.error('Failed to load models:', data.error);
-          // Fallback to Together AI model if API fetch fails
-          const fallbackModels = [{
-            id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
-            name: 'Llama 3.1 70B Turbo ⚡ (Recommended)',
-            provider: 'together',
-            category: 'chat',
-            tier: 'premium',
-            capabilities: ['chat'],
-            contextWindow: 131072,
-            speed: 'fast'
-          }];
-          setAvailableModels(fallbackModels);
-          setModelGroups({ reasoning: [], chat: fallbackModels, search: [], all: fallbackModels });
+        // Set default model based on what's available (Together AI first)
+        if (data.models.all.length > 0) {
+          // Prefer Together AI models (first one will be Llama 3.1 70B Recommended)
+          const preferredModel = data.models.all.find((m: any) => m.provider === 'together') ||
+                               data.models.all[0];
+          setSelectedModel(preferredModel.id);
         }
-      } catch (error) {
-        console.error('Error fetching models:', error);
-        // Fallback to Together AI model
+      } else {
+        console.error('Failed to load models:', data.error);
+        // Fallback to Together AI model if API fetch fails
         const fallbackModels = [{
           id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
-          name: 'Llama 3.1 70B Turbo ⚡ (Recommended)', 
+          name: 'Llama 3.1 70B Turbo ⚡ (Recommended)',
           provider: 'together',
           category: 'chat',
           tier: 'premium',
@@ -153,88 +136,116 @@ export default function ChatPage() {
         }];
         setAvailableModels(fallbackModels);
         setModelGroups({ reasoning: [], chat: fallbackModels, search: [], all: fallbackModels });
-      } finally {
-        setIsLoadingModels(false);
       }
-    };
-
-    fetchModels();
+    } catch (error) {
+      console.error('Error fetching models:', error);
+      // Fallback to Together AI model
+      const fallbackModels = [{
+        id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+        name: 'Llama 3.1 70B Turbo ⚡ (Recommended)', 
+        provider: 'together',
+        category: 'chat',
+        tier: 'premium',
+        capabilities: ['chat'],
+        contextWindow: 131072,
+        speed: 'fast'
+      }];
+      setAvailableModels(fallbackModels);
+      setModelGroups({ reasoning: [], chat: fallbackModels, search: [], all: fallbackModels });
+    } finally {
+      setIsLoadingModels(false);
+    }
   }, []);
 
+  useEffect(() => {
+    fetchModels();
+  }, [fetchModels]);
+
   // Filter and group models
-  const filteredModels = availableModels.filter(model => 
+  const filteredModels = useMemo(() => availableModels.filter(model => 
     model.name.toLowerCase().includes(modelSearch.toLowerCase()) ||
     model.provider.toLowerCase().includes(modelSearch.toLowerCase()) ||
     model.capabilities.some(cap => cap.toLowerCase().includes(modelSearch.toLowerCase()))
-  )
+  ), [availableModels, modelSearch])
 
-  const groupedModels = filteredModels.reduce((acc, model) => {
+  const groupedModels = useMemo(() => filteredModels.reduce((acc, model) => {
     if (!acc[model.category]) {
       acc[model.category] = []
     }
     acc[model.category].push(model)
     return acc
-  }, {} as Record<string, typeof availableModels>)
+  }, {} as Record<string, typeof availableModels>), [filteredModels])
 
-  const currentSession = sessions.find(s => s.id === currentSessionId)
-  const selectedModelInfo = availableModels.find(m => m.id === selectedModel)
+  const currentSession = useMemo(() => sessions.find(s => s.id === currentSessionId), [sessions, currentSessionId])
+  const selectedModelInfo = useMemo(() => availableModels.find(m => m.id === selectedModel), [availableModels, selectedModel])
 
   // Load chat sessions from DB on mount
-  useEffect(() => {
+  const fetchSessions = useCallback(async () => {
     if (!user?.id) {
       setIsLoadingSessions(false);
       return;
     }
     
-    const fetchSessions = async () => {
-      setIsLoadingSessions(true);
-      try {
-        const dbSessions = await dbHelpers.getChatSessions(user.id);
-        
-        if (dbSessions && dbSessions.length > 0) {
-          const mappedSessions = dbSessions.map((s: any) => ({
-            id: String(s.id),
-            title: String(s.title || 'New Chat'),
-            model: String(s.model_id || 'gpt-4o-mini'),
-            lastActivity: new Date(String(s.updated_at || s.created_at)),
-            messages: (s.chat_messages || []).map((m: any) => ({
-              id: String(m.id),
-              role: m.role as 'user' | 'assistant',
-              content: String(m.content),
-              timestamp: new Date(String(m.created_at)),
-              user_name: m.user_name ? String(m.user_name) : undefined,
-              user_email: m.user_email ? String(m.user_email) : undefined,
-            }))
-          }));
-          setSessions(mappedSessions);
-          if (mappedSessions.length > 0) {
-            setCurrentSessionId(mappedSessions[0].id);
-          }
-        } else {
-          setSessions([]);
-          setCurrentSessionId(null);
+    setIsLoadingSessions(true);
+    try {
+      const dbSessions = await dbHelpers.getChatSessions(user.id);
+      
+      if (dbSessions && dbSessions.length > 0) {
+        const mappedSessions = dbSessions.map((s: any) => ({
+          id: String(s.id),
+          title: String(s.title || 'New Chat'),
+          model: String(s.model_id || 'gpt-4o-mini'),
+          lastActivity: new Date(String(s.updated_at || s.created_at)),
+          messages: (s.chat_messages || []).map((m: any) => ({
+            id: String(m.id),
+            role: m.role as 'user' | 'assistant',
+            content: String(m.content),
+            timestamp: new Date(String(m.created_at)),
+            user_name: m.user_name ? String(m.user_name) : undefined,
+            user_email: m.user_email ? String(m.user_email) : undefined,
+          }))
+        }));
+        setSessions(mappedSessions);
+        if (mappedSessions.length > 0) {
+          setCurrentSessionId(mappedSessions[0].id);
         }
-      } catch (error) {
-        console.error('Error fetching sessions:', error);
+      } else {
         setSessions([]);
         setCurrentSessionId(null);
-      } finally {
-        setIsLoadingSessions(false);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching sessions:', error);
+      setSessions([]);
+      setCurrentSessionId(null);
+    } finally {
+      setIsLoadingSessions(false);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
     fetchSessions();
-  }, [user]); // depend on 'user' instead of 'user?.id'
+  }, [fetchSessions]);
+
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [])
 
   useEffect(() => {
     scrollToBottom()
-  }, [currentSession?.messages])
+  }, [currentSession?.messages?.length, scrollToBottom])
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+  // Cleanup recording interval on unmount
+  useEffect(() => {
+    return () => {
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current)
+        recordingIntervalRef.current = null
+      }
+    }
+  }, [])
 
   // Strip markdown formatting from text
-  const stripMarkdown = (text: string): string => {
+  const stripMarkdown = useCallback((text: string): string => {
     return text
       // Remove headers (### text -> text)
       .replace(/^#{1,6}\s+/gm, '')
@@ -255,10 +266,10 @@ export default function ChatPage() {
       // Clean up extra whitespace
       .replace(/\n{3,}/g, '\n\n')
       .trim()
-  }
+  }, [])
 
   // Create new session in DB
-  const createNewSession = async () => {
+  const createNewSession = useCallback(async () => {
     if (!user?.id) return;
     const session = await dbHelpers.createChatSession({
       user_id: user.id,
@@ -273,10 +284,10 @@ export default function ChatPage() {
       messages: []
     }, ...prev])
     setCurrentSessionId(String(session.id))
-  }
+  }, [user?.id, selectedModel])
 
   // Generate smart chat title based on message content
-  const generateChatTitle = (messageContent: string): string => {
+  const generateChatTitle = useCallback((messageContent: string): string => {
     // Remove extra whitespace and limit length
     const cleanContent = messageContent.trim().substring(0, 50);
     
@@ -295,10 +306,10 @@ export default function ChatPage() {
     }
     
     return title || cleanContent.substring(0, 30) + '...';
-  };
+  }, []);
 
   // Update chat title based on conversation context
-  const updateChatTitle = async (sessionId: string, firstMessage: string) => {
+  const updateChatTitle = useCallback(async (sessionId: string, firstMessage: string) => {
     try {
       const smartTitle = generateChatTitle(firstMessage);
       
@@ -314,10 +325,10 @@ export default function ChatPage() {
     } catch (error) {
       console.error('Error updating chat title:', error);
     }
-  };
+  }, [generateChatTitle]);
 
   // Send message and store in DB
-  const sendMessage = async () => {
+  const sendMessage = useCallback(async () => {
     if (!message.trim() || isLoading || !user?.id) return;
     
     // Store the message content before clearing the input
@@ -325,9 +336,12 @@ export default function ChatPage() {
     
     // Clear the input immediately
     setMessage('');
-          // Input cleared
     
     setIsLoading(true);
+    
+    // Create AbortController for this request
+    const abortController = new AbortController();
+    const { signal } = abortController;
     
     try {
       let sessionId: string = currentSessionId || '';
@@ -421,8 +435,14 @@ export default function ChatPage() {
           model: selectedModel,
           maxTokens: 1000,
           temperature: 0.7
-        })
+        }),
+        signal
       })
+      
+      if (signal.aborted) {
+        throw new Error('Request was aborted');
+      }
+      
       const data = await response.json()
       
       // Store assistant message
@@ -477,27 +497,31 @@ export default function ChatPage() {
       }
       
     } catch (error) {
-      console.error('Error in sendMessage:', error);
-      // Optionally show an error message to the user
+      if (signal.aborted) {
+        console.log('Request was aborted');
+      } else {
+        console.error('Error in sendMessage:', error);
+        // Optionally show an error message to the user
+      }
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [message, isLoading, user?.id, currentSessionId, selectedModel, sessions, updateChatTitle, stripMarkdown, user?.name, user?.email]);
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       sendMessage()
     }
-  }
+  }, [sendMessage])
 
-  const loadTemplate = (template: typeof CHAT_TEMPLATES[0]) => {
+  const loadTemplate = useCallback((template: typeof CHAT_TEMPLATES[0]) => {
     setMessage(template.prompt)
     textareaRef.current?.focus()
-  }
+  }, [])
 
   // File upload handlers
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader()
@@ -508,18 +532,18 @@ export default function ChatPage() {
       }
       reader.readAsDataURL(file)
     }
-  }
+  }, [])
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       setMessage(prev => prev + `\n[File uploaded: ${file.name}]`)
       // In real implementation, you'd upload the file and get a URL
     }
-  }
+  }, [])
 
   // Voice recording handlers
-  const startRecording = async () => {
+  const startRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       const mediaRecorder = new MediaRecorder(stream)
@@ -558,27 +582,28 @@ export default function ChatPage() {
       console.error('Error starting recording:', error)
       alert('Could not access microphone. Please check permissions.')
     }
-  }
+  }, []);
 
-  const stopRecording = () => {
+  const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop()
       setIsRecording(false)
       
       if (recordingIntervalRef.current) {
         clearInterval(recordingIntervalRef.current)
+        recordingIntervalRef.current = null
       }
     }
-  }
+  }, [isRecording]);
 
-  const formatTime = (seconds: number) => {
+  const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
+  }, [])
 
   // Delete session and its messages
-  const deleteSession = async (sessionId: string) => {
+  const deleteSession = useCallback(async (sessionId: string) => {
     try {
       await dbHelpers.deleteChatSession(sessionId);
       setSessions(prev => prev.filter(s => s.id !== sessionId));
@@ -595,7 +620,7 @@ export default function ChatPage() {
         setCurrentSessionId(remainingSessions.length > 0 ? remainingSessions[0].id : null);
       }
     }
-  };
+  }, [currentSessionId, sessions]);
 
   return (
     <div className="flex h-screen bg-background">

@@ -42,7 +42,7 @@ export function initPerformanceMonitoring() {
   }
 }
 
-// Auto-initialize performance monitoring
-if (typeof window !== 'undefined') {
-  initPerformanceMonitoring();
-} 
+// Auto-initialize performance monitoring - DISABLED TO PREVENT LOOPS
+// if (typeof window !== 'undefined') {
+//   initPerformanceMonitoring();
+// } 

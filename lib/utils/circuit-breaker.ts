@@ -142,7 +142,7 @@ export function preventStuckState() {
   }, 60000); // Check every minute
 }
 
-// Initialize anti-stuck measures
-if (typeof window !== 'undefined') {
-  preventStuckState();
-}
+// Initialize anti-stuck measures - DISABLED TO PREVENT LOOPS
+// if (typeof window !== 'undefined') {
+//   preventStuckState();
+// }

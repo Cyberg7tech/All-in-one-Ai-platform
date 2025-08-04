@@ -95,8 +95,8 @@ export function initChromiumRecovery() {
   window.addEventListener('load', clearAuthTimer);
 }
 
-// Auto-initialize for Chromium browsers
-if (typeof window !== 'undefined') {
-  // Initialize recovery system immediately
-  initChromiumRecovery();
-}
+// Auto-initialize for Chromium browsers - DISABLED TO PREVENT LOOPS
+// if (typeof window !== 'undefined') {
+//   // Initialize recovery system immediately
+//   initChromiumRecovery();
+// }

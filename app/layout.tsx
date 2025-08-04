@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider'
 import { QueryProvider } from '@/components/providers/query-provider'
 import { AuthProvider } from '@/contexts/auth-context'
 import { Toaster } from 'sonner'
-import BrowserAuthInitializer from '@/components/browser-auth-initializer'
+// import BrowserAuthInitializer from '@/components/browser-auth-initializer'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -43,19 +43,40 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // Only clear problematic legacy storage keys, preserve current auth
+              // NUCLEAR CACHE CLEARING - Force fresh everything
               (function() {
                 try {
-                  // Only clear specific problematic keys, not current ones
+                  // Clear ALL problematic storage
                   const problematicKeys = ['nuclear-oneai-auth', 'oneai-auth-permanent', 'oneai-auth'];
                   problematicKeys.forEach(key => {
                     localStorage.removeItem(key);
                     sessionStorage.removeItem(key);
                   });
                   
-                  console.log('Legacy storage cleanup completed');
+                  // Force service worker refresh
+                  if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                      for(let registration of registrations) {
+                        registration.unregister();
+                      }
+                    });
+                  }
+                  
+                  // Clear caches
+                  if ('caches' in window) {
+                    caches.keys().then(function(names) {
+                      for (let name of names) {
+                        caches.delete(name);
+                      }
+                    });
+                  }
+                  
+                  // Add cache busting timestamp and force reload flag
+                  window.__CACHE_BUST = Date.now();
+                  window.__FORCE_RELOAD = true;
+                  console.log('🚀 NUCLEAR CACHE CLEAR at:', new Date().toISOString());
                 } catch (e) {
-                  console.warn('Error clearing legacy storage:', e);
+                  console.warn('Error in nuclear cleanup:', e);
                 }
               })();
             `,
@@ -71,7 +92,7 @@ export default function RootLayout({
         >
           <AuthProvider>
             <QueryProvider>
-              <BrowserAuthInitializer />
+              {/* <BrowserAuthInitializer /> */}
               {children}
               <Toaster />
             </QueryProvider>

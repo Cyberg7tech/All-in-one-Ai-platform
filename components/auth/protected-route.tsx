@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { Loader2 } from 'lucide-react';
@@ -19,36 +19,30 @@ export default function ProtectedRoute({
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
   const hasRedirected = useRef(false);
-  const [showContent, setShowContent] = useState(false);
 
-  useEffect(() => {
-    // Add a small delay to prevent flash of loading
-    const timer = setTimeout(() => {
-      setShowContent(true);
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, []);
+  // Debug logging
+  console.log('🔍 ProtectedRoute:', { isLoading, isAuthenticated, userEmail: user?.email });
 
   useEffect(() => {
     // Only redirect when we're certain about auth state
-    if (!isLoading && requireAuth && !isAuthenticated && !hasRedirected.current && showContent) {
-      console.log('Redirecting to login - not authenticated');
+    if (!isLoading && requireAuth && !isAuthenticated && !hasRedirected.current) {
+      console.log('🔄 Redirecting to login - not authenticated');
       hasRedirected.current = true;
       router.push(redirectTo);
     }
-  }, [isAuthenticated, isLoading, requireAuth, redirectTo, router, showContent]);
+  }, [isAuthenticated, isLoading, requireAuth, redirectTo, router]);
 
   // Reset redirect flag when auth state changes
   useEffect(() => {
     if (isAuthenticated) {
       hasRedirected.current = false;
-      console.log('User authenticated:', user?.email);
+      console.log('✅ User authenticated:', user?.email);
     }
   }, [isAuthenticated, user]);
 
-  // Show loading while checking authentication or before showing content
-  if (isLoading || !showContent) {
+  // Show loading while checking authentication
+  if (isLoading) {
+    console.log('⏳ Showing loading state');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -61,6 +55,7 @@ export default function ProtectedRoute({
 
   // Don't render anything while redirecting
   if (requireAuth && !isAuthenticated) {
+    console.log('🔄 Redirecting - user not authenticated');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -71,5 +66,6 @@ export default function ProtectedRoute({
     );
   }
 
+  console.log('✅ Rendering protected content');
   return <>{children}</>;
 } 

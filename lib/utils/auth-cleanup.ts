@@ -41,15 +41,15 @@ export function emergencyAuthCleanup() {
   }
 }
 
-// Only run emergency cleanup if there are clear signs of issues
-if (typeof window !== 'undefined') {
-  // Check for known problematic keys
-  const hasProblematicKeys = Object.keys(localStorage).some(key => 
-    key.includes('nuclear-oneai') || key.includes('oneai-auth-permanent')
-  );
+// Only run emergency cleanup if there are clear signs of issues - DISABLED TO PREVENT LOOPS
+// if (typeof window !== 'undefined') {
+//   // Check for known problematic keys
+//   const hasProblematicKeys = Object.keys(localStorage).some(key => 
+//     key.includes('nuclear-oneai') || key.includes('oneai-auth-permanent')
+//   );
 
-  if (hasProblematicKeys) {
-    console.log('Detected problematic storage keys, cleaning up...');
-    clearProblematicStorage();
-  }
-}
+//   if (hasProblematicKeys) {
+//     console.log('Detected problematic storage keys, cleaning up...');
+//     clearProblematicStorage();
+//   }
+// }
