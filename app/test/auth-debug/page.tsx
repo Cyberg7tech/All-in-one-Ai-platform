@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase/client'
+import { getSupabaseClient } from '@/lib/supabase/client'
 import { useAuth } from '@/contexts/auth-context'
 
 export default function AuthDebugPage() {
@@ -43,6 +43,7 @@ export default function AuthDebugPage() {
 
     // Check Supabase session
     const checkSession = async () => {
+      const supabase = getSupabaseClient();
       const { data: { session }, error } = await supabase.auth.getSession()
       setSessionInfo({
         hasSession: !!session,

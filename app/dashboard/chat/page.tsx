@@ -102,31 +102,52 @@ export default function ChatPage() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Fetch models from AI API service
-  const fetchModels = useCallback(async () => {
-    try {
-      setIsLoadingModels(true);
-      const response = await fetch('/api/ai/models');
-      const data = await response.json();
-      
-      if (data.success) {
-        setModelGroups(data.models);
-        setAvailableModels(data.models.all);
-        // Models loaded successfully
+  // Load models from AI API service only once
+  useEffect(() => {
+    if (hasFetchedModels.current) return;
+
+    const fetchModels = async () => {
+      console.log('🔄 Fetching AI models...');
+      try {
+        setIsLoadingModels(true);
+        const response = await fetch('/api/ai/models');
+        const data = await response.json();
         
-        // Set default model based on what's available (Together AI first)
-        if (data.models.all.length > 0) {
-          // Prefer Together AI models (first one will be Llama 3.1 70B Recommended)
-          const preferredModel = data.models.all.find((m: any) => m.provider === 'together') ||
-                               data.models.all[0];
-          setSelectedModel(preferredModel.id);
+        if (data.success) {
+          setModelGroups(data.models);
+          setAvailableModels(data.models.all);
+          // Models loaded successfully
+          
+          // Set default model based on what's available (Together AI first)
+          if (data.models.all.length > 0) {
+            // Prefer Together AI models (first one will be Llama 3.1 70B Recommended)
+            const preferredModel = data.models.all.find((m: any) => m.provider === 'together') ||
+                                 data.models.all[0];
+            setSelectedModel(preferredModel.id);
+          }
+          console.log('✅ Loaded', data.models.all.length, 'AI models');
+        } else {
+          console.error('Failed to load models:', data.error);
+          // Fallback to Together AI model if API fetch fails
+          const fallbackModels = [{
+            id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+            name: 'Llama 3.1 70B Turbo ⚡ (Recommended)',
+            provider: 'together',
+            category: 'chat',
+            tier: 'premium',
+            capabilities: ['chat'],
+            contextWindow: 131072,
+            speed: 'fast'
+          }];
+          setAvailableModels(fallbackModels);
+          setModelGroups({ reasoning: [], chat: fallbackModels, search: [], all: fallbackModels });
         }
-      } else {
-        console.error('Failed to load models:', data.error);
-        // Fallback to Together AI model if API fetch fails
+      } catch (error) {
+        console.error('Error fetching models:', error);
+        // Fallback to Together AI model
         const fallbackModels = [{
           id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
-          name: 'Llama 3.1 70B Turbo ⚡ (Recommended)',
+          name: 'Llama 3.1 70B Turbo ⚡ (Recommended)', 
           provider: 'together',
           category: 'chat',
           tier: 'premium',
@@ -136,30 +157,14 @@ export default function ChatPage() {
         }];
         setAvailableModels(fallbackModels);
         setModelGroups({ reasoning: [], chat: fallbackModels, search: [], all: fallbackModels });
+      } finally {
+        setIsLoadingModels(false);
+        hasFetchedModels.current = true;
       }
-    } catch (error) {
-      console.error('Error fetching models:', error);
-      // Fallback to Together AI model
-      const fallbackModels = [{
-        id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
-        name: 'Llama 3.1 70B Turbo ⚡ (Recommended)', 
-        provider: 'together',
-        category: 'chat',
-        tier: 'premium',
-        capabilities: ['chat'],
-        contextWindow: 131072,
-        speed: 'fast'
-      }];
-      setAvailableModels(fallbackModels);
-      setModelGroups({ reasoning: [], chat: fallbackModels, search: [], all: fallbackModels });
-    } finally {
-      setIsLoadingModels(false);
-    }
-  }, []);
+    };
 
-  useEffect(() => {
     fetchModels();
-  }, [fetchModels]);
+  }, []);
 
   // Filter and group models
   const filteredModels = useMemo(() => availableModels.filter(model => 
@@ -179,52 +184,57 @@ export default function ChatPage() {
   const currentSession = useMemo(() => sessions.find(s => s.id === currentSessionId), [sessions, currentSessionId])
   const selectedModelInfo = useMemo(() => availableModels.find(m => m.id === selectedModel), [availableModels, selectedModel])
 
-  // Load chat sessions from DB on mount
-  const fetchSessions = useCallback(async () => {
-    if (!user?.id) {
-      setIsLoadingSessions(false);
-      return;
-    }
-    
-    setIsLoadingSessions(true);
-    try {
-      const dbSessions = await dbHelpers.getChatSessions(user.id);
-      
-      if (dbSessions && dbSessions.length > 0) {
-        const mappedSessions = dbSessions.map((s: any) => ({
-          id: String(s.id),
-          title: String(s.title || 'New Chat'),
-          model: String(s.model_id || 'gpt-4o-mini'),
-          lastActivity: new Date(String(s.updated_at || s.created_at)),
-          messages: (s.chat_messages || []).map((m: any) => ({
-            id: String(m.id),
-            role: m.role as 'user' | 'assistant',
-            content: String(m.content),
-            timestamp: new Date(String(m.created_at)),
-            user_name: m.user_name ? String(m.user_name) : undefined,
-            user_email: m.user_email ? String(m.user_email) : undefined,
-          }))
-        }));
-        setSessions(mappedSessions);
-        if (mappedSessions.length > 0) {
-          setCurrentSessionId(mappedSessions[0].id);
+  // Refs for preventing infinite loops
+  const hasFetchedSessions = useRef(false);
+  const hasFetchedModels = useRef(false);
+
+  // Load chat sessions from DB only once when user.id is available
+  useEffect(() => {
+    if (!user?.id || hasFetchedSessions.current) return;
+
+    const fetchSessions = async () => {
+      console.log('🔄 Fetching chat sessions for user:', user.id);
+      setIsLoadingSessions(true);
+      try {
+        const dbSessions = await dbHelpers.getChatSessions(user.id);
+        
+        if (dbSessions && dbSessions.length > 0) {
+          const mappedSessions = dbSessions.map((s: any) => ({
+            id: String(s.id),
+            title: String(s.title || 'New Chat'),
+            model: String(s.model_id || 'gpt-4o-mini'),
+            lastActivity: new Date(String(s.updated_at || s.created_at)),
+            messages: (s.chat_messages || []).map((m: any) => ({
+              id: String(m.id),
+              role: m.role as 'user' | 'assistant',
+              content: String(m.content),
+              timestamp: new Date(String(m.created_at)),
+              user_name: m.user_name ? String(m.user_name) : undefined,
+              user_email: m.user_email ? String(m.user_email) : undefined,
+            }))
+          }));
+          setSessions(mappedSessions);
+          if (mappedSessions.length > 0) {
+            setCurrentSessionId(mappedSessions[0].id);
+          }
+          console.log('✅ Loaded', mappedSessions.length, 'chat sessions');
+        } else {
+          setSessions([]);
+          setCurrentSessionId(null);
+          console.log('ℹ️ No existing chat sessions found');
         }
-      } else {
+      } catch (error) {
+        console.error('❌ Error fetching sessions:', error);
         setSessions([]);
         setCurrentSessionId(null);
+      } finally {
+        setIsLoadingSessions(false);
+        hasFetchedSessions.current = true;
       }
-    } catch (error) {
-      console.error('Error fetching sessions:', error);
-      setSessions([]);
-      setCurrentSessionId(null);
-    } finally {
-      setIsLoadingSessions(false);
-    }
-  }, [user?.id]);
+    };
 
-  useEffect(() => {
     fetchSessions();
-  }, [fetchSessions]);
+  }, [user?.id]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })

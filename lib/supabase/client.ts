@@ -1,127 +1,44 @@
-import { createClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
+import { type SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ttnkomdxbkmfmkaycjao.supabase.co'
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTcwMTgsImV4cCI6MjA2ODczMzAxOH0.ZpedifMgWW0XZzqq-CCkdHeiQb2HnzLZ8wXN03cjh7g'
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzE1NzAxOCwiZXhwIjoyMDY4NzMzMDE4fQ.UOE8fFmFYqnCHKiA-MlfHEfxDxViasspD64trjmsMLI'
+let _supabaseClient: SupabaseClient | null = null
 
-// Global singleton to prevent multiple instances across all contexts
-declare global {
-  var __supabase_client: any;
-  var __supabase_client_initialized: boolean;
-  var __supabase_creation_count: number;
+export function getSupabaseClient(): SupabaseClient {
+  if (!_supabaseClient) {
+    _supabaseClient = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+  }
+  return _supabaseClient
 }
 
-// Create Supabase client with enhanced browser compatibility
-function createSupabaseClient() {
-  if (typeof window === 'undefined') {
-    // Server-side client
-    return createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false
-      }
-    });
+// Export a default instance for backward compatibility (lazy getter)
+export const supabase = (() => {
+  let instance: SupabaseClient | null = null
+  return () => {
+    if (!instance) {
+      instance = getSupabaseClient()
+    }
+    return instance
   }
-
-  // Client-side: Check for existing instance first
-  if (globalThis.__supabase_client && globalThis.__supabase_client_initialized) {
-    console.log('🔄 Reusing existing Supabase client instance');
-    return globalThis.__supabase_client;
-  }
-
-  // Track creation count
-  globalThis.__supabase_creation_count = (globalThis.__supabase_creation_count || 0) + 1;
-  console.log('🚀 Creating Supabase client instance #', globalThis.__supabase_creation_count);
-
-  // Detect browser type for specific optimizations
-  const userAgent = navigator.userAgent.toLowerCase();
-  const isFirefox = userAgent.includes('firefox');
-  const isChromium = userAgent.includes('chrome') || userAgent.includes('chromium') || userAgent.includes('edg') || userAgent.includes('brave');
-  
-  // Browser-optimized configuration
-  const clientConfig = {
-    auth: {
-      persistSession: true,
-      storageKey: 'sb-ttnkomdxbkmfmkaycjao-auth-token',
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      flowType: 'pkce' as const,
-      storage: window.localStorage,
-      // Add browser-specific optimizations
-      debug: false, // Disable debug logs to reduce console noise
-    },
-    realtime: {
-      params: {
-        eventsPerSecond: isFirefox ? 1 : 2 // Firefox needs lower rate
-      }
-    },
-    global: {
-      headers: {
-        'X-Client-Info': 'oneai-platform@1.0.0',
-        'X-Browser-Type': isFirefox ? 'firefox' : isChromium ? 'chromium' : 'other'
-      }
-    },
-    // Add retry configuration for better stability
-    db: {
-      schema: 'public'
-    },
-    // Enhanced Chromium-specific optimizations
-    ...(isChromium && {
-      log: {
-        level: 'error' // Only log errors, not warnings
-      },
-      // Add retry configuration for Chromium
-      retry: {
-        attempts: 3,
-        backoff: 1000
-      },
-      // Add timeout configuration
-      global: {
-        headers: {
-          'X-Client-Info': 'oneai-platform@1.0.0',
-          'X-Browser-Type': 'chromium'
-        }
-      }
-    })
-  };
-
-  const client = createClient(supabaseUrl, supabaseKey, clientConfig);
-  
-  // Store globally to prevent multiple instances
-  globalThis.__supabase_client = client;
-  globalThis.__supabase_client_initialized = true;
-  
-  // Add browser-specific initialization
-  if (isFirefox) {
-    // Firefox-specific: Force a session check after a small delay
-    setTimeout(() => {
-      client.auth.getSession().catch(() => {
-        // Ignore errors, this is just to ensure session is loaded
-      });
-    }, 100);
-  }
-  
-  return client;
-}
-
-export const supabase = createSupabaseClient();
+})()
 
 // Admin client for backend operations  
-let _adminClient: any = null;
+let _adminClient: any = null
 
 export const supabaseAdmin = (() => {
   if (_adminClient) {
-    return _adminClient;
+    return _adminClient
   }
   
-  _adminClient = createClient(supabaseUrl, supabaseServiceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
+  // For admin operations, we still need the service role key
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ttnkomdxbkmfmkaycjao.supabase.co'
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzE1NzAxOCwiZXhwIjoyMDY4NzMzMDE4fQ.UOE8fFmFYqnCHKiA-MlfHEfxDxViasspD64trjmsMLI'
   
-  return _adminClient;
+  _adminClient = createBrowserClient(supabaseUrl, supabaseServiceKey)
+  
+  return _adminClient
 })()
 
 // Enhanced database helpers for the One AI platform
@@ -147,7 +64,7 @@ export const dbHelpers = {
   },
 
   async getUserById(userId: string) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('users')
       .select('*')
       .eq('id', userId)
@@ -167,7 +84,7 @@ export const dbHelpers = {
     model_id: string;
     agent_id?: string;
   }) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('chat_sessions')
       .insert(sessionData)
       .select()
@@ -183,7 +100,7 @@ export const dbHelpers = {
   async getChatSessions(userId: string) {
     try {
       // First get the chat sessions
-      const { data: sessions, error: sessionsError } = await supabase
+      const { data: sessions, error: sessionsError } = await supabase()
         .from('chat_sessions')
         .select('*')
         .eq('user_id', userId)
@@ -197,7 +114,7 @@ export const dbHelpers = {
       // Then get messages for each session
       const sessionsWithMessages = await Promise.all(
         (sessions || []).map(async (session: any) => {
-          const { data: messages, error: messagesError } = await supabase
+          const { data: messages, error: messagesError } = await supabase()
             .from('chat_messages')
             .select('*')
             .eq('session_id', String(session.id))
@@ -226,7 +143,7 @@ export const dbHelpers = {
   },
 
   async deleteChatSession(sessionId: string) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('chat_sessions')
       .delete()
       .eq('id', sessionId)
@@ -244,7 +161,7 @@ export const dbHelpers = {
     model_id?: string;
     agent_id?: string;
   }) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('chat_sessions')
       .update(updates)
       .eq('id', sessionId)
@@ -259,7 +176,7 @@ export const dbHelpers = {
 
   // AI Models
   async getAIModels() {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('ai_models')
       .select('*')
       .order('provider')
@@ -282,7 +199,7 @@ export const dbHelpers = {
     cost?: number;
     metadata?: any;
   }) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('chat_messages')
       .insert(messageData)
       .select()
@@ -306,7 +223,7 @@ export const dbHelpers = {
     tools?: string[];
     model_config?: any;
   }) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('ai_agents')
       .insert(agentData)
       .select()
@@ -328,7 +245,7 @@ export const dbHelpers = {
     tools: string[];
     model_config: any;
   }>) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('ai_agents')
       .update(agentData)
       .eq('id', agentId)
@@ -343,7 +260,7 @@ export const dbHelpers = {
   },
 
   async deleteAgent(agentId: string) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('ai_agents')
       .delete()
       .eq('id', agentId)
@@ -358,7 +275,7 @@ export const dbHelpers = {
   },
 
   async getUserAgents(userId: string) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('ai_agents')
       .select('*')
       .eq('user_id', userId)
@@ -381,7 +298,7 @@ export const dbHelpers = {
   }) {
     // Note: This would require a documents table in the database
     // For now, we'll use generated_content table as a placeholder
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('generated_content')
       .insert({
         user_id: docData.user_id,
@@ -406,7 +323,7 @@ export const dbHelpers = {
   async searchDocuments(userId: string, query: string, embedding: number[], limit: number = 10) {
     // This is a simplified implementation
     // In a real scenario, you'd use vector similarity search
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('generated_content')
       .select('*')
       .eq('user_id', userId)
@@ -430,7 +347,7 @@ export const dbHelpers = {
     results?: any;
   }) {
     // Store anomaly detection data in analytics_data table
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('analytics_data')
       .insert({
         user_id: anomalyData.user_id,
@@ -456,7 +373,7 @@ export const dbHelpers = {
   },
 
   async getAnomalyDetections(userId: string) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('analytics_data')
       .select('*')
       .eq('user_id', userId)
@@ -478,7 +395,7 @@ export const dbHelpers = {
     config: any;
     predictions?: any;
   }) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('analytics_data')
       .insert({
         user_id: forecastData.user_id,
@@ -504,7 +421,7 @@ export const dbHelpers = {
   },
 
   async getForecasts(userId: string) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('analytics_data')
       .select('*')
       .eq('user_id', userId)
@@ -526,7 +443,7 @@ export const dbHelpers = {
     cost: number;
     feature_type: 'chat' | 'image' | 'video' | 'audio' | 'embedding';
   }) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('usage_tracking')
       .insert(usageData)
       .select()
@@ -556,7 +473,7 @@ export const dbHelpers = {
         break;
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('usage_tracking')
       .select('*')
       .eq('user_id', userId)
@@ -571,7 +488,7 @@ export const dbHelpers = {
 
   // Get user activities
   async getUserActivities(userId: string, limit: number = 10) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('activities')
       .select('*')
       .eq('user_id', userId)
@@ -587,7 +504,7 @@ export const dbHelpers = {
 
   // Add activity
   async addActivity(userId: string, type: string, name: string, description?: string, icon?: string, metadata?: any) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('activities')
       .insert({
         user_id: userId,
@@ -609,7 +526,7 @@ export const dbHelpers = {
 
   // Get analytics data
   async getAnalyticsData(userId: string, timeRange: string = '7d') {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('analytics_data')
       .select('*')
       .eq('user_id', userId)
@@ -625,7 +542,7 @@ export const dbHelpers = {
 
   // Add analytics data point
   async addAnalyticsData(userId: string, metricName: string, metricValue: number, metricType: string, timePeriod: string, metadata?: any) {
-    const { data, error } = await supabase
+    const { data, error } = await supabase()
       .from('analytics_data')
       .insert({
         user_id: userId,

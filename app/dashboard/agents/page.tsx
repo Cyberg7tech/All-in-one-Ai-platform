@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Plus, Bot, Settings, Play, Trash2, Search, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -187,14 +187,20 @@ export default function AgentsPage() {
   const [filterType, setFilterType] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
 
+  // Ref to prevent infinite loops
+  const hasLoadedAgents = useRef(false);
+
   useEffect(() => {
+    if (!user?.id || hasLoadedAgents.current) return;
+    
     // Simulate loading agents based on user role
     if (user?.role === 'admin') {
       setAgents(demoAgents)
     } else {
       setAgents(demoAgents.slice(0, 2))
     }
-  }, [user])
+    hasLoadedAgents.current = true;
+  }, [user?.id, user?.role])
 
   const filteredAgents = agents.filter(agent => {
     const matchesSearch = agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

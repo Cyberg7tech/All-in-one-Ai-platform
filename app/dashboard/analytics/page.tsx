@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { TrendingUp, TrendingDown, Users, Bot, Brain, Zap, AlertTriangle, CheckCircle, Clock, DollarSign } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -30,11 +30,22 @@ export default function AnalyticsPage() {
   const [modelUsage, setModelUsage] = useState<ChartData[]>([])
   const [errorData, setErrorData] = useState<ChartData[]>([])
 
+  // Ref to prevent infinite loops
+  const hasLoadedAnalytics = useRef(false);
+
   useEffect(() => {
-    if (user) {
+    if (!user?.id || hasLoadedAnalytics.current) return;
+    
+    loadAnalyticsData()
+    hasLoadedAnalytics.current = true;
+  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Separate effect for timeRange changes
+  useEffect(() => {
+    if (user?.id && hasLoadedAnalytics.current) {
       loadAnalyticsData()
     }
-  }, [user, timeRange]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [timeRange]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadAnalyticsData = () => {
     // Generate analytics based on user data

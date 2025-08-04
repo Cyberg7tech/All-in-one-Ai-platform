@@ -9,7 +9,7 @@ export default function TestAuthPage() {
 
   useEffect(() => {
     setRenderCount(prev => prev + 1)
-  })
+  }, [])
 
   return (
     <div className="min-h-screen p-8 bg-gray-100">

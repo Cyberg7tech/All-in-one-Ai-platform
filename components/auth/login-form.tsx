@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/contexts/auth-context';
 import { Eye, EyeOff, User, Lock, LogIn, UserPlus, ArrowLeft } from 'lucide-react';
 import { AIIcon } from '@/components/ui/ai-icon';
-import { supabase } from '@/lib/supabase/client';
+import { getSupabaseClient } from '@/lib/supabase/client';
 
 const PLANS = [
   { value: 'free', label: 'Free' },
@@ -90,6 +90,7 @@ export default function LoginForm() {
     setError('');
     setIsLoading(true);
     try {
+      const supabase = getSupabaseClient();
       const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
       if (error) throw error;
       // Supabase will redirect on success

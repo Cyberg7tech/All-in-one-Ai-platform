@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
+import { getSupabaseClient } from '@/lib/supabase/client';
 import { dbHelpers } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { useState, useEffect, Suspense } from 'react'
@@ -65,6 +65,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) {
       const fetchStats = async () => {
+        const supabase = getSupabaseClient();
         const { data: userStats, error } = await supabase
           .from('users')
           .select('*')
@@ -119,6 +120,7 @@ export default function DashboardPage() {
     
     setIsSaving(true);
     try {
+      const supabase = getSupabaseClient();
       const { error } = await supabase
         .from('users')
         .update({ name: displayName.trim() })
