@@ -109,12 +109,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase]);
 
   useEffect(() => {
-    // Get initial session immediately
+    // Get initial session immediately - use basic user info first for speed
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
+        // Set basic user info immediately to avoid loading states
+        setUser(getUserFromSession(session));
+        
+        // Then fetch full profile in background
         fetchUserProfile(session.user)
           .then(setUser)
-          .catch(() => setUser(getUserFromSession(session)));
+          .catch(() => {
+            // Keep the basic user info if profile fetch fails
+            console.warn('Failed to fetch user profile, using basic session data');
+          });
       } else {
         setUser(null);
       }
@@ -126,11 +133,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (event === 'SIGNED_OUT' || !session) {
           setUser(null);
         } else if (session?.user) {
+          // Set basic info first for immediate UI update
+          setUser(getUserFromSession(session));
+          
+          // Then update with full profile
           try {
             const userProfile = await fetchUserProfile(session.user);
             setUser(userProfile);
           } catch (profileError) {
-            setUser(getUserFromSession(session));
+            // Keep the basic user info if profile fetch fails
+            console.warn('Failed to fetch user profile, using basic session data');
           }
         }
       }

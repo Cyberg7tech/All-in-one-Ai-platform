@@ -66,7 +66,7 @@ export default function ChatPage() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [isLoadingSessions, setIsLoadingSessions] = useState(true)
+  const [isLoadingSessions, setIsLoadingSessions] = useState(false)
   const [selectedModel, setSelectedModel] = useState('gpt-4o-mini')
   const [modelSearch, setModelSearch] = useState('')
   const [showModelPicker, setShowModelPicker] = useState(false)
@@ -82,7 +82,7 @@ export default function ChatPage() {
     contextWindow: number;
     speed: string;
   }>>([]);
-  const [isLoadingModels, setIsLoadingModels] = useState(true);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [modelGroups, setModelGroups] = useState<{
     reasoning: any[];
     chat: any[];
