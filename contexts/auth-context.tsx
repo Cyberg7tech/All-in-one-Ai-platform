@@ -16,6 +16,7 @@ interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   signup: (email: string, password: string, name: string, plan: string) => Promise<void>;
@@ -26,6 +27,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const supabase = getSupabaseClient();
 
   const fetchUserProfile = useCallback(async (authUser: User): Promise<AuthUser> => {
@@ -128,41 +130,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase, getUserFromSession]);
 
   useEffect(() => {
-    // Get initial session immediately - use basic user info first for speed
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        // Set basic user info immediately to avoid loading states
         setUser(getUserFromSession(session));
-        
-        // Then fetch full profile in background
+        // Fetch full profile in background
         fetchUserProfile(session.user)
           .then(setUser)
           .catch(() => {
-            // Keep the basic user info if profile fetch fails
             console.warn('Failed to fetch user profile, using basic session data');
           });
       } else {
         setUser(null);
       }
+      setIsLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, session: Session | null) => {
-        if (event === 'SIGNED_OUT' || !session) {
+        if (!session?.user || event === 'SIGNED_OUT') {
           setUser(null);
-        } else if (session?.user) {
-          // Set basic info first for immediate UI update
+        } else {
           setUser(getUserFromSession(session));
-          
-          // Then update with full profile
-          try {
-            const userProfile = await fetchUserProfile(session.user);
-            setUser(userProfile);
-          } catch (profileError) {
-            // Keep the basic user info if profile fetch fails
-            console.warn('Failed to fetch user profile, using basic session data');
-          }
+          fetchUserProfile(session.user).then(setUser).catch(() => {});
         }
       }
     );
@@ -173,6 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
+    isLoading,
     login,
     logout,
     signup,

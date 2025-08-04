@@ -5,7 +5,6 @@ import { ThemeProvider } from '@/components/providers/theme-provider'
 import { QueryProvider } from '@/components/providers/query-provider'
 import { AuthProvider } from '@/contexts/auth-context'
 import { Toaster } from 'sonner'
-// import BrowserAuthInitializer from '@/components/browser-auth-initializer'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -51,7 +50,6 @@ export default function RootLayout({
         >
           <AuthProvider>
             <QueryProvider>
-              {/* <BrowserAuthInitializer /> */}
               {children}
               <Toaster />
             </QueryProvider>
