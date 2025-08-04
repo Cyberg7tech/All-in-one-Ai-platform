@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
 
 export default function TestAuthPage() {
-  const { user, isLoading, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {

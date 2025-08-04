@@ -1,9 +1,8 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, ReactNode, useRef, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { getSupabaseClient } from '@/lib/supabase/client';
-import { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
-import { authDebug } from '@/lib/utils/debug';
+import { Session, User } from '@supabase/supabase-js';
 
 interface AuthUser {
   id: string;
@@ -16,7 +15,6 @@ interface AuthUser {
 
 interface AuthContextType {
   user: AuthUser | null;
-  isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -28,40 +26,25 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const supabase = getSupabaseClient();
 
-  // Use refs to prevent multiple simultaneous auth operations
-  const isInitializing = useRef(false);
-  const authListenerSetup = useRef(false);
-  const lastProcessedEvent = useRef<string | null>(null);
-  const loadingTimeout = useRef<NodeJS.Timeout | null>(null);
-
-  // Helper to set loading with timeout
-  const setLoadingWithTimeout = useCallback((loading: boolean) => {
-    if (loadingTimeout.current) {
-      clearTimeout(loadingTimeout.current);
-      loadingTimeout.current = null;
-    }
-    if (loading) {
-      setIsLoading(true);
-      // Set a maximum loading time of 5 seconds
-      loadingTimeout.current = setTimeout(() => {
-        authDebug.warn('Loading timeout reached, forcing loading to false');
-        setIsLoading(false);
-      }, 5000);
-    } else {
-      setIsLoading(false);
-    }
-  }, []);
+  const getUserFromSession = (session: Session | null): AuthUser | null => {
+    if (!session?.user) return null;
+    return {
+      id: session.user.id,
+      email: session.user.email ?? '',
+      name: session.user.user_metadata?.name ?? '',
+    };
+  };
 
   const fetchUserProfile = useCallback(async (authUser: User): Promise<AuthUser> => {
-    const supabase = getSupabaseClient();
     // Fetch user profile from users table
     const { data: profile } = await supabase
       .from('users')
       .select('name, role, subscription_plan, created_at')
       .eq('id', authUser.id)
       .single();
+    
     return {
       id: authUser.id,
       email: authUser.email || '',
@@ -70,14 +53,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription_plan: profile?.subscription_plan as string | undefined,
       created_at: profile?.created_at as string | undefined,
     };
-  }, []);
+  }, [supabase]);
 
   const refreshUser = useCallback(async () => {
-    const supabase = getSupabaseClient();
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error || !session?.user) {
       setUser(null);
-      setIsLoading(false);
     } else {
       try {
         const userProfile = await fetchUserProfile(session.user);
@@ -90,177 +71,82 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name: session.user.user_metadata?.name || undefined
         });
       }
-      setIsLoading(false);
     }
-  }, [fetchUserProfile]);
+  }, [supabase, fetchUserProfile]);
 
   const login = useCallback(async (email: string, password: string) => {
-    const supabase = getSupabaseClient();
-    // Don't set loading here as it conflicts with the auth listener
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error || !data.user) {
-        throw new Error(error?.message || 'Invalid email or password');
-      }
-      // Don't manually set user here - let the auth listener handle it
-      // This prevents race conditions and duplicate state updates
-    } catch (error) {
-      // Re-throw the error to be handled by the caller
-      throw error;
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error || !data.user) {
+      throw new Error(error?.message || 'Invalid email or password');
     }
-  }, []);
+    // The auth state change listener will handle updating the user
+  }, [supabase]);
 
   const logout = useCallback(async () => {
-    const supabase = getSupabaseClient();
     await supabase.auth.signOut();
     setUser(null);
-  }, []);
+  }, [supabase]);
 
   const signup = useCallback(async (email: string, password: string, name: string, plan: string) => {
-    const supabase = getSupabaseClient();
-    // Don't set loading here as it conflicts with the auth listener
-    try {
-      // Create user account
-      const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error || !data.user) {
-        throw new Error(error?.message || 'Failed to create account');
-      }
-      // Create user profile
-      const { error: profileError } = await supabase
-        .from('users')
-        .insert({
-          id: data.user.id,
-          email: data.user.email,
-          name,
-          subscription_plan: plan,
-          role: 'user'
-        });
-      if (profileError) {
-        console.error('Error creating user profile:', profileError);
-        // Don't throw here as the auth account was created successfully
-      }
-      // Don't manually set user here - let the auth listener handle it
-      // This prevents race conditions and duplicate state updates
-    } catch (error) {
-      // Re-throw the error to be handled by the caller
-      throw error;
+    // Create user account
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error || !data.user) {
+      throw new Error(error?.message || 'Failed to create account');
     }
-  }, []);
+    
+    // Create user profile
+    const { error: profileError } = await supabase
+      .from('users')
+      .insert({
+        id: data.user.id,
+        email: data.user.email,
+        name,
+        subscription_plan: plan,
+        role: 'user'
+      });
+    
+    if (profileError) {
+      console.error('Error creating user profile:', profileError);
+    }
+    // The auth state change listener will handle updating the user
+  }, [supabase]);
 
-  // Only setup auth state listener once
   useEffect(() => {
-    const supabase = getSupabaseClient();
-    let mounted = true;
-    let authSubscription: any = null;
+    // On mount, check current session immediately
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchUserProfile(session.user).then(userProfile => {
+          setUser(userProfile);
+        }).catch(() => {
+          setUser(getUserFromSession(session));
+        });
+      } else {
+        setUser(null);
+      }
+    });
 
-    const initializeAuth = async () => {
-      if (isInitializing.current) return;
-      isInitializing.current = true;
-      setLoadingWithTimeout(true);
-      try {
-        // First, try to get the current session
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (mounted && !error) {
-          if (session?.user) {
-            try {
-              const userProfile = await fetchUserProfile(session.user);
-              setUser(userProfile);
-            } catch (profileError) {
-              // If profile fetch fails, still set basic user info
-              setUser({
-                id: session.user.id,
-                email: session.user.email || '',
-                name: session.user.user_metadata?.name || undefined
-              });
-            }
-          } else {
-            setUser(null);
-          }
-          authDebug.log('Auth initialization complete', { hasUser: !!session?.user });
-        }
-      } catch (error) {
-        if (mounted) {
-          authDebug.error('Auth initialization error', error);
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        if (!session) {
           setUser(null);
-        }
-      } finally {
-        if (mounted) {
-          setLoadingWithTimeout(false);
-          isInitializing.current = false;
-        }
-      }
-    };
-
-    // Set up auth state listener
-    const setupAuthListener = () => {
-      // Prevent multiple listeners
-      if (authListenerSetup.current) {
-        return;
-      }
-      authListenerSetup.current = true;
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        async (event: AuthChangeEvent, session: Session | null) => {
-          if (!mounted) return;
-          // Prevent processing duplicate events
-          const eventKey = `${event}-${session?.user?.id || 'no-session'}-${Date.now()}`;
-          if (event !== 'TOKEN_REFRESHED' && event !== 'INITIAL_SESSION') {
-            // For non-refresh events, check if we recently processed a similar event
-            const lastEventTime = lastProcessedEvent.current?.split('-').pop();
-            if (lastEventTime && Date.now() - parseInt(lastEventTime) < 100) {
-              return;
-            }
-          }
-          lastProcessedEvent.current = eventKey;
-          authDebug.log('Auth state change', { event, userId: session?.user?.id });
-          if (event === 'SIGNED_OUT' || !session) {
-            setUser(null);
-            authDebug.log('User signed out, clearing loading state');
-            setLoadingWithTimeout(false);
-          } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
-            if (session?.user) {
-              // Only update user if it's different
-              if (!user || user.id !== session.user.id) {
-                try {
-                  const userProfile = await fetchUserProfile(session.user);
-                  setUser(userProfile);
-                } catch (profileError) {
-                  authDebug.error('Profile fetch error', profileError);
-                  setUser({
-                    id: session.user.id,
-                    email: session.user.email || '',
-                    name: session.user.user_metadata?.name || undefined
-                  });
-                }
-              }
-              authDebug.log('User authenticated, clearing loading state');
-              setLoadingWithTimeout(false);
-            }
+        } else if (session?.user) {
+          try {
+            const userProfile = await fetchUserProfile(session.user);
+            setUser(userProfile);
+          } catch (error) {
+            setUser(getUserFromSession(session));
           }
         }
-      );
-      authSubscription = subscription;
-    };
-
-    // Initialize everything
-    initializeAuth();
-    setupAuthListener();
-
-    return () => {
-      mounted = false;
-      authListenerSetup.current = false;
-      if (authSubscription) {
-        authSubscription.unsubscribe();
       }
-      if (loadingTimeout.current) {
-        clearTimeout(loadingTimeout.current);
-      }
-    };
-  }, [setLoadingWithTimeout, fetchUserProfile, user]);
+    );
+
+    return () => subscription.unsubscribe();
+  }, [supabase, fetchUserProfile]);
 
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
-    isLoading,
     login,
     logout,
     signup,

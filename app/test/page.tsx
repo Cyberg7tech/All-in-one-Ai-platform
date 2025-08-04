@@ -4,14 +4,14 @@ import { useAuth } from '@/contexts/auth-context'
 import { useEffect, useState } from 'react'
 
 export default function TestPage() {
-  const { user, isLoading, isAuthenticated } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const [testResults, setTestResults] = useState<string[]>([])
 
   useEffect(() => {
     const results = []
     
     // Test 1: Check if auth context is working
-    results.push(`Auth Context: ${isLoading ? 'Loading' : 'Ready'}`)
+    results.push(`Auth Context: Ready`)
     
     // Test 2: Check authentication status
     results.push(`Authentication: ${isAuthenticated ? 'Authenticated' : 'Not authenticated'}`)
@@ -40,7 +40,7 @@ export default function TestPage() {
     }
     
     setTestResults(results)
-  }, [user, isLoading, isAuthenticated])
+  }, [user, isAuthenticated])
 
   return (
     <div className="container mx-auto p-8">
@@ -58,7 +58,7 @@ export default function TestPage() {
         
         <div className="p-4 bg-blue-100 rounded">
           <h2 className="font-semibold mb-2">Current State:</h2>
-          <p>Loading: {isLoading ? 'Yes' : 'No'}</p>
+          <p>Authentication: {isAuthenticated ? 'Authenticated' : 'Not authenticated'}</p>
           <p>Authenticated: {isAuthenticated ? 'Yes' : 'No'}</p>
           <p>User: {user ? user.email : 'None'}</p>
         </div>

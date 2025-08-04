@@ -1,28 +1,19 @@
+'use client'
+
 import { createBrowserClient } from '@supabase/ssr'
 import { type SupabaseClient } from '@supabase/supabase-js'
 
-let _supabaseClient: SupabaseClient | null = null
+let supabase: SupabaseClient | null = null
 
 export function getSupabaseClient(): SupabaseClient {
-  if (!_supabaseClient) {
-    _supabaseClient = createBrowserClient(
+  if (!supabase) {
+    supabase = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
   }
-  return _supabaseClient
+  return supabase
 }
-
-// Export a default instance for backward compatibility (lazy getter)
-export const supabase = (() => {
-  let instance: SupabaseClient | null = null
-  return () => {
-    if (!instance) {
-      instance = getSupabaseClient()
-    }
-    return instance
-  }
-})()
 
 // Admin client for backend operations  
 let _adminClient: any = null
@@ -64,7 +55,7 @@ export const dbHelpers = {
   },
 
   async getUserById(userId: string) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('users')
       .select('*')
       .eq('id', userId)
@@ -84,7 +75,7 @@ export const dbHelpers = {
     model_id: string;
     agent_id?: string;
   }) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('chat_sessions')
       .insert(sessionData)
       .select()
@@ -100,7 +91,7 @@ export const dbHelpers = {
   async getChatSessions(userId: string) {
     try {
       // First get the chat sessions
-      const { data: sessions, error: sessionsError } = await supabase()
+      const { data: sessions, error: sessionsError } = await getSupabaseClient()
         .from('chat_sessions')
         .select('*')
         .eq('user_id', userId)
@@ -114,7 +105,7 @@ export const dbHelpers = {
       // Then get messages for each session
       const sessionsWithMessages = await Promise.all(
         (sessions || []).map(async (session: any) => {
-          const { data: messages, error: messagesError } = await supabase()
+          const { data: messages, error: messagesError } = await getSupabaseClient()
             .from('chat_messages')
             .select('*')
             .eq('session_id', String(session.id))
@@ -143,7 +134,7 @@ export const dbHelpers = {
   },
 
   async deleteChatSession(sessionId: string) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('chat_sessions')
       .delete()
       .eq('id', sessionId)
@@ -161,7 +152,7 @@ export const dbHelpers = {
     model_id?: string;
     agent_id?: string;
   }) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('chat_sessions')
       .update(updates)
       .eq('id', sessionId)
@@ -176,7 +167,7 @@ export const dbHelpers = {
 
   // AI Models
   async getAIModels() {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('ai_models')
       .select('*')
       .order('provider')
@@ -199,7 +190,7 @@ export const dbHelpers = {
     cost?: number;
     metadata?: any;
   }) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('chat_messages')
       .insert(messageData)
       .select()
@@ -223,7 +214,7 @@ export const dbHelpers = {
     tools?: string[];
     model_config?: any;
   }) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('ai_agents')
       .insert(agentData)
       .select()
@@ -245,7 +236,7 @@ export const dbHelpers = {
     tools: string[];
     model_config: any;
   }>) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('ai_agents')
       .update(agentData)
       .eq('id', agentId)
@@ -260,7 +251,7 @@ export const dbHelpers = {
   },
 
   async deleteAgent(agentId: string) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('ai_agents')
       .delete()
       .eq('id', agentId)
@@ -275,7 +266,7 @@ export const dbHelpers = {
   },
 
   async getUserAgents(userId: string) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('ai_agents')
       .select('*')
       .eq('user_id', userId)
@@ -298,7 +289,7 @@ export const dbHelpers = {
   }) {
     // Note: This would require a documents table in the database
     // For now, we'll use generated_content table as a placeholder
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('generated_content')
       .insert({
         user_id: docData.user_id,
@@ -323,7 +314,7 @@ export const dbHelpers = {
   async searchDocuments(userId: string, query: string, embedding: number[], limit: number = 10) {
     // This is a simplified implementation
     // In a real scenario, you'd use vector similarity search
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('generated_content')
       .select('*')
       .eq('user_id', userId)
@@ -347,7 +338,7 @@ export const dbHelpers = {
     results?: any;
   }) {
     // Store anomaly detection data in analytics_data table
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('analytics_data')
       .insert({
         user_id: anomalyData.user_id,
@@ -373,7 +364,7 @@ export const dbHelpers = {
   },
 
   async getAnomalyDetections(userId: string) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('analytics_data')
       .select('*')
       .eq('user_id', userId)
@@ -395,7 +386,7 @@ export const dbHelpers = {
     config: any;
     predictions?: any;
   }) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('analytics_data')
       .insert({
         user_id: forecastData.user_id,
@@ -421,7 +412,7 @@ export const dbHelpers = {
   },
 
   async getForecasts(userId: string) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('analytics_data')
       .select('*')
       .eq('user_id', userId)
@@ -443,7 +434,7 @@ export const dbHelpers = {
     cost: number;
     feature_type: 'chat' | 'image' | 'video' | 'audio' | 'embedding';
   }) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('usage_tracking')
       .insert(usageData)
       .select()
@@ -473,7 +464,7 @@ export const dbHelpers = {
         break;
     }
 
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('usage_tracking')
       .select('*')
       .eq('user_id', userId)
@@ -488,7 +479,7 @@ export const dbHelpers = {
 
   // Get user activities
   async getUserActivities(userId: string, limit: number = 10) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('activities')
       .select('*')
       .eq('user_id', userId)
@@ -504,7 +495,7 @@ export const dbHelpers = {
 
   // Add activity
   async addActivity(userId: string, type: string, name: string, description?: string, icon?: string, metadata?: any) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('activities')
       .insert({
         user_id: userId,
@@ -526,7 +517,7 @@ export const dbHelpers = {
 
   // Get analytics data
   async getAnalyticsData(userId: string, timeRange: string = '7d') {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('analytics_data')
       .select('*')
       .eq('user_id', userId)
@@ -542,7 +533,7 @@ export const dbHelpers = {
 
   // Add analytics data point
   async addAnalyticsData(userId: string, metricName: string, metricValue: number, metricType: string, timePeriod: string, metadata?: any) {
-    const { data, error } = await supabase()
+    const { data, error } = await getSupabaseClient()
       .from('analytics_data')
       .insert({
         user_id: userId,
@@ -593,6 +584,4 @@ export const dbHelpers = {
       return false;
     }
   }
-}
-
-export default supabase 
+} 
