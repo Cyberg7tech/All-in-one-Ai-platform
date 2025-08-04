@@ -50,7 +50,7 @@ export default function LoginForm() {
   const router = useRouter();
 
   const handleGoBack = () => {
-    router.push('/');
+    router.back();
   };
 
   // Login handler
