@@ -1,37 +1,59 @@
 "use client"
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/auth-context'
-import { Loader2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/auth-context';
+import { Loader2 } from 'lucide-react';
+import { authDebug } from '@/lib/utils/debug';
 
 interface ProtectedRouteProps {
-  children: React.ReactNode
+  children: React.ReactNode;
+  requireAuth?: boolean;
+  redirectTo?: string;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const router = useRouter()
-  const { user, isAuthenticated, isLoading } = useAuth()
-  const [authChecked, setAuthChecked] = useState(false)
+export default function ProtectedRoute({ 
+  children, 
+  requireAuth = true, 
+  redirectTo = '/login' 
+}: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const router = useRouter();
+  const hasRedirected = useRef(false);
+  const [isReady, setIsReady] = useState(false);
+
+  // Debug logging
+  authDebug.log('ProtectedRoute state', { isLoading, isAuthenticated, userEmail: user?.email, isReady });
 
   useEffect(() => {
-    console.log('🔍 ProtectedRoute:', { isLoading, isAuthenticated, userEmail: user?.email })
+    // Add a small delay to ensure auth state is stable
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 50);
 
-    // Only run when loading has finished
-    if (!isLoading) {
-      if (!isAuthenticated || !user) {
-        console.log('🔄 Redirecting to login - not authenticated')
-        router.replace('/login')
-      } else {
-        console.log('✅ User authenticated:', user.email)
-        setAuthChecked(true)
-      }
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    // Only redirect when we're certain about auth state and component is ready
+    if (isReady && !isLoading && requireAuth && !isAuthenticated && !hasRedirected.current) {
+      authDebug.log('Redirecting to login - not authenticated');
+      hasRedirected.current = true;
+      router.push(redirectTo);
     }
-  }, [isLoading, isAuthenticated, user, router])
+  }, [isAuthenticated, isLoading, requireAuth, redirectTo, router, isReady]);
 
-  // Show loading while checking authentication
-  if (isLoading || !authChecked) {
-    console.log('⏳ Showing loading state')
+  // Reset redirect flag when auth state changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      hasRedirected.current = false;
+      authDebug.log('User authenticated in ProtectedRoute', { email: user?.email });
+    }
+  }, [isLoading, isAuthenticated, user, router]);
+
+  // Show loading while checking authentication or not ready
+  if (isLoading || !isReady) {
+    authDebug.log('Showing loading state', { isLoading, isReady });
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -39,12 +61,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
-    )
+    );
   }
 
-  // Only render children when authenticated and auth check is complete
-  console.log('✅ Rendering protected content')
-  return <>{children}</>
-}
+  // Don't render anything while redirecting
+  if (requireAuth && !isAuthenticated) {
+    authDebug.log('Redirecting - user not authenticated');
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Redirecting to login...</p>
+        </div>
+      </div>
+    );
+  }
 
-export default ProtectedRoute 
+  authDebug.log('Rendering protected content');
+  return <>{children}</>;
+}

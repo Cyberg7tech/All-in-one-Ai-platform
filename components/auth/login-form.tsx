@@ -60,10 +60,12 @@ export default function LoginForm() {
     setIsLoading(true);
     try {
       await login(email, password);
-      router.push('/dashboard');
+      // Add a small delay to allow auth state to stabilize
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -77,10 +79,10 @@ export default function LoginForm() {
     try {
       await signup(signupEmail, signupPassword, signupName, signupPlan);
       setSuccess(true);
-      setTimeout(() => router.push('/dashboard'), 1200);
+      // Use consistent delay for auth state stabilization
+      setTimeout(() => router.push('/dashboard'), 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign up failed');
-    } finally {
       setIsLoading(false);
     }
   };
