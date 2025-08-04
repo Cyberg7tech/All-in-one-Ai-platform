@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ['@tensorflow/tfjs-node'],
   images: {
     domains: ['images.unsplash.com', 'via.placeholder.com', 'api.dicebear.com'],
     remotePatterns: [

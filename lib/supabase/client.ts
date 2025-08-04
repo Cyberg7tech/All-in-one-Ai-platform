@@ -3,17 +3,12 @@
 import { createBrowserClient } from '@supabase/ssr'
 import { type SupabaseClient } from '@supabase/supabase-js'
 
-let _supabaseClient: SupabaseClient | null = null
-
-export function getSupabaseClient(): SupabaseClient {
-  if (!_supabaseClient) {
-    _supabaseClient = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-  }
-  return _supabaseClient
-}
+export const getSupabaseClient = () => {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+};
 
 // Admin client for backend operations  
 let _adminClient: SupabaseClient | null = null

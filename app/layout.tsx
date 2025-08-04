@@ -39,7 +39,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <meta name="theme-color" content="#3B82F6" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-
+        <meta name="style-insertion-point" content="" />
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider

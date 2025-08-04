@@ -29,14 +29,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
-  const supabase = getSupabaseClient();
+  const [supabase, setSupabase] = useState<any>(null);
 
-  // Ensure we're on the client side
+  // Ensure we're on the client side and initialize Supabase
   useEffect(() => {
     setIsClient(true);
+    const client = getSupabaseClient();
+    setSupabase(client);
   }, []);
 
   const fetchUserProfile = useCallback(async (authUser: User): Promise<AuthUser> => {
+    if (!supabase) {
+      return {
+        id: authUser.id,
+        email: authUser.email || '',
+        name: authUser.user_metadata?.name || '',
+      };
+    }
+    
     // Fetch user profile from users table
     const { data: profile } = await supabase
       .from('users')
@@ -64,6 +74,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshUser = useCallback(async () => {
+    if (!supabase) return;
+    
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error || !session?.user) {
       setUser(null);
@@ -79,6 +91,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase, fetchUserProfile, getUserFromSession]);
 
   const login = useCallback(async (email: string, password: string) => {
+    if (!supabase) throw new Error('Supabase client not initialized');
+    
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error || !data.user) {
       throw new Error(error?.message || 'Invalid email or password');
@@ -99,11 +113,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase, getUserFromSession, fetchUserProfile]);
 
   const logout = useCallback(async () => {
+    if (!supabase) return;
+    
     await supabase.auth.signOut();
     setUser(null);
   }, [supabase]);
 
   const signup = useCallback(async (email: string, password: string, name: string, plan: string) => {
+    if (!supabase) throw new Error('Supabase client not initialized');
+    
     // Create user account
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error || !data.user) {
@@ -136,11 +154,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase, getUserFromSession]);
 
   useEffect(() => {
-    // Only run auth logic on client side
-    if (!isClient) return;
+    // Only run auth logic on client side and when supabase is ready
+    if (!isClient || !supabase) return;
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       if (session?.user) {
         setUser(getUserFromSession(session));
         // Fetch full profile in background
