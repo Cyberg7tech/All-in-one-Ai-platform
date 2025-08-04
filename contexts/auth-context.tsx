@@ -75,8 +75,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error || !data.user) {
       throw new Error(error?.message || 'Invalid email or password');
     }
-    // Auth listener will handle user state update
-  }, [supabase]);
+    
+    // Immediately set basic user info to prevent race conditions
+    const basicUser = getUserFromSession(data.session);
+    if (basicUser) {
+      setUser(basicUser);
+      
+      // Fetch full profile in background
+      fetchUserProfile(data.user)
+        .then(setUser)
+        .catch(() => {
+          console.warn('Failed to fetch user profile after login, using basic session data');
+        });
+    }
+  }, [supabase, getUserFromSession, fetchUserProfile]);
 
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
@@ -105,8 +117,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Error creating user profile:', profileError);
       // Don't throw here as the auth account was created successfully
     }
-    // Auth listener will handle user state update
-  }, [supabase]);
+    
+    // Immediately set user info if session exists
+    if (data.session) {
+      const basicUser = getUserFromSession(data.session);
+      if (basicUser) {
+        setUser({ ...basicUser, name, subscription_plan: plan, role: 'user' });
+      }
+    }
+  }, [supabase, getUserFromSession]);
 
   useEffect(() => {
     // Get initial session immediately - use basic user info first for speed
