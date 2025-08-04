@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useRef, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
+import { authDebug } from '@/lib/utils/debug';
 
 export interface AuthUser {
   id: string;
@@ -37,6 +38,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isInitializing = useRef(false);
   const authListenerSetup = useRef(false);
   const lastProcessedEvent = useRef<string | null>(null);
+  const loadingTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Helper to set loading with timeout
+  const setLoadingWithTimeout = useCallback((loading: boolean) => {
+    if (loadingTimeout.current) {
+      clearTimeout(loadingTimeout.current);
+      loadingTimeout.current = null;
+    }
+    
+    if (loading) {
+      setIsLoading(true);
+      // Set a maximum loading time of 5 seconds
+      loadingTimeout.current = setTimeout(() => {
+        authDebug.warn('Loading timeout reached, forcing loading to false');
+        setIsLoading(false);
+      }, 5000);
+    } else {
+      setIsLoading(false);
+    }
+  }, []);
 
   const fetchUserProfile = useCallback(async (authUser: any): Promise<AuthUser> => {
     // Fetch user profile from users table
@@ -97,17 +118,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
           } else {
             setUser(null);
           }
-          console.log('🔄 AuthContext: Auth initialization complete');
-          setIsLoading(false);
+          authDebug.log('Auth initialization complete', { hasUser: !!session?.user });
         }
-      } catch (error) {
-        if (mounted) {
-          setUser(null);
-          setIsLoading(false);
+              } catch (error) {
+          if (mounted) {
+            authDebug.error('Auth initialization error', error);
+            setUser(null);
+          }
+              } finally {
+          if (mounted) {
+            setLoadingWithTimeout(false);
+            isInitializing.current = false;
+          }
         }
-      } finally {
-        isInitializing.current = false;
-      }
     };
 
     // Set up auth state listener
@@ -124,23 +147,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (!mounted) return;
           
           // Prevent processing duplicate events
-          const eventKey = `${event}-${session?.user?.id || 'no-session'}`;
-          if (lastProcessedEvent.current === eventKey && event !== 'TOKEN_REFRESHED') {
-            return;
+          const eventKey = `${event}-${session?.user?.id || 'no-session'}-${Date.now()}`;
+          if (event !== 'TOKEN_REFRESHED' && event !== 'INITIAL_SESSION') {
+            // For non-refresh events, check if we recently processed a similar event
+            const lastEventTime = lastProcessedEvent.current?.split('-').pop();
+            if (lastEventTime && Date.now() - parseInt(lastEventTime) < 100) {
+              return;
+            }
           }
           lastProcessedEvent.current = eventKey;
           
+          authDebug.log('Auth state change', { event, userId: session?.user?.id });
+          
           if (event === 'SIGNED_OUT' || !session) {
             setUser(null);
-            console.log('🔄 AuthContext: User signed out, clearing loading state');
-            setIsLoading(false);
-          } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            authDebug.log('User signed out, clearing loading state');
+            setLoadingWithTimeout(false);
+          } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
             if (session?.user) {
-              if (user?.id !== session.user.id) {
+              // Only update user if it's different
+              if (!user || user.id !== session.user.id) {
                 try {
                   const userProfile = await fetchUserProfile(session.user);
                   setUser(userProfile);
                 } catch (profileError) {
+                  authDebug.error('Profile fetch error', profileError);
                   setUser({
                     id: session.user.id,
                     email: session.user.email || '',
@@ -148,8 +179,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
                   });
                 }
               }
-              console.log('✅ AuthContext: User authenticated, clearing loading state');
-              setIsLoading(false);
+              authDebug.log('User authenticated, clearing loading state');
+              setLoadingWithTimeout(false);
             }
           }
         }
@@ -167,22 +198,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (authSubscription) {
         authSubscription.unsubscribe();
       }
+      if (loadingTimeout.current) {
+        clearTimeout(loadingTimeout.current);
+      }
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [setLoadingWithTimeout]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = useCallback(async (email: string, password: string) => {
-    setIsLoading(true);
+    // Don't set loading here as it conflicts with the auth listener
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error || !data.user) {
         throw new Error(error?.message || 'Invalid email or password');
       }
-      const userProfile = await fetchUserProfile(data.user);
-      setUser(userProfile);
-    } finally {
-      setIsLoading(false);
+      // Don't manually set user here - let the auth listener handle it
+      // This prevents race conditions and duplicate state updates
+    } catch (error) {
+      // Re-throw the error to be handled by the caller
+      throw error;
     }
-  }, [fetchUserProfile]);
+  }, []);
 
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
@@ -190,7 +225,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const signup = useCallback(async (email: string, password: string, name: string, plan: string) => {
-    setIsLoading(true);
+    // Don't set loading here as it conflicts with the auth listener
     try {
       // Create user account
       const { data, error } = await supabase.auth.signUp({ email, password });
@@ -214,13 +249,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Don't throw here as the auth account was created successfully
       }
 
-      // Set user state
-      const userProfile = await fetchUserProfile(data.user);
-      setUser(userProfile);
-    } finally {
-      setIsLoading(false);
+      // Don't manually set user here - let the auth listener handle it
+      // This prevents race conditions and duplicate state updates
+    } catch (error) {
+      // Re-throw the error to be handled by the caller
+      throw error;
     }
-  }, [fetchUserProfile]);
+  }, []);
 
   const value = useMemo(() => ({
     user,
