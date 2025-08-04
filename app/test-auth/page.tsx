@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
 
 export default function TestAuthPage() {
-  const { user, isLoading, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -21,9 +21,6 @@ export default function TestAuthPage() {
           <CardTitle>Authentication Test Page</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <strong>Loading State:</strong> {isLoading ? '⏳ Loading...' : '✅ Not Loading'}
-          </div>
           <div>
             <strong>Authenticated:</strong> {isAuthenticated ? '✅ Yes' : '❌ No'}
           </div>

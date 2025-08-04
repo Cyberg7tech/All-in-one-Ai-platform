@@ -5,7 +5,7 @@ import { getSupabaseClient } from '@/lib/supabase/client'
 import { useAuth } from '@/contexts/auth-context'
 
 export default function AuthDebugPage() {
-  const { user, isLoading, isAuthenticated } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const [storageInfo, setStorageInfo] = useState<any>({})
   const [sessionInfo, setSessionInfo] = useState<any>(null)
 
@@ -76,7 +76,6 @@ export default function AuthDebugPage() {
           <h2 className="font-semibold mb-2">Auth Context Status:</h2>
           <pre className="text-sm">
             {JSON.stringify({
-              isLoading,
               isAuthenticated,
               userEmail: user?.email,
               userName: user?.name
