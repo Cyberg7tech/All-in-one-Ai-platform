@@ -113,11 +113,7 @@ export default function ChatPage() {
         if (data.success) {
           setModelGroups(data.models);
           setAvailableModels(data.models.all);
-          console.log('Loaded models:', {
-            total: data.total,
-            providers: data.providers,
-            configuration: data.configuration
-          });
+          // Models loaded successfully
           
           // Set default model based on what's available (Together AI first)
           if (data.models.all.length > 0) {
@@ -186,7 +182,6 @@ export default function ChatPage() {
   // Load chat sessions from DB on mount
   useEffect(() => {
     if (!user?.id) {
-      console.log('User not ready yet:', user);
       setIsLoadingSessions(false);
       return;
     }
@@ -194,9 +189,7 @@ export default function ChatPage() {
     const fetchSessions = async () => {
       setIsLoadingSessions(true);
       try {
-        console.log('Fetching chat sessions for user:', user.id);
         const dbSessions = await dbHelpers.getChatSessions(user.id);
-        console.log('Raw DB sessions:', dbSessions);
         
         if (dbSessions && dbSessions.length > 0) {
           const mappedSessions = dbSessions.map((s: any) => ({
@@ -213,13 +206,11 @@ export default function ChatPage() {
               user_email: m.user_email ? String(m.user_email) : undefined,
             }))
           }));
-          console.log('Mapped sessions:', mappedSessions);
           setSessions(mappedSessions);
           if (mappedSessions.length > 0) {
             setCurrentSessionId(mappedSessions[0].id);
           }
         } else {
-          console.log('No sessions found');
           setSessions([]);
           setCurrentSessionId(null);
         }
@@ -334,7 +325,7 @@ export default function ChatPage() {
     
     // Clear the input immediately
     setMessage('');
-    console.log('Input cleared, message content:', messageContent);
+          // Input cleared
     
     setIsLoading(true);
     
@@ -476,17 +467,8 @@ export default function ChatPage() {
           const updatedSession = prev.find(s => s.id === sessionId);
           const totalMessages = updatedSession ? updatedSession.messages.length : 0;
           
-          console.log('Title update check:', {
-            sessionId,
-            totalMessages,
-            shouldUpdate: totalMessages === 2,
-            messageContent: messageContent.substring(0, 30),
-            sessionTitle: updatedSession?.title
-          });
-          
           // If this is the first exchange (2 total messages) and title is still "New Chat"
           if (totalMessages === 2 && updatedSession?.title === 'New Chat') {
-            console.log('Updating chat title for first exchange...');
             updateChatTitle(sessionId, messageContent);
           }
           
@@ -499,7 +481,6 @@ export default function ChatPage() {
       // Optionally show an error message to the user
     } finally {
       setIsLoading(false);
-      console.log('sendMessage completed, isLoading set to false');
     }
   }
 

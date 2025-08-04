@@ -7,47 +7,86 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJ
 // Global singleton to prevent multiple instances across all contexts
 declare global {
   var __supabase_client: any;
+  var __supabase_client_initialized: boolean;
 }
 
-export const supabase = (() => {
-  // Check for existing global instance first
-  if (typeof globalThis !== 'undefined' && globalThis.__supabase_client) {
+// Create Supabase client with enhanced browser compatibility
+function createSupabaseClient() {
+  if (typeof window === 'undefined') {
+    // Server-side client
+    return createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false
+      }
+    });
+  }
+
+  // Client-side: Check for existing instance first
+  if (globalThis.__supabase_client && globalThis.__supabase_client_initialized) {
     return globalThis.__supabase_client;
   }
 
-  console.log('Creating new Supabase client');
+  // Detect browser type for specific optimizations
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isFirefox = userAgent.includes('firefox');
+  const isChromium = userAgent.includes('chrome') || userAgent.includes('chromium') || userAgent.includes('edg');
   
-  // Browser-optimized configuration that works across all browsers
+  // Browser-optimized configuration
   const clientConfig = {
     auth: {
       persistSession: true,
       storageKey: 'sb-ttnkomdxbkmfmkaycjao-auth-token',
       autoRefreshToken: true,
-      detectSessionInUrl: false,
+      detectSessionInUrl: true,
       flowType: 'pkce' as const,
-      storage: typeof window !== 'undefined' ? window.localStorage : undefined
+      storage: window.localStorage,
+      // Add browser-specific optimizations
+      debug: false, // Disable debug logs to reduce console noise
     },
     realtime: {
       params: {
-        eventsPerSecond: 2 // Conservative setting for stability
+        eventsPerSecond: isFirefox ? 1 : 2 // Firefox needs lower rate
       }
     },
     global: {
       headers: {
-        'X-Client-Info': 'oneai-platform@1.0.0'
+        'X-Client-Info': 'oneai-platform@1.0.0',
+        'X-Browser-Type': isFirefox ? 'firefox' : isChromium ? 'chromium' : 'other'
       }
-    }
+    },
+    // Add retry configuration for better stability
+    db: {
+      schema: 'public'
+    },
+    // Suppress duplicate client warnings
+    ...(isChromium && {
+      log: {
+        level: 'error' // Only log errors, not warnings
+      }
+    })
   };
 
   const client = createClient(supabaseUrl, supabaseKey, clientConfig);
   
   // Store globally to prevent multiple instances
-  if (typeof globalThis !== 'undefined') {
-    globalThis.__supabase_client = client;
+  globalThis.__supabase_client = client;
+  globalThis.__supabase_client_initialized = true;
+  
+  // Add browser-specific initialization
+  if (isFirefox) {
+    // Firefox-specific: Force a session check after a small delay
+    setTimeout(() => {
+      client.auth.getSession().catch(() => {
+        // Ignore errors, this is just to ensure session is loaded
+      });
+    }, 100);
   }
   
   return client;
-})()
+}
+
+export const supabase = createSupabaseClient();
 
 // Admin client for backend operations  
 let _adminClient: any = null;

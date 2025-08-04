@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider'
 import { QueryProvider } from '@/components/providers/query-provider'
 import { AuthProvider } from '@/contexts/auth-context'
 import { Toaster } from 'sonner'
+import BrowserAuthInitializer from '@/components/browser-auth-initializer'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -46,7 +47,7 @@ export default function RootLayout({
               (function() {
                 try {
                   // Only clear specific problematic keys, not current ones
-                  const problematicKeys = ['nuclear-oneai-auth', 'oneai-auth-permanent'];
+                  const problematicKeys = ['nuclear-oneai-auth', 'oneai-auth-permanent', 'oneai-auth'];
                   problematicKeys.forEach(key => {
                     localStorage.removeItem(key);
                     sessionStorage.removeItem(key);
@@ -57,11 +58,6 @@ export default function RootLayout({
                   console.warn('Error clearing legacy storage:', e);
                 }
               })();
-              
-              // Initialize browser debugger for development
-              if (typeof window !== 'undefined') {
-                console.log('%c🔧 OneAI Loading Debugger Active', 'color: #00aa00; font-size: 12px;');
-              }
             `,
           }}
         />
@@ -75,6 +71,7 @@ export default function RootLayout({
         >
           <AuthProvider>
             <QueryProvider>
+              <BrowserAuthInitializer />
               {children}
               <Toaster />
             </QueryProvider>

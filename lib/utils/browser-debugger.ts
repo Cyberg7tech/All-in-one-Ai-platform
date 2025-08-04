@@ -3,6 +3,7 @@
 export class BrowserDebugger {
   private static instance: BrowserDebugger;
   private logs: Array<{ timestamp: number; message: string; level: string }> = [];
+  private enabled: boolean = true;
   
   static getInstance() {
     if (!BrowserDebugger.instance) {
@@ -13,7 +14,13 @@ export class BrowserDebugger {
 
   private constructor() {
     if (typeof window !== 'undefined') {
-      this.initializeDebugger();
+      // Only enable debugging in development or when explicitly enabled
+      this.enabled = process.env.NODE_ENV === 'development' || 
+                     window.location.search.includes('debug=true');
+      
+      if (this.enabled) {
+        this.initializeDebugger();
+      }
     }
   }
 
@@ -46,13 +53,17 @@ export class BrowserDebugger {
       this.log('Window lost focus', 'info');
     });
 
-    // Check for stuck loading states every 5 seconds
+    // Check for stuck loading states every 10 seconds (reduced frequency)
     setInterval(() => {
-      this.checkForStuckStates();
-    }, 5000);
+      if (document.visibilityState === 'visible') {
+        this.checkForStuckStates();
+      }
+    }, 10000);
   }
 
   public log(message: string, level: 'info' | 'warn' | 'error' | 'success' = 'info') {
+    if (!this.enabled) return;
+    
     const timestamp = Date.now();
     this.logs.push({ timestamp, message, level });
     
@@ -76,18 +87,27 @@ export class BrowserDebugger {
   }
 
   private checkForStuckStates() {
-    // Check for elements that might indicate stuck loading
+    // Only check for actual problems, not routine states
     const loadingElements = document.querySelectorAll('[class*="loading"], [class*="spinner"]');
+    
+    // Only warn if loading elements persist for too long
     if (loadingElements.length > 0) {
-      this.log(`Found ${loadingElements.length} loading elements on page`, 'warn');
+      const now = Date.now();
+      const pageLoadTime = performance.timing.loadEventEnd;
+      const timeSinceLoad = now - pageLoadTime;
+      
+      // Only warn if loading elements persist for more than 10 seconds after page load
+      if (timeSinceLoad > 10000) {
+        this.log(`Found ${loadingElements.length} persistent loading elements`, 'warn');
+      }
     }
 
-    // Check for auth states
+    // Check for excessive auth tokens (more than 5 is problematic)
     const authTokens = Object.keys(localStorage).filter(key => 
       key.includes('auth') || key.includes('supabase')
     );
-    if (authTokens.length > 3) {
-      this.log(`Multiple auth tokens found: ${authTokens.length}`, 'warn');
+    if (authTokens.length > 5) {
+      this.log(`Excessive auth tokens found: ${authTokens.length}`, 'warn');
     }
   }
 
@@ -171,8 +191,11 @@ if (typeof window !== 'undefined') {
   (window as any).oneaiLogs = () => console.table(debug.exportLogs());
   (window as any).oneaiClear = () => debug.clearLogs();
   
-  console.log('%c🔧 OneAI Browser Debugger Ready', 'color: #00aa00; font-size: 14px; font-weight: bold;');
-  console.log('Use oneaiStatus(), oneaiLogs(), or oneaiClear() in console for debugging');
+  // Only show debug message if debugging is enabled
+  if (process.env.NODE_ENV === 'development' || window.location.search.includes('debug=true')) {
+    console.log('%c🔧 OneAI Browser Debugger Ready', 'color: #00aa00; font-size: 14px; font-weight: bold;');
+    console.log('Use oneaiStatus(), oneaiLogs(), or oneaiClear() in console for debugging');
+  }
 }
 
 export default BrowserDebugger;
