@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import BrowserDebugger from '@/lib/utils/browser-debugger';
@@ -34,6 +34,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const debug = BrowserDebugger.getInstance();
+  
+  // Use refs to prevent multiple simultaneous auth operations
+  const isInitializing = useRef(false);
+  const authListenerSetup = useRef(false);
+  const lastProcessedEvent = useRef<string | null>(null);
 
   const fetchUserProfile = async (authUser: any): Promise<AuthUser> => {
     // Fetch user profile from users table
@@ -67,11 +72,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     // Initialize auth state
     const initializeAuth = async () => {
+      // Prevent multiple simultaneous initializations
+      if (isInitializing.current) {
+        return;
+      }
+      
+      isInitializing.current = true;
+      
       try {
         // First, try to get the current session
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (mounted) {
+        if (mounted && !error) {
           if (session?.user) {
             debug.log('Found existing session', 'success');
             try {
@@ -95,19 +107,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
           debug.log('Auth initialization complete', 'success');
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
         if (mounted) {
+          debug.log(`Error initializing auth: ${error}`, 'error');
           setUser(null);
           setIsLoading(false);
         }
+      } finally {
+        isInitializing.current = false;
       }
     };
 
     // Set up auth state listener
     const setupAuthListener = () => {
+      // Prevent multiple listeners
+      if (authListenerSetup.current) {
+        return;
+      }
+      
+      authListenerSetup.current = true;
+      
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         async (event: AuthChangeEvent, session: Session | null) => {
           if (!mounted) return;
+          
+          // Prevent processing duplicate events
+          const eventKey = `${event}-${session?.user?.id || 'no-session'}`;
+          if (lastProcessedEvent.current === eventKey && event !== 'TOKEN_REFRESHED') {
+            return;
+          }
+          lastProcessedEvent.current = eventKey;
           
           debug.log(`Auth state changed: ${event} (session: ${!!session})`, 'info');
           
@@ -116,7 +144,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             setUser(null);
             setIsLoading(false);
           } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-            if (session?.user) {
+            if (session?.user && user?.id !== session.user.id) {
               debug.log(`Processing ${event} event`, 'info');
               try {
                 const userProfile = await fetchUserProfile(session.user);
@@ -144,6 +172,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     return () => {
       mounted = false;
+      authListenerSetup.current = false;
       if (authSubscription) {
         authSubscription.unsubscribe();
       }
