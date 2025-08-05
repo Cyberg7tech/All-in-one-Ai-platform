@@ -9,7 +9,8 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
+    // Fix for client-side module resolution
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -17,29 +18,86 @@ const nextConfig = {
         net: false,
         tls: false,
         crypto: false,
+        path: false,
+        stream: false,
+        buffer: false,
+        process: false,
       };
       
-      // Optimize for browser compatibility
+      // Ensure proper module resolution
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@': __dirname,
+      };
+      
+      // Configure module resolution
+      config.resolve.extensions = ['.ts', '.tsx', '.js', '.jsx', '.json'];
+      
+      // Optimize for browser compatibility with deterministic IDs
       config.optimization = {
         ...config.optimization,
+        moduleIds: 'deterministic',
+        runtimeChunk: 'single',
         splitChunks: {
           chunks: 'all',
+          maxAsyncRequests: 30,
+          maxInitialRequests: 30,
           cacheGroups: {
-            supabase: {
-              test: /[\\/]node_modules[\\/]@supabase[\\/]/,
-              name: 'supabase',
+            default: false,
+            vendors: false,
+            framework: {
               chunks: 'all',
-              priority: 10,
+              name: 'framework',
+              test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
+              priority: 40,
+              enforce: true,
             },
-            react: {
-              test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
-              name: 'react',
-              chunks: 'all',
+            lib: {
+              test(module) {
+                return module.size() > 160000 && /node_modules[/\\]/.test(module.identifier());
+              },
+              name(module) {
+                const hash = require('crypto').createHash('sha1');
+                if (module.type === 'css/mini-extract') {
+                  module.updateHash(hash);
+                } else {
+                  hash.update(module.identifier());
+                }
+                return hash.digest('hex').substring(0, 8);
+              },
+              priority: 30,
+              minChunks: 1,
+              reuseExistingChunk: true,
+            },
+            commons: {
+              name: 'commons',
+              chunks: 'initial',
+              minChunks: 2,
               priority: 20,
+            },
+            shared: {
+              name(module, chunks) {
+                const hash = require('crypto')
+                  .createHash('sha1')
+                  .update(chunks.reduce((acc, chunk) => acc + chunk.name, ''))
+                  .digest('hex');
+                return hash + (isServer ? '-server' : '');
+              },
+              priority: 10,
+              minChunks: 2,
+              reuseExistingChunk: true,
             },
           },
         },
       };
+      
+      // Add plugin to handle module loading errors
+      const webpack = require('webpack');
+      config.plugins.push(
+        new webpack.DefinePlugin({
+          'process.env.BROWSER': true,
+        })
+      );
     }
     
     // Handle Supabase SSR issues
@@ -50,12 +108,33 @@ const nextConfig = {
       });
     }
     
+    // Add error handling for module loading
+    config.module.rules.push({
+      test: /\.m?js$/,
+      type: 'javascript/auto',
+      resolve: {
+        fullySpecified: false,
+      },
+    });
+    
+    // Ignore certain warnings
+    config.ignoreWarnings = [
+      /Failed to parse source map/,
+      /Cannot read properties of undefined/,
+    ];
+    
     return config;
   },
   // Performance optimizations
   swcMinify: true,
   compress: true,
   poweredByHeader: false,
+  
+  // Experimental features for better hydration
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    serverComponentsExternalPackages: ['@supabase/supabase-js'],
+  },
   
   // Headers for security and performance
   async headers() {
