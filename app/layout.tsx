@@ -7,6 +7,7 @@ import { QueryProvider } from '@/components/providers/query-provider'
 import { AuthProvider } from '@/contexts/auth-context'
 import { ErrorBoundary } from '@/components/providers/error-boundary'
 import { WebpackInitializer } from '@/components/webpack-initializer'
+import { SupabaseDebugger } from '@/components/dev/supabase-debugger'
 import { Toaster } from 'sonner'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -119,6 +120,7 @@ export default function RootLayout({
               <QueryProvider>
                 {children}
                 <Toaster />
+                <SupabaseDebugger />
               </QueryProvider>
             </AuthProvider>
           </ThemeProvider>

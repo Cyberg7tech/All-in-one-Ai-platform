@@ -27,26 +27,54 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [supabase, setSupabase] = useState<any>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // Initialize Supabase client only on client side
-    const client = getSupabaseClient();
-    setSupabase(client);
-
-    // Get initial session
-    client.auth.getSession().then(({ data: { session } }) => {
-      setUser(getUserFromSession(session));
-      setIsLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
-      setUser(getUserFromSession(session));
-    });
-
-    return () => subscription.unsubscribe();
+    setIsClient(true);
   }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        const client = getSupabaseClient();
+        
+        // Get initial session
+        const { data: { session }, error } = await client.auth.getSession();
+        
+        if (mounted) {
+          if (error) {
+            console.error('Error getting session:', error);
+          } else {
+            setUser(getUserFromSession(session));
+          }
+          setIsLoading(false);
+        }
+
+        // Listen for auth changes
+        const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
+          if (mounted) {
+            setUser(getUserFromSession(session));
+          }
+        });
+
+        return () => {
+          mounted = false;
+          subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
+  }, [isClient]);
 
   const getUserFromSession = (session: Session | null): AuthUser | null => {
     if (!session?.user) return null;
@@ -58,8 +86,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshUser = async () => {
-    if (!supabase) return;
-    const { data: { session }, error } = await supabase.auth.getSession();
+    if (!isClient) return;
+    const client = getSupabaseClient();
+    const { data: { session }, error } = await client.auth.getSession();
     if (error || !session?.user) {
       setUser(null);
     } else {
@@ -68,23 +97,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
-    if (!supabase) throw new Error('Supabase client not initialized');
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!isClient) throw new Error('Client not initialized');
+    const client = getSupabaseClient();
+    const { data, error } = await client.auth.signInWithPassword({ email, password });
     if (error) throw new Error(error.message);
     setUser(getUserFromSession(data.session));
   };
 
   const logout = async () => {
-    if (!supabase) return;
-    await supabase.auth.signOut();
+    if (!isClient) return;
+    const client = getSupabaseClient();
+    await client.auth.signOut();
     setUser(null);
   };
 
   const signup = async (email: string, password: string, name: string, plan: string) => {
-    if (!supabase) throw new Error('Supabase client not initialized');
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (!isClient) throw new Error('Client not initialized');
+    const client = getSupabaseClient();
+    const { data, error } = await client.auth.signUp({ email, password });
     if (error || !data.user) throw new Error(error?.message || 'Signup failed');
-    await supabase.from('users').insert({
+    await client.from('users').insert({
       id: data.user.id,
       email,
       name,

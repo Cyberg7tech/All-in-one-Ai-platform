@@ -22,10 +22,10 @@ if (typeof window !== 'undefined') {
         return moduleCache[moduleId].exports;
       }
       
-      try {
-        // Try original require
-        return originalRequire.call(this, moduleId);
-      } catch (error: any) {
+              try {
+          // Try original require
+          return originalRequire.call(originalRequire, moduleId);
+        } catch (error: any) {
         console.warn(`Module ${moduleId} failed to load:`, error);
         
         // Check if it's the specific "Cannot read properties of undefined" error
@@ -80,15 +80,7 @@ if (typeof window !== 'undefined') {
     setTimeout(() => patchWebpackRequire(), 0);
   }
   
-  // Patch module loading errors in promises
-  const originalPromiseReject = Promise.reject;
-  Promise.reject = function(reason: any) {
-    if (reason && reason.message && reason.message.includes("Cannot read properties of undefined (reading 'call')")) {
-      console.warn('Caught webpack module loading error in Promise:', reason);
-      return originalPromiseReject.call(Promise, new Error('Module loading failed, using fallback'));
-    }
-    return originalPromiseReject.call(Promise, reason);
-  };
+  // Note: Promise.reject patching removed due to TypeScript compatibility issues
 }
 
 export {};

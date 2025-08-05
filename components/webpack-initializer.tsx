@@ -20,7 +20,7 @@ export function WebpackInitializer() {
         }
         
         try {
-          return originalRequire.call(this, moduleId);
+          return originalRequire.call(originalRequire, moduleId);
         } catch (error: any) {
           if (error?.message?.includes('Cannot read properties of undefined')) {
             console.warn(`Module ${moduleId} failed to load, creating stub`);

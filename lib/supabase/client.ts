@@ -3,15 +3,31 @@
 import { createBrowserClient } from '@supabase/ssr'
 import { type SupabaseClient } from '@supabase/supabase-js'
 
+// Singleton client instance to prevent multiple GoTrueClient instances
+let _client: SupabaseClient | null = null
+
 export const getSupabaseClient = () => {
   if (typeof window === 'undefined') {
     throw new Error('Supabase client called on server');
   }
 
-  return createBrowserClient(
+  // Return existing client if available
+  if (_client) {
+    return _client;
+  }
+
+  // Create new client only if one doesn't exist
+  _client = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
+
+  // Store reference for debugging
+  if (typeof window !== 'undefined') {
+    (window as any).__supabaseInstance = _client;
+  }
+
+  return _client;
 };
 
 // Admin client for backend operations  
@@ -23,6 +39,11 @@ export function getSupabaseAdmin(): SupabaseClient {
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzE1NzAxOCwiZXhwIjoyMDY4NzMzMDE4fQ.UOE8fFmFYqnCHKiA-MlfHEfxDxViasspD64trjmsMLI'
     
     _adminClient = createBrowserClient(supabaseUrl, supabaseServiceKey)
+    
+    // Store reference for debugging
+    if (typeof window !== 'undefined') {
+      (window as any).__supabaseAdminInstance = _adminClient;
+    }
   }
   
   return _adminClient
