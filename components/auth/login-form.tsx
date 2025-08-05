@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
-import { getSupabaseClient } from '@/lib/supabase/client';
+import { useSupabaseClient } from '@/components/providers/supabase-provider';
 
 export default function LoginForm() {
   const [tab, setTab] = useState('login');
@@ -17,6 +17,7 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const { login, signup } = useAuth();
   const router = useRouter();
+  const supabase = useSupabaseClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,11 +44,14 @@ export default function LoginForm() {
   };
 
   const handleGoogleOAuth = async () => {
-    const supabase = getSupabaseClient();
+    const redirectTo = process.env.NODE_ENV === 'production' 
+      ? 'https://one-ai.sgbizsolution.com/auth/callback'
+      : `${window.location.origin}/auth/callback`;
+      
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+        redirectTo
       }
     });
   };

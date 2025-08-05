@@ -1,6 +1,6 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
-import { getSupabaseClient } from '@/lib/supabase/client';
+import { useSupabaseClient } from '@/components/providers/supabase-provider';
 import { Session, User } from '@supabase/supabase-js';
 
 interface AuthUser {
@@ -27,54 +27,39 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const supabase = useSupabaseClient();
 
   useEffect(() => {
-    setIsClient(true);
+    setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (!isClient) return;
+    if (!mounted) return;
 
-    let mounted = true;
-
+    // Get initial session
     const initializeAuth = async () => {
       try {
-        const client = getSupabaseClient();
-        
-        // Get initial session
-        const { data: { session }, error } = await client.auth.getSession();
-        
-        if (mounted) {
-          if (error) {
-            console.error('Error getting session:', error);
-          } else {
-            setUser(getUserFromSession(session));
-          }
-          setIsLoading(false);
-        }
-
-        // Listen for auth changes
-        const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
-          if (mounted) {
-            setUser(getUserFromSession(session));
-          }
-        });
-
-        return () => {
-          mounted = false;
-          subscription.unsubscribe();
-        };
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(getUserFromSession(session));
+        setIsLoading(false);
       } catch (error) {
-        console.error('Error initializing auth:', error);
-        if (mounted) {
-          setIsLoading(false);
-        }
+        console.error('Error getting session:', error);
+        setIsLoading(false);
       }
     };
 
     initializeAuth();
-  }, [isClient]);
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(getUserFromSession(session));
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [mounted, supabase]);
 
   const getUserFromSession = (session: Session | null): AuthUser | null => {
     if (!session?.user) return null;
@@ -86,9 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshUser = async () => {
-    if (!isClient) return;
-    const client = getSupabaseClient();
-    const { data: { session }, error } = await client.auth.getSession();
+    if (!mounted) return;
+    const { data: { session }, error } = await supabase.auth.getSession();
     if (error || !session?.user) {
       setUser(null);
     } else {
@@ -97,33 +81,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
-    if (!isClient) throw new Error('Client not initialized');
-    const client = getSupabaseClient();
-    const { data, error } = await client.auth.signInWithPassword({ email, password });
+    if (!mounted) throw new Error('Component not mounted');
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw new Error(error.message);
-    setUser(getUserFromSession(data.session));
+    // Session will be handled by the useSession hook
   };
 
   const logout = async () => {
-    if (!isClient) return;
-    const client = getSupabaseClient();
-    await client.auth.signOut();
-    setUser(null);
+    if (!mounted) return;
+    await supabase.auth.signOut();
+    // Session will be handled by the useSession hook
   };
 
   const signup = async (email: string, password: string, name: string, plan: string) => {
-    if (!isClient) throw new Error('Client not initialized');
-    const client = getSupabaseClient();
-    const { data, error } = await client.auth.signUp({ email, password });
+    if (!mounted) throw new Error('Component not mounted');
+    const { data, error } = await supabase.auth.signUp({ email, password });
     if (error || !data.user) throw new Error(error?.message || 'Signup failed');
-    await client.from('users').insert({
+    await supabase.from('users').insert({
       id: data.user.id,
       email,
       name,
       role: 'user',
       subscription_plan: plan,
     });
-    setUser(getUserFromSession(data.session));
+    // Session will be handled by the useSession hook
   };
 
   return (

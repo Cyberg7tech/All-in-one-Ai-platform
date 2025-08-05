@@ -9,6 +9,7 @@ import { ErrorBoundary } from '@/components/providers/error-boundary'
 import { WebpackInitializer } from '@/components/webpack-initializer'
 import { SupabaseDebugger } from '@/components/dev/supabase-debugger'
 import { Toaster } from 'sonner'
+import SupabaseProvider from '@/components/providers/supabase-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -116,13 +117,15 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <AuthProvider>
-              <QueryProvider>
-                {children}
-                <Toaster />
-                <SupabaseDebugger />
-              </QueryProvider>
-            </AuthProvider>
+            <SupabaseProvider>
+              <AuthProvider>
+                <QueryProvider>
+                  {children}
+                  <Toaster />
+                  <SupabaseDebugger />
+                </QueryProvider>
+              </AuthProvider>
+            </SupabaseProvider>
           </ThemeProvider>
         </ErrorBoundary>
       </body>
