@@ -31,10 +31,25 @@ const nextConfig = {
               chunks: 'all',
               priority: 10,
             },
+            react: {
+              test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+              name: 'react',
+              chunks: 'all',
+              priority: 20,
+            },
           },
         },
       };
     }
+    
+    // Handle Supabase SSR issues
+    config.externals = config.externals || [];
+    if (isServer) {
+      config.externals.push({
+        '@supabase/supabase-js': 'commonjs @supabase/supabase-js',
+      });
+    }
+    
     return config;
   },
   // Performance optimizations

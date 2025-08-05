@@ -83,7 +83,7 @@ export function useTextToSpeech(options: UseTextToSpeechOptions = {}) {
         await new Promise(resolve => setTimeout(resolve, retryDelay * retryCount));
       }
     }
-  }, [maxRetries, retryDelay, timeout]);
+  }, [maxRetries, retryDelay]);
 
   const cancelRequest = useCallback(() => {
     if (abortControllerRef.current) {

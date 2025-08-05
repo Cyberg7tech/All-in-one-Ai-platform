@@ -481,11 +481,13 @@ body {
     font-size: 16px; /* Prevent zoom on iOS */
     border-radius: 0; /* Remove iOS styling */
     -webkit-appearance: none;
+    appearance: none;
   }
   
   /* Mobile buttons */
   button {
     -webkit-appearance: none;
+    appearance: none;
     touch-action: manipulation;
   }
 } 
