@@ -76,7 +76,7 @@ export function smartChunk(text: string, options: ChunkOptions = {}): string[] {
   const majorSeparators = ['\n\n\n', '\n\n', '\n'];
   const sections: string[] = [];
 
-  let currentText = text;
+  const currentText = text;
 
   for (const separator of majorSeparators) {
     if (currentText.includes(separator)) {
@@ -136,7 +136,7 @@ export function normalizeText(text: string): string {
   return text
     .replace(/\s+/g, ' ')
     .replace(/\n\s*\n/g, '\n')
-    .replace(/[^\w\s\.\!\?\,\;\:\-\(\)]/g, '')
+    .replace(/[^\w\s.!?,;:\-()]/g, '')
     .trim();
 }
 

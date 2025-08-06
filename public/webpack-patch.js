@@ -89,7 +89,9 @@
         for (const key in original) {
           try {
             patched[key] = original[key];
-          } catch (e) {}
+          } catch (e) {
+            // Silently ignore property copy errors
+          }
         }
 
         this._webpackRequire = patched;

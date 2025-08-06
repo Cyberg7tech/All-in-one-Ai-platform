@@ -111,8 +111,8 @@ ${imageUrl ? `**Source image**: Provided` : '**Type**: Text-to-video'}
     console.log('Runway API Response:', runwayData);
 
     // Handle different response formats
-    let videoUrl = runwayData.url || runwayData.video_url || runwayData.data?.url;
-    let thumbnailUrl = runwayData.thumbnail_url || runwayData.data?.thumbnail_url;
+    const videoUrl = runwayData.url || runwayData.video_url || runwayData.data?.url;
+    const thumbnailUrl = runwayData.thumbnail_url || runwayData.data?.thumbnail_url;
 
     // If still processing, return status
     if (runwayData.status === 'processing' || runwayData.status === 'pending') {
