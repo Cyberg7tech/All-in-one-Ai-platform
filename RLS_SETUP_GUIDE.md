@@ -29,9 +29,9 @@ Copy and paste the contents of `supabase/essential-rls.sql` into the SQL Editor 
 After running the script, verify that RLS is enabled by running this query:
 
 ```sql
-SELECT schemaname, tablename, rowsecurity 
-FROM pg_tables 
-WHERE schemaname = 'public' 
+SELECT schemaname, tablename, rowsecurity
+FROM pg_tables
+WHERE schemaname = 'public'
 AND rowsecurity = true;
 ```
 
@@ -49,38 +49,47 @@ You should see all your tables listed with `rowsecurity = true`.
 ## Core Tables and Their Policies
 
 ### 1. `ai_agents`
+
 - **Policy**: Users can only manage their own AI agents
 - **Key Field**: `user_id`
 
 ### 2. `chat_sessions`
+
 - **Policy**: Users can only manage their own chat sessions
 - **Key Field**: `user_id`
 
 ### 3. `chat_messages`
+
 - **Policy**: Users can only manage messages from their own sessions
 - **Key Field**: Linked via `session_id` to `chat_sessions.user_id`
 
 ### 4. `usage_tracking`
+
 - **Policy**: Users can view and insert their own usage data
 - **Key Field**: `user_id`
 
 ### 5. `user_subscriptions`
+
 - **Policy**: Users can only manage their own subscription
 - **Key Field**: `user_id`
 
 ### 6. `workflows`
+
 - **Policy**: Users can only manage their own workflows
 - **Key Field**: `user_id`
 
 ### 7. `forecasting_models`
+
 - **Policy**: Users can only manage their own forecasting models
 - **Key Field**: `user_id`
 
 ### 8. `anomaly_detections`
+
 - **Policy**: Users can only manage their own anomaly detections
 - **Key Field**: `user_id`
 
 ### 9. `documents`
+
 - **Policy**: Users can only manage their own documents
 - **Key Field**: `user_id` (stored in metadata JSON)
 

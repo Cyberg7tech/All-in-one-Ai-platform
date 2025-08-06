@@ -2,43 +2,46 @@
 
 > **A comprehensive AI application suite featuring 18+ AI-powered tools for content creation, media processing, and intelligent automation.**
 
-[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![Supabase](https://img.shields.io/badge/Supabase-Database-green?logo=supabase)](https://supabase.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/) [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/) [![Supabase](https://img.shields.io/badge/Supabase-Database-green?logo=supabase)](https://supabase.com/) [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
 
 ---
 
 ## 🌟 Features
 
 ### 🤖 AI Chat & Language Models
+
 - **💬 MultiLLM ChatGPT** - Support for GPT-4, Claude, Gemini, and more
 - **🦙 Llama 3.1 Chat** - Advanced open-source language model
 - **🤖 AI Agents** - Create custom AI assistants with specialized skills
 
 ### 📝 Content Creation
+
 - **📝 Content Writer** - Generate blogs, social media posts, and marketing copy
 - **📺 YouTube Content Generator** - Create video scripts, titles, and descriptions
 - **🎵 Music Generator** - Compose original music with AI
 
 ### 🖼️ Image & Visual AI
+
 - **🎨 Image Generator** - Create custom images from text prompts
 - **🖼️ Photo Enhancer & Upscaler** - Improve image quality and resolution
 - **🖼️ Headshot Generator** - Professional AI-generated portraits
 - **🏠 Interior Design Generator** - AI-powered room design concepts
 
 ### 🎬 Video & Audio
+
 - **🎥 Video Generator** - Create videos from text descriptions
 - **🎬 Talking Video Generator** - AI avatars that speak your content
 - **🗣️ Text to Speech** - Natural voice synthesis in multiple languages
 - **🎙️ Voice Transcription** - Convert audio to text with high accuracy
 
 ### 📄 Document & Data Processing
+
 - **📄 Chat with PDF** - Interactive Q&A with your documents
 - **🎥 Chat with YouTube** - Ask questions about video content
 - **📱 QR Code Generator** - Create custom QR codes
 
 ### 🔧 Productivity Tools
+
 - **🎯 Brand Voice** - Maintain consistent messaging across content
 - **📊 Analytics Dashboard** - Track usage, costs, and performance
 - **⚡ Workflow Automation** - Chain AI tools together
@@ -77,6 +80,7 @@ npm install
 1. **Create a Supabase project** at [supabase.com](https://supabase.com)
 
 2. **Reset and setup database:**
+
    ```bash
    # In Supabase SQL Editor, run these files in order:
    # 1. supabase/reset-database.sql (⚠️ This deletes all data!)
@@ -202,6 +206,7 @@ The platform supports multiple AI providers:
 ### Adding New AI Models
 
 1. **Update database:**
+
    ```sql
    INSERT INTO ai_models (id, name, provider, model_type, description)
    VALUES ('new-model-id', 'Model Name', 'Provider', 'chat', 'Description');
@@ -238,6 +243,7 @@ Access analytics at `/dashboard/analytics`
 ### Common Issues
 
 **🔴 Database Connection Errors**
+
 ```bash
 # Check Supabase configuration
 echo $NEXT_PUBLIC_SUPABASE_URL
@@ -245,16 +251,19 @@ echo $NEXT_PUBLIC_SUPABASE_ANON_KEY
 ```
 
 **🔴 Authentication Issues**
+
 - Verify `NEXTAUTH_URL` matches your domain
 - Check Google OAuth configuration in Supabase
 - Ensure Supabase Auth is properly configured
 
 **🔴 AI API Errors**
+
 - Verify API keys are correct and have sufficient credits
 - Check rate limits and quotas
 - Review error logs in browser console
 
 **🔴 Build Errors**
+
 ```bash
 # Clear cache and rebuild
 rm -rf .next node_modules package-lock.json
@@ -265,6 +274,7 @@ npm run build
 ### Environment Variables Debug
 
 Use the debug endpoint to verify environment variables:
+
 ```
 GET /api/debug/env
 ```
@@ -274,9 +284,10 @@ GET /api/debug/env
 If you encounter database errors:
 
 1. **Check schema:**
+
    ```sql
    -- Run in Supabase SQL Editor
-   SELECT table_name FROM information_schema.tables 
+   SELECT table_name FROM information_schema.tables
    WHERE table_schema = 'public';
    ```
 
@@ -284,8 +295,8 @@ If you encounter database errors:
 
 3. **Check RLS policies:**
    ```sql
-   SELECT schemaname, tablename, rowsecurity 
-   FROM pg_tables 
+   SELECT schemaname, tablename, rowsecurity
+   FROM pg_tables
    WHERE schemaname = 'public';
    ```
 

@@ -13,6 +13,7 @@ This guide will help you completely reset your Supabase database and set up a fr
 ## 📋 Step-by-Step Process
 
 ### Step 1: Reset the Database
+
 1. Go to your Supabase Dashboard → SQL Editor
 2. Copy and paste the contents of `supabase/reset-database.sql`
 3. Click **Run** to execute
@@ -24,6 +25,7 @@ This guide will help you completely reset your Supabase database and set up a fr
    - Reset the public schema
 
 ### Step 2: Set Up Fresh Database
+
 1. In the same SQL Editor, clear the previous query
 2. Copy and paste the contents of `supabase/fresh-setup.sql`
 3. Click **Run** to execute
@@ -37,6 +39,7 @@ This guide will help you completely reset your Supabase database and set up a fr
 ## 🗃️ Database Structure Created
 
 ### Core Tables:
+
 - **`users`** - User profiles (extends auth.users)
 - **`ai_models`** - Available AI models (GPT, Claude, DALL-E, etc.)
 - **`ai_agents`** - Custom AI agents created by users
@@ -51,6 +54,7 @@ This guide will help you completely reset your Supabase database and set up a fr
 - **`workspace_projects`** - User projects and workflows
 
 ### Security Features:
+
 - ✅ Row Level Security enabled on all tables
 - ✅ Users can only access their own data
 - ✅ Proper UUID relationships
@@ -58,6 +62,7 @@ This guide will help you completely reset your Supabase database and set up a fr
 - ✅ Performance indexes
 
 ### Built-in Features:
+
 - ✅ Auto-updating timestamps
 - ✅ Default AI models pre-loaded
 - ✅ Proper data types and constraints
@@ -66,12 +71,14 @@ This guide will help you completely reset your Supabase database and set up a fr
 ## 🔧 What This Fixes
 
 ### From Your Previous Issues:
+
 - ❌ **Type casting errors** → ✅ Proper UUID types throughout
 - ❌ **Missing tables** → ✅ All tables defined and created
 - ❌ **View RLS errors** → ✅ Views excluded from RLS
 - ❌ **Inconsistent structure** → ✅ Clean, consistent schema
 
 ### New Benefits:
+
 - 🚀 **Better performance** with proper indexes
 - 🔒 **Stronger security** with comprehensive RLS
 - 🏗️ **Scalable structure** for future features
@@ -82,14 +89,16 @@ This guide will help you completely reset your Supabase database and set up a fr
 After running both scripts:
 
 1. **Check tables created**:
+
    ```sql
-   SELECT table_name FROM information_schema.tables 
+   SELECT table_name FROM information_schema.tables
    WHERE table_schema = 'public' ORDER BY table_name;
    ```
 
 2. **Verify RLS is enabled**:
+
    ```sql
-   SELECT tablename, rowsecurity FROM pg_tables 
+   SELECT tablename, rowsecurity FROM pg_tables
    WHERE schemaname = 'public' AND rowsecurity = true;
    ```
 
