@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       subject,
       html,
       text,
-      reply_to: replyTo,
+      replyTo: replyTo,
       attachments,
     });
 
