@@ -52,12 +52,12 @@ If you have any questions, feel free to reach out to our support team.
 Best regards,
 The One AI Team`,
     variables: ['name', 'dashboardUrl'],
-    category: 'welcome'
+    category: 'welcome',
   },
   {
     id: 'onboarding',
     name: 'Onboarding Series',
-    subject: 'Let\'s get you started with One AI',
+    subject: "Let's get you started with One AI",
     body: `Hi {{name}},
 
 Great to see you've joined One AI! Let's make sure you get the most out of our platform.
@@ -74,7 +74,7 @@ Ready to start? Visit: {{dashboardUrl}}
 Best regards,
 The One AI Team`,
     variables: ['name', 'dashboardUrl'],
-    category: 'onboarding'
+    category: 'onboarding',
   },
   {
     id: 'billing',
@@ -95,8 +95,8 @@ View your billing details: {{billingUrl}}
 Best regards,
 The One AI Team`,
     variables: ['name', 'planName', 'planFeatures', 'nextBillingDate', 'amount', 'billingUrl'],
-    category: 'billing'
-  }
+    category: 'billing',
+  },
 ];
 
 interface EmailSystemProps {
@@ -106,12 +106,7 @@ interface EmailSystemProps {
   className?: string;
 }
 
-export function EmailSystem({
-  provider = 'loops',
-  apiKey,
-  onSend,
-  className = ''
-}: EmailSystemProps) {
+export function EmailSystem({ provider = 'loops', apiKey, onSend, className = '' }: EmailSystemProps) {
   const [templates, setTemplates] = useState<EmailTemplate[]>(defaultTemplates);
   const [campaigns, setCampaigns] = useState<EmailCampaign[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
@@ -131,11 +126,11 @@ export function EmailSystem({
     setLoading(true);
     try {
       const emailData = {
-        to: recipients.split(',').map(email => email.trim()),
+        to: recipients.split(',').map((email) => email.trim()),
         subject,
         body,
         variables,
-        provider
+        provider,
       };
 
       const response = await fetch('/api/emails/send', {
@@ -153,15 +148,15 @@ export function EmailSystem({
         const newCampaign: EmailCampaign = {
           id: Date.now().toString(),
           name: subject,
-          template: templates.find(t => t.id === selectedTemplate) || defaultTemplates[0],
-          recipients: recipients.split(',').map(email => email.trim()),
+          template: templates.find((t) => t.id === selectedTemplate) || defaultTemplates[0],
+          recipients: recipients.split(',').map((email) => email.trim()),
           status: 'sent',
-          sentAt: new Date()
+          sentAt: new Date(),
         };
 
-        setCampaigns(prev => [newCampaign, ...prev]);
+        setCampaigns((prev) => [newCampaign, ...prev]);
         onSend?.(emailData);
-        
+
         // Reset form
         setRecipients('');
         setSubject('');
@@ -180,15 +175,15 @@ export function EmailSystem({
   };
 
   const handleTemplateSelect = (templateId: string) => {
-    const template = templates.find(t => t.id === templateId);
+    const template = templates.find((t) => t.id === templateId);
     if (template) {
       setSelectedTemplate(templateId);
       setSubject(template.subject);
       setBody(template.body);
-      
+
       // Initialize variables
       const initialVariables: Record<string, string> = {};
-      template.variables.forEach(variable => {
+      template.variables.forEach((variable) => {
         initialVariables[variable] = '';
       });
       setVariables(initialVariables);
@@ -196,7 +191,7 @@ export function EmailSystem({
   };
 
   const updateVariable = (key: string, value: string) => {
-    setVariables(prev => ({ ...prev, [key]: value }));
+    setVariables((prev) => ({ ...prev, [key]: value }));
   };
 
   const replaceVariables = (text: string, vars: Record<string, string>) => {
@@ -209,11 +204,16 @@ export function EmailSystem({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'sent': return 'bg-green-100 text-green-800';
-      case 'sending': return 'bg-blue-100 text-blue-800';
-      case 'failed': return 'bg-red-100 text-red-800';
-      case 'scheduled': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'sent':
+        return 'bg-green-100 text-green-800';
+      case 'sending':
+        return 'bg-blue-100 text-blue-800';
+      case 'failed':
+        return 'bg-red-100 text-red-800';
+      case 'scheduled':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -222,28 +222,28 @@ export function EmailSystem({
       {/* Email Composer */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <Mail className="mr-2 size-5" />
+          <CardTitle className='flex items-center'>
+            <Mail className='mr-2 size-5' />
             Email Composer
           </CardTitle>
           <CardDescription>
             Send transactional emails using {provider === 'loops' ? 'Loops' : 'Resend'}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className='space-y-4'>
           {/* Template Selection */}
-          <div className="space-y-2">
+          <div className='space-y-2'>
             <Label>Email Template</Label>
             <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a template" />
+                <SelectValue placeholder='Select a template' />
               </SelectTrigger>
               <SelectContent>
-                {templates.map(template => (
+                {templates.map((template) => (
                   <SelectItem key={template.id} value={template.id}>
-                    <div className="flex items-center justify-between w-full">
+                    <div className='flex items-center justify-between w-full'>
                       <span>{template.name}</span>
-                      <Badge variant="secondary" className="ml-2">
+                      <Badge variant='secondary' className='ml-2'>
                         {template.category}
                       </Badge>
                     </div>
@@ -254,33 +254,29 @@ export function EmailSystem({
           </div>
 
           {/* Recipients */}
-          <div className="space-y-2">
+          <div className='space-y-2'>
             <Label>Recipients (comma-separated)</Label>
             <Input
-              placeholder="user@example.com, another@example.com"
+              placeholder='user@example.com, another@example.com'
               value={recipients}
               onChange={(e) => setRecipients(e.target.value)}
             />
           </div>
 
           {/* Subject */}
-          <div className="space-y-2">
+          <div className='space-y-2'>
             <Label>Subject</Label>
-            <Input
-              placeholder="Email subject"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-            />
+            <Input placeholder='Email subject' value={subject} onChange={(e) => setSubject(e.target.value)} />
           </div>
 
           {/* Variables */}
           {selectedTemplate && Object.keys(variables).length > 0 && (
-            <div className="space-y-2">
+            <div className='space-y-2'>
               <Label>Template Variables</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {Object.keys(variables).map(key => (
-                  <div key={key} className="space-y-1">
-                    <Label className="text-sm">{key}</Label>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
+                {Object.keys(variables).map((key) => (
+                  <div key={key} className='space-y-1'>
+                    <Label className='text-sm'>{key}</Label>
                     <Input
                       placeholder={`Enter ${key}`}
                       value={variables[key]}
@@ -293,30 +289,24 @@ export function EmailSystem({
           )}
 
           {/* Body */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
+          <div className='space-y-2'>
+            <div className='flex items-center justify-between'>
               <Label>Email Body</Label>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowPreview(!showPreview)}
-              >
-                {showPreview ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              <Button variant='ghost' size='sm' onClick={() => setShowPreview(!showPreview)}>
+                {showPreview ? <EyeOff className='size-4' /> : <Eye className='size-4' />}
                 {showPreview ? 'Hide Preview' : 'Show Preview'}
               </Button>
             </div>
             {showPreview ? (
-              <div className="border rounded-md p-4 bg-muted/50">
-                <div className="prose prose-sm max-w-none">
+              <div className='border rounded-md p-4 bg-muted/50'>
+                <div className='prose prose-sm max-w-none'>
                   <h3>{replaceVariables(subject, variables)}</h3>
-                  <div className="whitespace-pre-wrap">
-                    {replaceVariables(body, variables)}
-                  </div>
+                  <div className='whitespace-pre-wrap'>{replaceVariables(body, variables)}</div>
                 </div>
               </div>
             ) : (
               <Textarea
-                placeholder="Email body content"
+                placeholder='Email body content'
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 rows={10}
@@ -328,16 +318,15 @@ export function EmailSystem({
           <Button
             onClick={handleSendEmail}
             disabled={loading || !recipients || !subject || !body}
-            className="w-full"
-          >
+            className='w-full'>
             {loading ? (
-              <div className="flex items-center">
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+              <div className='flex items-center'>
+                <div className='w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2' />
                 Sending...
               </div>
             ) : (
-              <div className="flex items-center">
-                <Send className="mr-2 size-4" />
+              <div className='flex items-center'>
+                <Send className='mr-2 size-4' />
                 Send Email
               </div>
             )}
@@ -349,36 +338,24 @@ export function EmailSystem({
       {campaigns.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Users className="mr-2 size-5" />
+            <CardTitle className='flex items-center'>
+              <Users className='mr-2 size-5' />
               Recent Campaigns
             </CardTitle>
-            <CardDescription>
-              Track your email campaigns and their performance
-            </CardDescription>
+            <CardDescription>Track your email campaigns and their performance</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {campaigns.map(campaign => (
-                <div key={campaign.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">{campaign.name}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {campaign.recipients.length} recipients
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {campaign.sentAt?.toLocaleDateString()}
-                    </p>
+            <div className='space-y-4'>
+              {campaigns.map((campaign) => (
+                <div key={campaign.id} className='flex items-center justify-between p-4 border rounded-lg'>
+                  <div className='flex-1'>
+                    <h4 className='font-medium'>{campaign.name}</h4>
+                    <p className='text-sm text-muted-foreground'>{campaign.recipients.length} recipients</p>
+                    <p className='text-sm text-muted-foreground'>{campaign.sentAt?.toLocaleDateString()}</p>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge className={getStatusColor(campaign.status)}>
-                      {campaign.status}
-                    </Badge>
-                    {campaign.openRate && (
-                      <Badge variant="outline">
-                        {campaign.openRate}% open rate
-                      </Badge>
-                    )}
+                  <div className='flex items-center space-x-2'>
+                    <Badge className={getStatusColor(campaign.status)}>{campaign.status}</Badge>
+                    {campaign.openRate && <Badge variant='outline'>{campaign.openRate}% open rate</Badge>}
                   </div>
                 </div>
               ))}
@@ -397,55 +374,43 @@ export function EmailTemplateManager() {
 
   const handleSaveTemplate = (template: EmailTemplate) => {
     if (editingTemplate) {
-      setTemplates(prev => prev.map(t => t.id === template.id ? template : t));
+      setTemplates((prev) => prev.map((t) => (t.id === template.id ? template : t)));
     } else {
-      setTemplates(prev => [...prev, { ...template, id: Date.now().toString() }]);
+      setTemplates((prev) => [...prev, { ...template, id: Date.now().toString() }]);
     }
     setEditingTemplate(null);
   };
 
   const handleDeleteTemplate = (templateId: string) => {
-    setTemplates(prev => prev.filter(t => t.id !== templateId));
+    setTemplates((prev) => prev.filter((t) => t.id !== templateId));
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Email Templates</h2>
-        <Button onClick={() => setEditingTemplate({} as EmailTemplate)}>
-          Create Template
-        </Button>
+    <div className='space-y-6'>
+      <div className='flex items-center justify-between'>
+        <h2 className='text-2xl font-bold'>Email Templates</h2>
+        <Button onClick={() => setEditingTemplate({} as EmailTemplate)}>Create Template</Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {templates.map(template => (
-          <Card key={template.id} className="cursor-pointer hover:shadow-md transition-shadow">
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+        {templates.map((template) => (
+          <Card key={template.id} className='cursor-pointer hover:shadow-md transition-shadow'>
             <CardHeader>
-              <CardTitle className="text-lg">{template.name}</CardTitle>
+              <CardTitle className='text-lg'>{template.name}</CardTitle>
               <CardDescription>{template.subject}</CardDescription>
-              <Badge variant="secondary">{template.category}</Badge>
+              <Badge variant='secondary'>{template.category}</Badge>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground line-clamp-3">
+              <p className='text-sm text-muted-foreground line-clamp-3'>
                 {template.body.substring(0, 100)}...
               </p>
-              <div className="flex items-center justify-between mt-4">
-                <span className="text-xs text-muted-foreground">
-                  {template.variables.length} variables
-                </span>
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditingTemplate(template)}
-                  >
+              <div className='flex items-center justify-between mt-4'>
+                <span className='text-xs text-muted-foreground'>{template.variables.length} variables</span>
+                <div className='flex space-x-2'>
+                  <Button variant='outline' size='sm' onClick={() => setEditingTemplate(template)}>
                     Edit
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteTemplate(template.id)}
-                  >
+                  <Button variant='outline' size='sm' onClick={() => handleDeleteTemplate(template.id)}>
                     Delete
                   </Button>
                 </div>

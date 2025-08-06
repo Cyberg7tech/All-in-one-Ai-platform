@@ -31,9 +31,9 @@ const plans: PricingPlan[] = [
       '1,000 API Calls/month',
       'Basic Support',
       'Community Access',
-      'Standard Models'
+      'Standard Models',
     ],
-    stripePriceId: ''
+    stripePriceId: '',
   },
   {
     id: 'pro',
@@ -49,9 +49,9 @@ const plans: PricingPlan[] = [
       'Custom AI Agents',
       'Advanced Analytics',
       'API Access',
-      'Premium Models'
+      'Premium Models',
     ],
-    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || ''
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || '',
   },
   {
     id: 'enterprise',
@@ -66,10 +66,10 @@ const plans: PricingPlan[] = [
       'White-label Solution',
       'Custom Integrations',
       'SLA Guarantee',
-      'All Models + Custom'
+      'All Models + Custom',
     ],
-    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_ENTERPRISE_PRICE_ID || ''
-  }
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_ENTERPRISE_PRICE_ID || '',
+  },
 ];
 
 interface StripeCheckoutProps {
@@ -85,7 +85,7 @@ export function StripeCheckout({
   userEmail,
   onSuccess,
   onError,
-  className = ''
+  className = '',
 }: StripeCheckoutProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -143,12 +143,12 @@ export function StripeCheckout({
   };
 
   const getFeatureIcon = (feature: string) => {
-    if (feature.includes('Support')) return <Shield className="size-4" />;
-    if (feature.includes('API')) return <Database className="size-4" />;
-    if (feature.includes('Analytics')) return <Zap className="size-4" />;
-    if (feature.includes('Agents')) return <Users className="size-4" />;
-    if (feature.includes('Models')) return <Crown className="size-4" />;
-    return <Check className="size-4" />;
+    if (feature.includes('Support')) return <Shield className='size-4' />;
+    if (feature.includes('API')) return <Database className='size-4' />;
+    if (feature.includes('Analytics')) return <Zap className='size-4' />;
+    if (feature.includes('Agents')) return <Users className='size-4' />;
+    if (feature.includes('Models')) return <Crown className='size-4' />;
+    return <Check className='size-4' />;
   };
 
   return (
@@ -160,76 +160,62 @@ export function StripeCheckout({
             plan.popular
               ? 'border-primary shadow-lg scale-105'
               : 'border-muted-foreground/25 hover:border-primary/50'
-          }`}
-        >
+          }`}>
           {plan.popular && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <Badge className="bg-primary text-primary-foreground px-3 py-1">
-                Most Popular
-              </Badge>
+            <div className='absolute -top-3 left-1/2 -translate-x-1/2'>
+              <Badge className='bg-primary text-primary-foreground px-3 py-1'>Most Popular</Badge>
             </div>
           )}
 
-          <CardHeader className="text-center pb-8">
-            <CardTitle className="text-2xl">{plan.name}</CardTitle>
-            <div className="mt-4">
-              <span className="text-4xl font-bold">
-                ${plan.price}
-              </span>
-              <span className="text-muted-foreground">
-                /{plan.interval}
-              </span>
+          <CardHeader className='text-center pb-8'>
+            <CardTitle className='text-2xl'>{plan.name}</CardTitle>
+            <div className='mt-4'>
+              <span className='text-4xl font-bold'>${plan.price}</span>
+              <span className='text-muted-foreground'>/{plan.interval}</span>
             </div>
-            <p className="text-muted-foreground mt-2">{plan.description}</p>
+            <p className='text-muted-foreground mt-2'>{plan.description}</p>
           </CardHeader>
 
-          <CardContent className="space-y-4">
-            <ul className="space-y-3">
+          <CardContent className='space-y-4'>
+            <ul className='space-y-3'>
               {plan.features.map((feature, index) => (
-                <li key={index} className="flex items-center">
-                  <div className="text-green-500 mr-3">
-                    {getFeatureIcon(feature)}
-                  </div>
-                  <span className="text-sm">{feature}</span>
+                <li key={index} className='flex items-center'>
+                  <div className='text-green-500 mr-3'>{getFeatureIcon(feature)}</div>
+                  <span className='text-sm'>{feature}</span>
                 </li>
               ))}
             </ul>
 
             <Button
-              className="w-full mt-6"
+              className='w-full mt-6'
               variant={plan.popular ? 'default' : 'outline'}
               onClick={() => handleCheckout(plan)}
-              disabled={loading === plan.id || !plan.stripePriceId}
-            >
+              disabled={loading === plan.id || !plan.stripePriceId}>
               {loading === plan.id ? (
-                <div className="flex items-center">
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                <div className='flex items-center'>
+                  <div className='w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2' />
                   Processing...
                 </div>
               ) : plan.price === 0 ? (
                 'Get Started Free'
               ) : (
-                <div className="flex items-center">
-                  <CreditCard className="mr-2 size-4" />
+                <div className='flex items-center'>
+                  <CreditCard className='mr-2 size-4' />
                   Subscribe Now
                 </div>
               )}
             </Button>
 
             {plan.price === 0 && (
-              <p className="text-xs text-center text-muted-foreground">
-                No credit card required
-              </p>
+              <p className='text-xs text-center text-muted-foreground'>No credit card required</p>
             )}
           </CardContent>
         </Card>
       ))}
 
       {error && (
-        <div className="col-span-full">
-          <div className="bg-red-50 border border-red-200 rounded-md p-4 text-red-700">
-            {error}
-          </div>
+        <div className='col-span-full'>
+          <div className='bg-red-50 border border-red-200 rounded-md p-4 text-red-700'>{error}</div>
         </div>
       )}
     </div>
@@ -269,20 +255,15 @@ export function StripeCustomerPortal({ customerId }: { customerId: string }) {
   };
 
   return (
-    <Button
-      onClick={handleManageSubscription}
-      disabled={loading}
-      variant="outline"
-      className="w-full"
-    >
+    <Button onClick={handleManageSubscription} disabled={loading} variant='outline' className='w-full'>
       {loading ? (
-        <div className="flex items-center">
-          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+        <div className='flex items-center'>
+          <div className='w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2' />
           Loading...
         </div>
       ) : (
-        <div className="flex items-center">
-          <CreditCard className="mr-2 size-4" />
+        <div className='flex items-center'>
+          <CreditCard className='mr-2 size-4' />
           Manage Subscription
         </div>
       )}

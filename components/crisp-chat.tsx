@@ -24,7 +24,7 @@ export function CrispChat({
   tokenId,
   locale = 'en',
   autoload = true,
-  className = ''
+  className = '',
 }: CrispChatProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -57,7 +57,7 @@ export function CrispChat({
     script.async = true;
     script.onload = () => {
       setIsLoaded(true);
-      
+
       // Set up event listeners
       window.$crisp.push(['on', 'chat:opened', () => setIsVisible(true)]);
       window.$crisp.push(['on', 'chat:closed', () => setIsVisible(false)]);
@@ -74,7 +74,7 @@ export function CrispChat({
         existingScript.remove();
       }
       delete window.$crisp;
-      delete window.CRISP_WEBSITE_ID;
+      delete (window as any).CRISP_WEBSITE_ID;
     };
   }, [websiteId, tokenId, locale, autoload]);
 
@@ -120,10 +120,9 @@ export function CrispChat({
       <div className={`fixed bottom-4 right-4 z-50 ${className}`}>
         <Button
           onClick={openChat}
-          className="rounded-full size-14 shadow-lg bg-primary hover:bg-primary/90"
-          disabled={!isLoaded}
-        >
-          <MessageCircle className="size-6" />
+          className='rounded-full size-14 shadow-lg bg-primary hover:bg-primary/90'
+          disabled={!isLoaded}>
+          <MessageCircle className='size-6' />
         </Button>
       </div>
     );
@@ -212,7 +211,7 @@ export const useCrispChat = () => {
     closeChat,
     resetChat,
     setSegments,
-    setCustomData
+    setCustomData,
   };
 };
 
@@ -230,17 +229,12 @@ export function CrispProvider({
   websiteId,
   tokenId,
   locale = 'en',
-  autoload = true
+  autoload = true,
 }: CrispProviderProps) {
   return (
     <>
       {children}
-      <CrispChat
-        websiteId={websiteId}
-        tokenId={tokenId}
-        locale={locale}
-        autoload={autoload}
-      />
+      <CrispChat websiteId={websiteId} tokenId={tokenId} locale={locale} autoload={autoload} />
     </>
   );
 }
@@ -252,13 +246,21 @@ export function CrispChatButton({ className = '' }: { className?: string }) {
 
   useEffect(() => {
     if (window.$crisp) {
-      window.$crisp.push(['on', 'message:received', () => {
-        setUnreadCount(prev => prev + 1);
-      }]);
-      
-      window.$crisp.push(['on', 'chat:opened', () => {
-        setUnreadCount(0);
-      }]);
+      window.$crisp.push([
+        'on',
+        'message:received',
+        () => {
+          setUnreadCount((prev) => prev + 1);
+        },
+      ]);
+
+      window.$crisp.push([
+        'on',
+        'chat:opened',
+        () => {
+          setUnreadCount(0);
+        },
+      ]);
     }
   }, []);
 
@@ -267,13 +269,12 @@ export function CrispChatButton({ className = '' }: { className?: string }) {
       <Button
         onClick={openChat}
         disabled={!isLoaded}
-        className="rounded-full size-12 shadow-lg bg-primary hover:bg-primary/90"
-      >
-        <MessageCircle className="size-5" />
+        className='rounded-full size-12 shadow-lg bg-primary hover:bg-primary/90'>
+        <MessageCircle className='size-5' />
       </Button>
-      
+
       {unreadCount > 0 && (
-        <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full size-5 flex items-center justify-center animate-pulse">
+        <div className='absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full size-5 flex items-center justify-center animate-pulse'>
           {unreadCount > 9 ? '9+' : unreadCount}
         </div>
       )}

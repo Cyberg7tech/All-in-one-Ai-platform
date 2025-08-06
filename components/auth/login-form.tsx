@@ -76,7 +76,7 @@ export default function LoginForm() {
     return (
       <div className='min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
         <div className='sm:mx-auto sm:w-full sm:max-w-md'>
-          <MagicLink 
+          <MagicLink
             onBack={() => setShowMagicLink(false)}
             redirectTo={
               process.env.NODE_ENV === 'production'
@@ -266,8 +266,7 @@ export default function LoginForm() {
                 variant='ghost'
                 size='sm'
                 onClick={() => setShowMagicLink(true)}
-                className='text-primary hover:text-primary/80'
-              >
+                className='text-primary hover:text-primary/80'>
                 <Sparkles className='size-4 mr-2' />
                 Try Magic Link instead
               </Button>
