@@ -7,7 +7,7 @@ import { QueryProvider } from '@/components/providers/query-provider';
 import { AuthProvider } from '@/contexts/auth-context';
 import { ErrorBoundary } from '@/components/providers/error-boundary';
 import { WebpackInitializer } from '@/components/webpack-initializer';
-import { SupabaseDebugger } from '@/components/dev/supabase-debugger';
+
 import { Toaster } from 'sonner';
 import SupabaseProvider from '@/components/providers/supabase-provider';
 
@@ -113,7 +113,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <QueryProvider>
                   {children}
                   <Toaster />
-                  <SupabaseDebugger />
                 </QueryProvider>
               </AuthProvider>
             </SupabaseProvider>
