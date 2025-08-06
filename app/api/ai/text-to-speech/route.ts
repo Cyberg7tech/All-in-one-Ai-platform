@@ -12,17 +12,14 @@ export async function POST(request: NextRequest) {
     const selectedVoice = voiceId || voice;
 
     if (!text) {
-      return NextResponse.json(
-        { error: 'Text is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Text is required' }, { status: 400 });
     }
 
     console.log('Text-to-Speech API: Generating speech', {
       textLength: text.length,
       voice,
       speed,
-      pitch
+      pitch,
     });
 
     try {
@@ -36,9 +33,11 @@ export async function POST(request: NextRequest) {
           audioUrl: '/api/demo-audio',
           text,
           voice,
-          note: result.content || 'Demo mode - Text-to-speech temporarily unavailable. Configure ELEVENLABS_API_KEY for real synthesis.',
+          note:
+            result.content ||
+            'Demo mode - Text-to-speech temporarily unavailable. Configure ELEVENLABS_API_KEY for real synthesis.',
           duration: Math.ceil(text.length / 10),
-          provider: 'demo'
+          provider: 'demo',
         });
       }
 
@@ -49,12 +48,11 @@ export async function POST(request: NextRequest) {
         voice: result.voice,
         note: result.note,
         duration: Math.ceil(text.length / 10), // Approximate duration
-        provider: 'elevenlabs'
+        provider: 'elevenlabs',
       });
-
     } catch (error) {
       console.error('Text-to-Speech generation error:', error);
-      
+
       // Return demo response instead of error
       return NextResponse.json({
         success: true,
@@ -63,16 +61,15 @@ export async function POST(request: NextRequest) {
         voice,
         note: 'Demo mode - Text-to-speech temporarily unavailable. Configure ELEVENLABS_API_KEY for real synthesis.',
         duration: Math.ceil(text.length / 10),
-        provider: 'demo'
+        provider: 'demo',
       });
     }
-
   } catch (error) {
     console.error('Text-to-Speech API error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Text-to-speech generation failed',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

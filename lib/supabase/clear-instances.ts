@@ -10,7 +10,7 @@ export function clearSupabaseInstances() {
     (window as any).__supabaseInstance = undefined;
     console.log('Cleared __supabaseInstance');
   }
-  
+
   if ((window as any).__supabaseAdminInstance) {
     (window as any).__supabaseAdminInstance = undefined;
     console.log('Cleared __supabaseAdminInstance');
@@ -27,7 +27,7 @@ export function clearSupabaseInstances() {
   // Clear any other Supabase-related storage
   try {
     const keys = Object.keys(localStorage);
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (key.includes('supabase') || key.includes('sb-')) {
         localStorage.removeItem(key);
         console.log(`Cleared ${key} from localStorage`);
@@ -48,4 +48,4 @@ export function resetSupabaseClients() {
     // Note: This is a workaround since we can't directly clear module variables
     console.log('Supabase clients will be recreated on next use');
   }
-} 
+}

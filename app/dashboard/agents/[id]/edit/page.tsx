@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -14,14 +14,14 @@ export default function AgentEditPage() {
   const params = useParams();
   const router = useRouter();
   const agentId = params.id as string;
-  
+
   const [agentData, setAgentData] = useState({
     name: '',
     description: '',
     instructions: '',
     model: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
     temperature: 0.7,
-    maxTokens: 1000
+    maxTokens: 1000,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -34,13 +34,13 @@ export default function AgentEditPage() {
       instructions: `You are Agent ${agentId}, a helpful AI assistant. Always be polite and professional in your responses.`,
       model: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
       temperature: 0.7,
-      maxTokens: 1000
+      maxTokens: 1000,
     });
   }, [agentId]);
 
   const handleSave = async () => {
     setIsLoading(true);
-    
+
     try {
       // Simulate saving
       setTimeout(() => {
@@ -55,52 +55,52 @@ export default function AgentEditPage() {
   };
 
   const handleInputChange = (field: string, value: string | number) => {
-    setAgentData(prev => ({
+    setAgentData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="mb-6">
-        <Link href="/dashboard/agents">
-          <Button variant="ghost" className="mb-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
+    <div className='container mx-auto p-6 max-w-4xl'>
+      <div className='mb-6'>
+        <Link href='/dashboard/agents'>
+          <Button variant='ghost' className='mb-4'>
+            <ArrowLeft className='w-4 h-4 mr-2' />
             Back to Agents
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold mb-2">Edit Agent {agentId}</h1>
-        <p className="text-muted-foreground">Configure your AI agent settings and behavior</p>
+        <h1 className='text-3xl font-bold mb-2'>Edit Agent {agentId}</h1>
+        <p className='text-muted-foreground'>Configure your AI agent settings and behavior</p>
       </div>
 
-      <div className="space-y-6">
+      <div className='space-y-6'>
         {/* Basic Information */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="w-5 h-5" />
+            <CardTitle className='flex items-center gap-2'>
+              <Settings className='w-5 h-5' />
               Basic Information
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className='space-y-4'>
             <div>
-              <Label htmlFor="name">Agent Name</Label>
+              <Label htmlFor='name'>Agent Name</Label>
               <Input
-                id="name"
+                id='name'
                 value={agentData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="Enter agent name"
+                placeholder='Enter agent name'
               />
             </div>
-            
+
             <div>
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor='description'>Description</Label>
               <Textarea
-                id="description"
+                id='description'
                 value={agentData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="Describe what this agent does"
+                placeholder='Describe what this agent does'
                 rows={3}
               />
             </div>
@@ -114,12 +114,12 @@ export default function AgentEditPage() {
           </CardHeader>
           <CardContent>
             <div>
-              <Label htmlFor="instructions">System Instructions</Label>
+              <Label htmlFor='instructions'>System Instructions</Label>
               <Textarea
-                id="instructions"
+                id='instructions'
                 value={agentData.instructions}
                 onChange={(e) => handleInputChange('instructions', e.target.value)}
-                placeholder="Define how the agent should behave and respond"
+                placeholder='Define how the agent should behave and respond'
                 rows={6}
               />
             </div>
@@ -131,44 +131,43 @@ export default function AgentEditPage() {
           <CardHeader>
             <CardTitle>Model Configuration</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className='space-y-4'>
             <div>
-              <Label htmlFor="model">Model</Label>
+              <Label htmlFor='model'>Model</Label>
               <select
-                id="model"
+                id='model'
                 value={agentData.model}
                 onChange={(e) => handleInputChange('model', e.target.value)}
-                className="w-full p-2 border rounded-lg"
-              >
-                <option value="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo">Llama 3.1 70B Turbo</option>
-                <option value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">Llama 3.1 8B Turbo</option>
-                <option value="mistralai/Mixtral-8x7B-Instruct-v0.1">Mixtral 8x7B</option>
-                <option value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Nous Hermes 2</option>
+                className='w-full p-2 border rounded-lg'>
+                <option value='meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo'>Llama 3.1 70B Turbo</option>
+                <option value='meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo'>Llama 3.1 8B Turbo</option>
+                <option value='mistralai/Mixtral-8x7B-Instruct-v0.1'>Mixtral 8x7B</option>
+                <option value='NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO'>Nous Hermes 2</option>
               </select>
             </div>
-            
-            <div className="grid grid-cols-2 gap-4">
+
+            <div className='grid grid-cols-2 gap-4'>
               <div>
-                <Label htmlFor="temperature">Temperature</Label>
+                <Label htmlFor='temperature'>Temperature</Label>
                 <Input
-                  id="temperature"
-                  type="number"
-                  min="0"
-                  max="2"
-                  step="0.1"
+                  id='temperature'
+                  type='number'
+                  min='0'
+                  max='2'
+                  step='0.1'
                   value={agentData.temperature}
                   onChange={(e) => handleInputChange('temperature', parseFloat(e.target.value))}
                 />
               </div>
-              
+
               <div>
-                <Label htmlFor="maxTokens">Max Tokens</Label>
+                <Label htmlFor='maxTokens'>Max Tokens</Label>
                 <Input
-                  id="maxTokens"
-                  type="number"
-                  min="100"
-                  max="4000"
-                  step="100"
+                  id='maxTokens'
+                  type='number'
+                  min='100'
+                  max='4000'
+                  step='100'
                   value={agentData.maxTokens}
                   onChange={(e) => handleInputChange('maxTokens', parseInt(e.target.value))}
                 />
@@ -178,15 +177,13 @@ export default function AgentEditPage() {
         </Card>
 
         {/* Actions */}
-        <div className="flex justify-between">
+        <div className='flex justify-between'>
           <Link href={`/dashboard/agents/${agentId}/chat`}>
-            <Button variant="outline">
-              Test Agent
-            </Button>
+            <Button variant='outline'>Test Agent</Button>
           </Link>
-          
+
           <Button onClick={handleSave} disabled={isLoading}>
-            <Save className="w-4 h-4 mr-2" />
+            <Save className='w-4 h-4 mr-2' />
             {isLoading ? 'Saving...' : isSaved ? 'Saved!' : 'Save Changes'}
           </Button>
         </div>

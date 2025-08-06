@@ -4,58 +4,58 @@ export async function GET(request: NextRequest) {
   const apiStatus = {
     supabase: {
       configured: !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
-      status: 'unknown'
+      status: 'unknown',
     },
     openai: {
       configured: !!process.env.OPENAI_API_KEY,
       keyFormat: process.env.OPENAI_API_KEY?.startsWith('sk-') || false,
-      status: 'unknown'
+      status: 'unknown',
     },
     anthropic: {
       configured: !!process.env.ANTHROPIC_API_KEY,
       keyFormat: process.env.ANTHROPIC_API_KEY?.startsWith('sk-ant-') || false,
-      status: 'unknown'
+      status: 'unknown',
     },
     google: {
       configured: !!process.env.GOOGLE_API_KEY,
-      status: 'unknown'
+      status: 'unknown',
     },
     together: {
       configured: !!process.env.TOGETHER_API_KEY,
-      status: 'unknown'
+      status: 'unknown',
     },
     xai: {
       configured: !!process.env.XAI_API_KEY,
-      status: 'unknown'
+      status: 'unknown',
     },
     deepseek: {
       configured: !!process.env.DEEPSEEK_API_KEY,
-      status: 'unknown'
+      status: 'unknown',
     },
     kimi: {
       configured: !!process.env.KIMI_API_KEY,
-      status: 'unknown'
+      status: 'unknown',
     },
     replicate: {
       configured: !!process.env.REPLICATE_API_TOKEN,
-      status: 'unknown'
+      status: 'unknown',
     },
     runway: {
       configured: !!process.env.RUNWAY_API_KEY,
-      status: 'unknown'
+      status: 'unknown',
     },
     heygen: {
       configured: !!process.env.HEYGEN_API_KEY,
-      status: 'unknown'
+      status: 'unknown',
     },
     suno: {
       configured: !!process.env.SUNO_API_KEY,
-      status: 'unknown'
+      status: 'unknown',
     },
     elevenlabs: {
       configured: !!process.env.ELEVENLABS_API_KEY,
-      status: 'unknown'
-    }
+      status: 'unknown',
+    },
   };
 
   // Quick connectivity tests for configured services
@@ -65,12 +65,14 @@ export async function GET(request: NextRequest) {
   if (apiStatus.openai.configured && apiStatus.openai.keyFormat) {
     testPromise.push(
       fetch('https://api.openai.com/v1/models', {
-        headers: { 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}` }
-      }).then(res => {
-        apiStatus.openai.status = res.ok ? 'healthy' : 'error';
-      }).catch(() => {
-        apiStatus.openai.status = 'error';
+        headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
       })
+        .then((res) => {
+          apiStatus.openai.status = res.ok ? 'healthy' : 'error';
+        })
+        .catch(() => {
+          apiStatus.openai.status = 'error';
+        })
     );
   }
 
@@ -82,18 +84,20 @@ export async function GET(request: NextRequest) {
         headers: {
           'x-api-key': process.env.ANTHROPIC_API_KEY!,
           'Content-Type': 'application/json',
-          'anthropic-version': '2023-06-01'
+          'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
           model: 'claude-3-haiku-20240307',
           max_tokens: 1,
-          messages: [{ role: 'user', content: 'test' }]
-        })
-      }).then(res => {
-        apiStatus.anthropic.status = res.status === 200 || res.status === 400 ? 'healthy' : 'error';
-      }).catch(() => {
-        apiStatus.anthropic.status = 'error';
+          messages: [{ role: 'user', content: 'test' }],
+        }),
       })
+        .then((res) => {
+          apiStatus.anthropic.status = res.status === 200 || res.status === 400 ? 'healthy' : 'error';
+        })
+        .catch(() => {
+          apiStatus.anthropic.status = 'error';
+        })
     );
   }
 
@@ -101,9 +105,10 @@ export async function GET(request: NextRequest) {
   if (apiStatus.google.configured) {
     testPromise.push(
       fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GOOGLE_API_KEY}`)
-        .then(res => {
+        .then((res) => {
           apiStatus.google.status = res.ok ? 'healthy' : 'error';
-        }).catch(() => {
+        })
+        .catch(() => {
           apiStatus.google.status = 'error';
         })
     );
@@ -113,12 +118,14 @@ export async function GET(request: NextRequest) {
   if (apiStatus.together.configured) {
     testPromise.push(
       fetch('https://api.together.xyz/v1/models', {
-        headers: { 'Authorization': `Bearer ${process.env.TOGETHER_API_KEY}` }
-      }).then(res => {
-        apiStatus.together.status = res.ok ? 'healthy' : 'error';
-      }).catch(() => {
-        apiStatus.together.status = 'error';
+        headers: { Authorization: `Bearer ${process.env.TOGETHER_API_KEY}` },
       })
+        .then((res) => {
+          apiStatus.together.status = res.ok ? 'healthy' : 'error';
+        })
+        .catch(() => {
+          apiStatus.together.status = 'error';
+        })
     );
   }
 
@@ -130,14 +137,14 @@ export async function GET(request: NextRequest) {
   }
 
   // Calculate overall health
-  const configuredServices = Object.values(apiStatus).filter(service => service.configured).length;
-  const healthyServices = Object.values(apiStatus).filter(service => service.status === 'healthy').length;
-  const hasBasicRequirements = apiStatus.supabase.configured && (
-    apiStatus.openai.status === 'healthy' || 
-    apiStatus.anthropic.status === 'healthy' || 
-    apiStatus.google.status === 'healthy' ||
-    apiStatus.together.status === 'healthy'
-  );
+  const configuredServices = Object.values(apiStatus).filter((service) => service.configured).length;
+  const healthyServices = Object.values(apiStatus).filter((service) => service.status === 'healthy').length;
+  const hasBasicRequirements =
+    apiStatus.supabase.configured &&
+    (apiStatus.openai.status === 'healthy' ||
+      apiStatus.anthropic.status === 'healthy' ||
+      apiStatus.google.status === 'healthy' ||
+      apiStatus.together.status === 'healthy');
 
   return NextResponse.json({
     overall: hasBasicRequirements ? 'healthy' : 'degraded',
@@ -149,9 +156,9 @@ export async function GET(request: NextRequest) {
       suggested: [
         ...(!apiStatus.openai.configured ? ['Add OPENAI_API_KEY for GPT models'] : []),
         ...(!apiStatus.anthropic.configured ? ['Add ANTHROPIC_API_KEY for Claude models'] : []),
-        ...(!apiStatus.together.configured ? ['Add TOGETHER_API_KEY for open-source models'] : [])
-      ]
+        ...(!apiStatus.together.configured ? ['Add TOGETHER_API_KEY for open-source models'] : []),
+      ],
     },
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
-} 
+}

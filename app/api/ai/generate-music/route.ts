@@ -6,17 +6,14 @@ export async function POST(request: NextRequest) {
     const { prompt, genre = 'pop', mood = 'upbeat', duration = 30 } = body;
 
     if (!prompt) {
-      return NextResponse.json(
-        { error: 'Prompt is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
     console.log('Music Generation API: Request received', {
       promptLength: prompt.length,
       genre,
       mood,
-      duration
+      duration,
     });
 
     // Music generation is not available in the simplified OpenAI + Together AI setup
@@ -55,19 +52,18 @@ export async function POST(request: NextRequest) {
         simplified_setup: true,
         available_providers: ['OpenAI', 'Together AI'],
         music_generation_available: false,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
-
   } catch (error) {
     console.error('Music Generation API error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Music generation request failed',
         message: error instanceof Error ? error.message : 'Unknown error',
-        note: 'Music generation is not available in the simplified OpenAI + Together AI setup.'
+        note: 'Music generation is not available in the simplified OpenAI + Together AI setup.',
       },
       { status: 500 }
     );
   }
-} 
+}

@@ -12,14 +12,11 @@ export async function GET() {
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'public, max-age=3600',
-        'Access-Control-Allow-Origin': '*'
-      }
+        'Access-Control-Allow-Origin': '*',
+      },
     });
   } catch (error) {
     console.error('Error serving manifest:', error);
-    return NextResponse.json(
-      { error: 'Manifest not found' },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: 'Manifest not found' }, { status: 404 });
   }
-} 
+}

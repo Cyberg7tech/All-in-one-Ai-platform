@@ -22,7 +22,7 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'multimodal',
       maxTokens: 128000,
       costPer1kTokens: 0.015,
-      description: 'Latest multimodal GPT-4 model with vision and reasoning'
+      description: 'Latest multimodal GPT-4 model with vision and reasoning',
     },
     {
       id: 'gpt-4o-mini',
@@ -31,7 +31,7 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'text',
       maxTokens: 128000,
       costPer1kTokens: 0.0015,
-      description: 'Fast and cost-effective GPT-4 class model'
+      description: 'Fast and cost-effective GPT-4 class model',
     },
     {
       id: 'gpt-4-turbo',
@@ -40,7 +40,7 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'text',
       maxTokens: 128000,
       costPer1kTokens: 0.03,
-      description: 'Advanced GPT-4 model with large context window'
+      description: 'Advanced GPT-4 model with large context window',
     },
     {
       id: 'gpt-4',
@@ -49,7 +49,7 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'text',
       maxTokens: 8192,
       costPer1kTokens: 0.06,
-      description: 'High-quality reasoning and complex tasks'
+      description: 'High-quality reasoning and complex tasks',
     },
     {
       id: 'gpt-3.5-turbo',
@@ -58,8 +58,8 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'text',
       maxTokens: 16385,
       costPer1kTokens: 0.002,
-      description: 'Fast and efficient for most tasks'
-    }
+      description: 'Fast and efficient for most tasks',
+    },
   ],
   together: [
     // Meta Llama Models
@@ -70,7 +70,7 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'text',
       contextLength: 131072,
       costPer1kTokens: 0.005,
-      description: 'Most capable open-source model, rivals GPT-4'
+      description: 'Most capable open-source model, rivals GPT-4',
     },
     {
       id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
@@ -79,7 +79,7 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'text',
       contextLength: 131072,
       costPer1kTokens: 0.0009,
-      description: 'High-quality open model for complex reasoning'
+      description: 'High-quality open model for complex reasoning',
     },
     {
       id: 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo',
@@ -88,7 +88,7 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'text',
       contextLength: 131072,
       costPer1kTokens: 0.0002,
-      description: 'Fast and efficient for general tasks'
+      description: 'Fast and efficient for general tasks',
     },
     {
       id: 'meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo',
@@ -97,9 +97,9 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'multimodal',
       contextLength: 131072,
       costPer1kTokens: 0.0005,
-      description: 'Multimodal model with vision capabilities'
+      description: 'Multimodal model with vision capabilities',
     },
-    
+
     // Qwen Models
     {
       id: 'Qwen/Qwen2.5-72B-Instruct-Turbo',
@@ -108,7 +108,7 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'text',
       contextLength: 32768,
       costPer1kTokens: 0.0009,
-      description: 'Advanced Chinese and English model'
+      description: 'Advanced Chinese and English model',
     },
     {
       id: 'Qwen/Qwen2.5-7B-Instruct-Turbo',
@@ -117,9 +117,9 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'text',
       contextLength: 32768,
       costPer1kTokens: 0.0002,
-      description: 'Efficient multilingual model'
+      description: 'Efficient multilingual model',
     },
-    
+
     // Mistral Models
     {
       id: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
@@ -128,7 +128,7 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'text',
       contextLength: 32768,
       costPer1kTokens: 0.0006,
-      description: 'High-performance mixture of experts model'
+      description: 'High-performance mixture of experts model',
     },
     {
       id: 'mistralai/Mistral-7B-Instruct-v0.3',
@@ -137,9 +137,9 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'text',
       contextLength: 32768,
       costPer1kTokens: 0.0002,
-      description: 'Efficient and capable for most tasks'
+      description: 'Efficient and capable for most tasks',
     },
-    
+
     // DeepSeek Models (available via Together AI)
     {
       id: 'deepseek-ai/deepseek-llm-67b-chat',
@@ -148,9 +148,9 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'text',
       contextLength: 4096,
       costPer1kTokens: 0.0009,
-      description: 'Advanced reasoning and code generation'
+      description: 'Advanced reasoning and code generation',
     },
-    
+
     // Nous Research Models
     {
       id: 'NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO',
@@ -159,9 +159,9 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'text',
       contextLength: 32768,
       costPer1kTokens: 0.0006,
-      description: 'Fine-tuned for helpful and harmless responses'
+      description: 'Fine-tuned for helpful and harmless responses',
     },
-    
+
     // Code-specific models
     {
       id: 'codellama/CodeLlama-70b-Instruct-hf',
@@ -170,7 +170,7 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'text',
       contextLength: 16384,
       costPer1kTokens: 0.0009,
-      description: 'Specialized for code generation and programming'
+      description: 'Specialized for code generation and programming',
     },
     {
       id: 'codellama/CodeLlama-13b-Instruct-hf',
@@ -179,9 +179,9 @@ export const AI_MODELS: Record<AIProvider, AIModel[]> = {
       type: 'text',
       contextLength: 16384,
       costPer1kTokens: 0.0003,
-      description: 'Efficient code model for development tasks'
-    }
-  ]
+      description: 'Efficient code model for development tasks',
+    },
+  ],
 };
 
 // Flatten all models for easy access
@@ -194,7 +194,7 @@ export const getModelsByProvider = (provider: AIProvider): AIModel[] => {
 
 // Get model by ID
 export const getModelById = (id: string): AIModel | undefined => {
-  return ALL_MODELS.find(model => model.id === id);
+  return ALL_MODELS.find((model) => model.id === id);
 };
 
 // Get popular models for quick selection
@@ -203,7 +203,7 @@ export const POPULAR_MODELS: AIModel[] = [
   getModelById('gpt-4o-mini')!,
   getModelById('gpt-4o')!,
   getModelById('gpt-4-turbo')!,
-  
+
   // Together AI popular models
   getModelById('meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo')!,
   getModelById('meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo')!,
@@ -217,20 +217,21 @@ export const DEFAULT_MODEL = getModelById('gpt-4o-mini')!;
 // Model categories for UI organization
 export const MODEL_CATEGORIES = {
   'OpenAI Models': getModelsByProvider('openai'),
-  'Meta Llama (Together AI)': getModelsByProvider('together').filter(m => m.id.includes('llama')),
-  'Qwen (Together AI)': getModelsByProvider('together').filter(m => m.id.includes('Qwen')),
-  'Mistral (Together AI)': getModelsByProvider('together').filter(m => m.id.includes('mistral')),
-  'Code Models (Together AI)': getModelsByProvider('together').filter(m => m.id.includes('CodeLlama')),
-  'Other (Together AI)': getModelsByProvider('together').filter(m => 
-    !m.id.includes('llama') && 
-    !m.id.includes('Qwen') && 
-    !m.id.includes('mistral') && 
-    !m.id.includes('CodeLlama')
-  )
+  'Meta Llama (Together AI)': getModelsByProvider('together').filter((m) => m.id.includes('llama')),
+  'Qwen (Together AI)': getModelsByProvider('together').filter((m) => m.id.includes('Qwen')),
+  'Mistral (Together AI)': getModelsByProvider('together').filter((m) => m.id.includes('mistral')),
+  'Code Models (Together AI)': getModelsByProvider('together').filter((m) => m.id.includes('CodeLlama')),
+  'Other (Together AI)': getModelsByProvider('together').filter(
+    (m) =>
+      !m.id.includes('llama') &&
+      !m.id.includes('Qwen') &&
+      !m.id.includes('mistral') &&
+      !m.id.includes('CodeLlama')
+  ),
 };
 
 // Helper function to determine provider from model ID
 export const getProviderFromModelId = (modelId: string): AIProvider => {
   const model = getModelById(modelId);
   return model?.provider || 'together'; // Default to Together AI for unknown models
-}; 
+};

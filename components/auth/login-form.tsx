@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -44,15 +44,16 @@ export default function LoginForm() {
   };
 
   const handleGoogleOAuth = async () => {
-    const redirectTo = process.env.NODE_ENV === 'production' 
-      ? 'https://one-ai.sgbizsolution.com/auth/callback'
-      : `${window.location.origin}/auth/callback`;
-      
+    const redirectTo =
+      process.env.NODE_ENV === 'production'
+        ? 'https://one-ai.sgbizsolution.com/auth/callback'
+        : `${window.location.origin}/auth/callback`;
+
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo
-      }
+        redirectTo,
+      },
     });
   };
 
@@ -62,4 +63,4 @@ export default function LoginForm() {
       {/* other form logic here for login/signup */}
     </div>
   );
-} 
+}

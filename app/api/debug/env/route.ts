@@ -15,13 +15,17 @@ export async function GET() {
     hasElevenLabsKey: !!process.env.ELEVENLABS_API_KEY,
     hasOpenAIKey: !!process.env.OPENAI_API_KEY,
     // Show first few characters to verify keys are loaded
-    togetherKeyPreview: process.env.TOGETHER_API_KEY ? process.env.TOGETHER_API_KEY.substring(0, 8) + '...' : 'NOT_SET',
-    supabaseUrlPreview: process.env.NEXT_PUBLIC_SUPABASE_URL ? process.env.NEXT_PUBLIC_SUPABASE_URL.substring(0, 20) + '...' : 'NOT_SET',
+    togetherKeyPreview: process.env.TOGETHER_API_KEY
+      ? process.env.TOGETHER_API_KEY.substring(0, 8) + '...'
+      : 'NOT_SET',
+    supabaseUrlPreview: process.env.NEXT_PUBLIC_SUPABASE_URL
+      ? process.env.NEXT_PUBLIC_SUPABASE_URL.substring(0, 20) + '...'
+      : 'NOT_SET',
   };
 
   return NextResponse.json({
     success: true,
     environment: envDebug,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 }

@@ -129,14 +129,6 @@
       ]
     }
   ],
-  "ignoreWords": [
-    "ttnkomdxbkmfmkaycjao"
-  ],
-  "ignorePaths": [
-    "node_modules/**",
-    ".next/**",
-    "dist/**",
-    "build/**",
-    "*.min.js"
-  ]
-} 
+  "ignoreWords": ["ttnkomdxbkmfmkaycjao"],
+  "ignorePaths": ["node_modules/**", ".next/**", "dist/**", "build/**", "*.min.js"]
+}

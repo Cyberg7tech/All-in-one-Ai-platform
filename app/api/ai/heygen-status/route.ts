@@ -9,19 +9,13 @@ export async function GET(request: NextRequest) {
     const videoId = searchParams.get('video_id');
 
     if (!videoId) {
-      return NextResponse.json(
-        { error: 'video_id parameter is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'video_id parameter is required' }, { status: 400 });
     }
 
     const heygenApiKey = process.env.HEYGEN_API_KEY;
-    
+
     if (!heygenApiKey) {
-      return NextResponse.json(
-        { error: 'HeyGen API key not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'HeyGen API key not configured' }, { status: 500 });
     }
 
     console.log('Checking HeyGen video status:', videoId);
@@ -30,17 +24,17 @@ export async function GET(request: NextRequest) {
     const statusResponse = await fetch(`https://api.heygen.com/v1/video_status.get?video_id=${videoId}`, {
       method: 'GET',
       headers: {
-        'X-API-KEY': heygenApiKey
-      }
+        'X-API-KEY': heygenApiKey,
+      },
     });
 
     if (!statusResponse.ok) {
       const errorText = await statusResponse.text();
       console.error('HeyGen Status API Error:', statusResponse.status, errorText);
       return NextResponse.json(
-        { 
+        {
           error: `Failed to check video status: ${statusResponse.status}`,
-          details: errorText 
+          details: errorText,
         },
         { status: statusResponse.status }
       );
@@ -83,15 +77,14 @@ export async function GET(request: NextRequest) {
       estimated_time: statusData.data?.estimated_time,
       error_message: statusData.data?.error_message,
       provider: 'heygen',
-      raw_status: statusData.data
+      raw_status: statusData.data,
     });
-
   } catch (error) {
     console.error('HeyGen status check error:', error);
     return NextResponse.json(
       {
         error: 'Failed to check video status',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

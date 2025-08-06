@@ -3,13 +3,18 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { prompt, imageUrl, style, duration = 5, resolution = '1280x720', aspectRatio = '16:9', userId } = body;
+    const {
+      prompt,
+      imageUrl,
+      style,
+      duration = 5,
+      resolution = '1280x720',
+      aspectRatio = '16:9',
+      userId,
+    } = body;
 
     if (!prompt) {
-      return NextResponse.json(
-        { error: 'Prompt is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
     console.log('Video Generation API: Request received', {
@@ -18,12 +23,12 @@ export async function POST(request: NextRequest) {
       style,
       duration,
       resolution,
-      aspectRatio
+      aspectRatio,
     });
 
     // Check if we have AI/ML API key for Runway
     const aimlApiKey = process.env.AIML_API_KEY;
-    
+
     if (!aimlApiKey) {
       console.log('Video Generation: No AIML API key found, returning demo response');
       return NextResponse.json({
@@ -56,21 +61,21 @@ ${imageUrl ? `**Source image**: Provided` : '**Type**: Text-to-video'}
           available_providers: ['OpenAI', 'Together AI'],
           video_generation_available: false,
           input_image_provided: !!imageUrl,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
     }
 
     // Generate video with Runway Gen-4 Turbo
     console.log('Video Generation: Using Runway Gen-4 Turbo API');
-    
+
     const requestBody: any = {
       model: 'runway/gen4_turbo',
       prompt: prompt.trim(),
       duration: duration || 5,
       ratio: aspectRatio || '16:9',
       seed: Math.floor(Math.random() * 1000000),
-      watermark: false
+      watermark: false,
     };
 
     // Add image URL if provided
@@ -81,22 +86,25 @@ ${imageUrl ? `**Source image**: Provided` : '**Type**: Text-to-video'}
     const runwayResponse = await fetch('https://api.aimlapi.com/v1/video/generations', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${aimlApiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${aimlApiKey}`,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     if (!runwayResponse.ok) {
       const errorText = await runwayResponse.text();
       console.error('Runway API Error:', runwayResponse.status, errorText);
-      
-      return NextResponse.json({
-        success: false,
-        error: `Video generation failed: ${runwayResponse.status}`,
-        details: errorText,
-        note: 'Check your AIML API key and credits'
-      }, { status: 500 });
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Video generation failed: ${runwayResponse.status}`,
+          details: errorText,
+          note: 'Check your AIML API key and credits',
+        },
+        { status: 500 }
+      );
     }
 
     const runwayData = await runwayResponse.json();
@@ -105,7 +113,7 @@ ${imageUrl ? `**Source image**: Provided` : '**Type**: Text-to-video'}
     // Handle different response formats
     let videoUrl = runwayData.url || runwayData.video_url || runwayData.data?.url;
     let thumbnailUrl = runwayData.thumbnail_url || runwayData.data?.thumbnail_url;
-    
+
     // If still processing, return status
     if (runwayData.status === 'processing' || runwayData.status === 'pending') {
       return NextResponse.json({
@@ -122,8 +130,8 @@ ${imageUrl ? `**Source image**: Provided` : '**Type**: Text-to-video'}
         metadata: {
           runway_id: runwayData.id,
           model: 'gen4_turbo',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
     }
 
@@ -143,19 +151,18 @@ ${imageUrl ? `**Source image**: Provided` : '**Type**: Text-to-video'}
         model: 'gen4_turbo',
         runway_id: runwayData.id,
         input_image_provided: !!imageUrl,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
-
   } catch (error) {
     console.error('Video Generation API error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Video generation request failed',
         message: error instanceof Error ? error.message : 'Unknown error',
-        note: 'Check your AIML API key configuration and network connection.'
+        note: 'Check your AIML API key configuration and network connection.',
       },
       { status: 500 }
     );
   }
-} 
+}

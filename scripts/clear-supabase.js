@@ -21,4 +21,4 @@ if (typeof localStorage !== 'undefined') {
   console.log('Cleared oneai-auth from localStorage');
 }
 
-console.log('Supabase instances cleared. Refresh the page to reinitialize.'); 
+console.log('Supabase instances cleared. Refresh the page to reinitialize.');

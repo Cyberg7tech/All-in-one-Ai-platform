@@ -6,26 +6,20 @@ export async function POST(request: NextRequest) {
     const { to, subject, content, from } = body;
 
     if (!to || !subject || !content) {
-      return NextResponse.json(
-        { error: 'To, subject, and content are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'To, subject, and content are required' }, { status: 400 });
     }
 
     // Validate email format (basic)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(to)) {
-      return NextResponse.json(
-        { error: 'Invalid email address format' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid email address format' }, { status: 400 });
     }
 
     console.log('Email Tool API: Request received', {
       to,
       subject,
       contentLength: content.length,
-      from: from || 'default'
+      from: from || 'default',
     });
 
     // Email sending is not available in the simplified setup
@@ -39,7 +33,7 @@ export async function POST(request: NextRequest) {
         subject,
         content,
         from: from || 'noreply@yourdomain.com',
-        composed_at: new Date().toISOString()
+        composed_at: new Date().toISOString(),
       },
       note: `Email sending is not available in the simplified OpenAI + Together AI setup.
 
@@ -76,19 +70,18 @@ ${from ? `**From**: ${from}` : ''}
         recipient: to,
         subject_length: subject.length,
         content_length: content.length,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
-
   } catch (error) {
     console.error('Email tool error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Email request failed',
         message: error instanceof Error ? error.message : 'Unknown error',
-        note: 'Email sending is not available in the simplified OpenAI + Together AI setup.'
+        note: 'Email sending is not available in the simplified OpenAI + Together AI setup.',
       },
       { status: 500 }
     );
   }
-} 
+}

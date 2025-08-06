@@ -40,7 +40,7 @@ class CircuitBreaker {
   private onFailure() {
     this.failures++;
     this.lastFailureTime = Date.now();
-    
+
     if (this.failures >= this.failureThreshold) {
       this.state = 'OPEN';
       console.warn('Circuit breaker opened due to repeated failures');
@@ -83,7 +83,7 @@ class LoadingStateManager {
 
     this.loadingStates.set(key, {
       startTime: Date.now(),
-      timeout
+      timeout,
     });
   }
 
@@ -98,7 +98,7 @@ class LoadingStateManager {
   isStuck(key: string): boolean {
     const state = this.loadingStates.get(key);
     if (!state) return false;
-    
+
     return Date.now() - state.startTime > this.defaultTimeout;
   }
 
@@ -120,7 +120,7 @@ export function preventStuckState() {
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       loadingManager.clearAll();
-      
+
       // Reset circuit breakers
       authCircuitBreaker.reset();
       chatCircuitBreaker.reset();

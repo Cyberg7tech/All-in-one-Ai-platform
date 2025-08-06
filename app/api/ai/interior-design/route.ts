@@ -4,37 +4,32 @@ import { AIAPIService } from '@/lib/ai/api-integration';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      prompt,
-      room_type = 'living room',
-      style = 'modern',
-      budget = 'medium',
-      userId
-    } = body;
+    const { prompt, room_type = 'living room', style = 'modern', budget = 'medium', userId } = body;
 
     if (!prompt || typeof prompt !== 'string') {
-      return NextResponse.json(
-        { error: 'Prompt is required and must be a string' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Prompt is required and must be a string' }, { status: 400 });
     }
 
     console.log('Interior Design API: Request received', {
       promptLength: prompt.length,
       room_type,
       style,
-      budget
+      budget,
     });
 
     // Use Together AI for intelligent design suggestions
     const aiService = new AIAPIService();
-    
+
     // Check if Together AI is available
     if (!process.env.TOGETHER_API_KEY) {
-      return NextResponse.json({
-        error: 'Together AI API key not configured. Please add TOGETHER_API_KEY to your environment variables.',
-        setup_info: 'Get your API key from https://api.together.ai/'
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error:
+            'Together AI API key not configured. Please add TOGETHER_API_KEY to your environment variables.',
+          setup_info: 'Get your API key from https://api.together.ai/',
+        },
+        { status: 500 }
+      );
     }
 
     const designPrompt = `You are an expert interior designer with 20+ years of experience. Create a comprehensive interior design plan for a ${room_type} in ${style} style with a ${budget} budget.
@@ -76,12 +71,14 @@ Focus on practical, achievable recommendations that match the user's budget and 
 
     try {
       // Use Together AI for intelligent design generation
-      const response = await aiService.chatWithTogether([
-        { role: 'user', content: designPrompt }
-      ], 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo', {
-        maxTokens: 2000,
-        temperature: 0.7
-      });
+      const response = await aiService.chatWithTogether(
+        [{ role: 'user', content: designPrompt }],
+        'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+        {
+          maxTokens: 2000,
+          temperature: 0.7,
+        }
+      );
 
       if (!response.content) {
         throw new Error('No response from Together AI');
@@ -102,42 +99,52 @@ Focus on practical, achievable recommendations that match the user's budget and 
         // Fallback: Create structured data from text response
         designData = {
           design_concept: `${style} ${room_type} design based on: ${prompt}`,
-          color_palette: style === 'modern' ? ['#FFFFFF', '#2C3E50', '#3498DB', '#ECF0F1', '#34495E'] : 
-                        style === 'traditional' ? ['#8B4513', '#DEB887', '#F5DEB3', '#D2B48C', '#A0522D'] :
-                        ['#F5F5F5', '#9E9E9E', '#607D8B', '#455A64', '#37474F'],
-          materials: response.content.includes('wood') ? ['Wood', 'Natural fibers', 'Stone'] :
-                    response.content.includes('modern') ? ['Glass', 'Steel', 'Concrete', 'Leather'] :
-                    ['Mixed materials', 'Textiles', 'Metal accents'],
-          furniture_recommendations: [{
-            category: 'Main Furniture',
-            items: [`${style} seating`, `${style} storage`, 'Accent pieces'],
-            placement: 'Optimized for functionality and flow',
-            estimated_cost: budget === 'low' ? '$2,000-5,000' : budget === 'medium' ? '$5,000-15,000' : '$15,000+'
-          }],
+          color_palette:
+            style === 'modern'
+              ? ['#FFFFFF', '#2C3E50', '#3498DB', '#ECF0F1', '#34495E']
+              : style === 'traditional'
+                ? ['#8B4513', '#DEB887', '#F5DEB3', '#D2B48C', '#A0522D']
+                : ['#F5F5F5', '#9E9E9E', '#607D8B', '#455A64', '#37474F'],
+          materials: response.content.includes('wood')
+            ? ['Wood', 'Natural fibers', 'Stone']
+            : response.content.includes('modern')
+              ? ['Glass', 'Steel', 'Concrete', 'Leather']
+              : ['Mixed materials', 'Textiles', 'Metal accents'],
+          furniture_recommendations: [
+            {
+              category: 'Main Furniture',
+              items: [`${style} seating`, `${style} storage`, 'Accent pieces'],
+              placement: 'Optimized for functionality and flow',
+              estimated_cost:
+                budget === 'low' ? '$2,000-5,000' : budget === 'medium' ? '$5,000-15,000' : '$15,000+',
+            },
+          ],
           lighting_plan: {
             ambient: 'Soft, overall illumination',
             task: 'Focused work lighting',
             accent: 'Decorative highlights',
-            fixtures: [`${style} ceiling light`, 'Table lamps', 'Floor lamps']
+            fixtures: [`${style} ceiling light`, 'Table lamps', 'Floor lamps'],
           },
           layout_suggestions: response.content.substring(0, 300) + '...',
           styling_tips: [
             'Consider natural light when placing furniture',
             'Mix textures for visual interest',
-            'Maintain clear pathways for easy movement'
+            'Maintain clear pathways for easy movement',
           ],
-          estimated_timeline: budget === 'low' ? '2-4 weeks' : budget === 'medium' ? '4-8 weeks' : '8-12 weeks',
+          estimated_timeline:
+            budget === 'low' ? '2-4 weeks' : budget === 'medium' ? '4-8 weeks' : '8-12 weeks',
           total_budget_breakdown: {
-            furniture: budget === 'low' ? '$1,500-3,000' : budget === 'medium' ? '$3,000-8,000' : '$8,000-20,000',
+            furniture:
+              budget === 'low' ? '$1,500-3,000' : budget === 'medium' ? '$3,000-8,000' : '$8,000-20,000',
             lighting: budget === 'low' ? '$200-600' : budget === 'medium' ? '$600-2,000' : '$2,000-5,000',
             accessories: budget === 'low' ? '$300-800' : budget === 'medium' ? '$800-2,500' : '$2,500-8,000',
-            labor: budget === 'low' ? '$500-1,500' : budget === 'medium' ? '$1,500-4,000' : '$4,000-12,000'
-          }
+            labor: budget === 'low' ? '$500-1,500' : budget === 'medium' ? '$1,500-4,000' : '$4,000-12,000',
+          },
         };
       }
 
       const designId = `design_${Date.now()}`;
-      
+
       return NextResponse.json({
         success: true,
         id: designId,
@@ -146,63 +153,74 @@ Focus on practical, achievable recommendations that match the user's budget and 
         model: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
         design_data: designData,
         // Legacy format for backwards compatibility
-        design_suggestions: [{
-          title: designData.design_concept || `${style} ${room_type} Design`,
-          description: designData.layout_suggestions || `Professional ${style} design for your ${room_type}`,
-          color_scheme: designData.color_palette || ['#FFFFFF', '#2C3E50', '#3498DB'],
-          materials: designData.materials || ['Mixed materials'],
-          estimated_cost: designData.total_budget_breakdown?.furniture || 'Contact for quote'
-        }],
-        furniture_recommendations: designData.furniture_recommendations || [{
-          category: 'Furniture',
-          items: [`${style} pieces`],
-          estimated_cost: 'Contact for detailed quote'
-        }],
+        design_suggestions: [
+          {
+            title: designData.design_concept || `${style} ${room_type} Design`,
+            description:
+              designData.layout_suggestions || `Professional ${style} design for your ${room_type}`,
+            color_scheme: designData.color_palette || ['#FFFFFF', '#2C3E50', '#3498DB'],
+            materials: designData.materials || ['Mixed materials'],
+            estimated_cost: designData.total_budget_breakdown?.furniture || 'Contact for quote',
+          },
+        ],
+        furniture_recommendations: designData.furniture_recommendations || [
+          {
+            category: 'Furniture',
+            items: [`${style} pieces`],
+            estimated_cost: 'Contact for detailed quote',
+          },
+        ],
         ai_analysis: {
           prompt_used: designPrompt.substring(0, 200) + '...',
           response_tokens: response.usage?.total_tokens || 0,
           model_used: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
-          processing_time: '2-3 seconds'
-        }
+          processing_time: '2-3 seconds',
+        },
       });
-
     } catch (aiError: any) {
       console.error('Together AI Error:', aiError);
-      
+
       // Fallback to demo response if AI fails
       const designId = `design_${Date.now()}`;
-      
+
       return NextResponse.json({
         success: true,
         id: designId,
         status: 'completed',
         mode: 'fallback',
-        design_suggestions: [{
-          title: `${style.charAt(0).toUpperCase() + style.slice(1)} ${room_type} Design`,
-          description: `A beautiful ${style} ${room_type} design based on your requirements. (Note: This is a demo response - configure TOGETHER_API_KEY for AI-powered suggestions)`,
-          color_scheme: style === 'modern' ? ['#FFFFFF', '#2C3E50', '#3498DB'] : ['#8B4513', '#DEB887', '#F5DEB3'],
-          materials: style === 'modern' ? ['Glass', 'Steel', 'Concrete'] : ['Wood', 'Leather', 'Natural fiber'],
-          estimated_cost: budget === 'low' ? '$2,000-5,000' : budget === 'medium' ? '$5,000-15,000' : '$15,000-50,000'
-        }],
-        furniture_recommendations: [{
-          category: 'Seating',
-          items: [`${style} sofa`, `${style} armchair`, 'Coffee table'],
-          estimated_cost: budget === 'low' ? '$500-1,500' : budget === 'medium' ? '$1,500-5,000' : '$5,000-15,000'
-        }],
+        design_suggestions: [
+          {
+            title: `${style.charAt(0).toUpperCase() + style.slice(1)} ${room_type} Design`,
+            description: `A beautiful ${style} ${room_type} design based on your requirements. (Note: This is a demo response - configure TOGETHER_API_KEY for AI-powered suggestions)`,
+            color_scheme:
+              style === 'modern' ? ['#FFFFFF', '#2C3E50', '#3498DB'] : ['#8B4513', '#DEB887', '#F5DEB3'],
+            materials:
+              style === 'modern' ? ['Glass', 'Steel', 'Concrete'] : ['Wood', 'Leather', 'Natural fiber'],
+            estimated_cost:
+              budget === 'low' ? '$2,000-5,000' : budget === 'medium' ? '$5,000-15,000' : '$15,000-50,000',
+          },
+        ],
+        furniture_recommendations: [
+          {
+            category: 'Seating',
+            items: [`${style} sofa`, `${style} armchair`, 'Coffee table'],
+            estimated_cost:
+              budget === 'low' ? '$500-1,500' : budget === 'medium' ? '$1,500-5,000' : '$5,000-15,000',
+          },
+        ],
         error_info: {
           message: 'Using demo mode - configure Together AI for intelligent suggestions',
-          setup_url: 'https://docs.together.ai/docs/quickstart'
-        }
+          setup_url: 'https://docs.together.ai/docs/quickstart',
+        },
       });
     }
-
   } catch (error: any) {
     console.error('Interior Design API Error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to generate interior design suggestions',
         details: error.message,
-        setup_info: 'Make sure TOGETHER_API_KEY is configured in your environment'
+        setup_info: 'Make sure TOGETHER_API_KEY is configured in your environment',
       },
       { status: 500 }
     );

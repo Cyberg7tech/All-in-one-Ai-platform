@@ -20,6 +20,6 @@ export default function LoginPage() {
   }, [user, isLoading, router, mounted]);
 
   if (!mounted || isLoading) return null;
-  
+
   return <LoginForm />;
-} 
+}

@@ -22,8 +22,8 @@
       "  );",
       "};",
       "",
-      "export default $1;"
+      "export default $1;",
     ],
-    "description": "Create functional components"
-  }
+    "description": "Create functional components",
+  },
 }

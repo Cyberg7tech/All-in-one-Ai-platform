@@ -56,7 +56,9 @@
 body {
   color: hsl(var(--foreground));
   background: hsl(var(--background));
-  font-feature-settings: "rlig" 1, "calt" 1;
+  font-feature-settings:
+    'rlig' 1,
+    'calt' 1;
 }
 
 /* Custom scrollbar */
@@ -97,7 +99,8 @@ body {
 
 /* Loading animations */
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     box-shadow: 0 0 5px hsl(var(--primary));
   }
@@ -347,7 +350,7 @@ body {
   @apply relative flex cursor-pointer rounded-lg border bg-background p-4 shadow-sm focus:outline-none;
 }
 
-.radio-card[aria-checked="true"] {
+.radio-card[aria-checked='true'] {
   @apply border-primary bg-primary/5;
 }
 
@@ -355,7 +358,7 @@ body {
   @apply relative flex cursor-pointer rounded-lg border bg-background p-4 shadow-sm focus:outline-none;
 }
 
-.checkbox-card[aria-checked="true"] {
+.checkbox-card[aria-checked='true'] {
   @apply border-primary bg-primary/5;
 }
 
@@ -384,9 +387,17 @@ body {
 
 /* AI typing indicator */
 @keyframes typing {
-  0%, 20% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-  80%, 100% { transform: scale(1); }
+  0%,
+  20% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  80%,
+  100% {
+    transform: scale(1);
+  }
 }
 
 .typing-indicator {
@@ -398,9 +409,15 @@ body {
   animation: typing 1.4s ease-in-out infinite;
 }
 
-.typing-dot:nth-child(1) { animation-delay: 0s; }
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+.typing-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
 
 /* Success/Error states */
 .success-state {
@@ -442,52 +459,54 @@ body {
   * {
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   html {
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
   }
-  
+
   body {
     font-size: 16px; /* Prevent zoom on iOS */
     min-height: 100vh;
     min-height: -webkit-fill-available;
   }
-  
+
   /* Fix for iOS Safari bottom bar */
   .min-h-screen {
     min-height: 100vh;
     min-height: -webkit-fill-available;
   }
-  
+
   /* Mobile navigation fixes */
   .sidebar {
     transform: translateX(-100%);
     transition: transform 0.3s ease;
   }
-  
+
   .sidebar.open {
     transform: translateX(0);
   }
-  
+
   /* Mobile chat interface */
   .chat-container {
     height: calc(100vh - 60px);
     height: calc(100vh - 60px - env(safe-area-inset-bottom));
   }
-  
+
   /* Mobile form elements */
-  input, textarea, select {
+  input,
+  textarea,
+  select {
     font-size: 16px; /* Prevent zoom on iOS */
     border-radius: 0; /* Remove iOS styling */
     -webkit-appearance: none;
     appearance: none;
   }
-  
+
   /* Mobile buttons */
   button {
     -webkit-appearance: none;
     appearance: none;
     touch-action: manipulation;
   }
-} 
+}

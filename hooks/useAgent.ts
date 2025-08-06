@@ -19,7 +19,7 @@ export function useAgent(options: UseAgentOptions = {}) {
   const [currentAgent, setCurrentAgent] = useState<Agent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const { callTogetherAI, cancelRequest, isLoading: aiLoading } = useTogetherAI(options);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -32,12 +32,13 @@ export function useAgent(options: UseAgentOptions = {}) {
     };
   }, []);
 
-  const createAgent = useCallback(async (agentData: Omit<Agent, 'id'>) => {
-    setIsLoading(true);
-    setError(null);
+  const createAgent = useCallback(
+    async (agentData: Omit<Agent, 'id'>) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const prompt = `Create an AI agent with the following specifications:
+      try {
+        const prompt = `Create an AI agent with the following specifications:
         Name: ${agentData.name}
         Description: ${agentData.description}
         Tools: ${agentData.tools.join(', ')}
@@ -45,67 +46,79 @@ export function useAgent(options: UseAgentOptions = {}) {
         
         Please provide a detailed response about this agent's capabilities and how it should behave.`;
 
-      const response = await callTogetherAI(prompt);
-      
-      const newAgent: Agent = {
-        ...agentData,
-        id: Date.now().toString(),
-      };
+        const response = await callTogetherAI(prompt);
 
-      setAgents(prev => [...prev, newAgent]);
-      setCurrentAgent(newAgent);
-      
-      return newAgent;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create agent');
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [callTogetherAI]);
+        const newAgent: Agent = {
+          ...agentData,
+          id: Date.now().toString(),
+        };
 
-  const updateAgent = useCallback(async (id: string, updates: Partial<Agent>) => {
-    setAgents(prev => prev.map(agent => 
-      agent.id === id ? { ...agent, ...updates } : agent
-    ));
-    
-    if (currentAgent?.id === id) {
-      setCurrentAgent(prev => prev ? { ...prev, ...updates } : null);
-    }
-  }, [currentAgent]);
+        setAgents((prev) => [...prev, newAgent]);
+        setCurrentAgent(newAgent);
 
-  const deleteAgent = useCallback((id: string) => {
-    setAgents(prev => prev.filter(agent => agent.id !== id));
-    
-    if (currentAgent?.id === id) {
-      setCurrentAgent(null);
-    }
-  }, [currentAgent]);
-
-  const selectAgent = useCallback((id: string) => {
-    const agent = agents.find(a => a.id === id);
-    setCurrentAgent(agent || null);
-  }, [agents]);
-
-  const startAgentMonitoring = useCallback((agentId: string, intervalMs: number = 5000) => {
-    // Clear any existing interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-
-    intervalRef.current = setInterval(async () => {
-      try {
-        // Monitor agent health/status
-        const agent = agents.find(a => a.id === agentId);
-        if (agent) {
-          // Perform health check or status update
-          console.log(`Monitoring agent: ${agent.name}`);
-        }
+        return newAgent;
       } catch (err) {
-        console.error('Agent monitoring error:', err);
+        setError(err instanceof Error ? err.message : 'Failed to create agent');
+        throw err;
+      } finally {
+        setIsLoading(false);
       }
-    }, intervalMs);
-  }, [agents]);
+    },
+    [callTogetherAI]
+  );
+
+  const updateAgent = useCallback(
+    async (id: string, updates: Partial<Agent>) => {
+      setAgents((prev) => prev.map((agent) => (agent.id === id ? { ...agent, ...updates } : agent)));
+
+      if (currentAgent?.id === id) {
+        setCurrentAgent((prev) => (prev ? { ...prev, ...updates } : null));
+      }
+    },
+    [currentAgent]
+  );
+
+  const deleteAgent = useCallback(
+    (id: string) => {
+      setAgents((prev) => prev.filter((agent) => agent.id !== id));
+
+      if (currentAgent?.id === id) {
+        setCurrentAgent(null);
+      }
+    },
+    [currentAgent]
+  );
+
+  const selectAgent = useCallback(
+    (id: string) => {
+      const agent = agents.find((a) => a.id === id);
+      setCurrentAgent(agent || null);
+    },
+    [agents]
+  );
+
+  const startAgentMonitoring = useCallback(
+    (agentId: string, intervalMs: number = 5000) => {
+      // Clear any existing interval
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+
+      intervalRef.current = setInterval(async () => {
+        try {
+          // Monitor agent health/status
+          const agent = agents.find((a) => a.id === agentId);
+          if (agent) {
+            // Perform health check or status update
+            console.log(`Monitoring agent: ${agent.name}`);
+          }
+        } catch (err) {
+          console.error('Agent monitoring error:', err);
+        }
+      }, intervalMs);
+    },
+    [agents]
+  );
 
   const stopAgentMonitoring = useCallback(() => {
     if (intervalRef.current) {
@@ -127,4 +140,4 @@ export function useAgent(options: UseAgentOptions = {}) {
     stopAgentMonitoring,
     cancelRequest,
   };
-} 
+}

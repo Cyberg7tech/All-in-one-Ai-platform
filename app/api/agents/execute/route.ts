@@ -21,17 +21,17 @@ export async function POST(request: NextRequest) {
       if (process.env.TOGETHER_API_KEY) {
         return 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo'; // Verified available Together AI model
       }
-      
+
       // Priority 2: AI/ML API for premium models (if configured)
       if (process.env.AIML_API_KEY) {
         return 'gpt-4.1'; // Premium GPT-4.1 via AI/ML API
       }
-      
+
       // Priority 3: OpenAI direct (if configured)
       if (process.env.OPENAI_API_KEY?.startsWith('sk-')) {
         return 'gpt-4o-mini'; // Fastest OpenAI model
-      } 
-      
+      }
+
       // Fallback: Default (will show error message if not configured)
       return 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo';
     };
@@ -53,33 +53,29 @@ Key guidelines:
 Available tools: web search, image generation, data analysis, code execution, email sending.
 
 Current date and time: ${new Date().toLocaleString()}`,
-      tools: ['web_search', 'generate_image', 'send_email', 'code_interpreter', 'analyze_data']
+      tools: ['web_search', 'generate_image', 'send_email', 'code_interpreter', 'analyze_data'],
     };
 
     // Execute the agent with enhanced capabilities
-    const result = await agentService.executeAgent(
-      agentConfig,
-      message,
-      {
-        userId,
-        sessionId: sessionId || `session_${Date.now()}`,
-        conversationHistory: [],
-        metadata: {
-          timestamp: new Date().toISOString(),
-          userAgent: request.headers.get('user-agent') || 'unknown',
-          model: agentConfig.model
-        }
-      }
-    );
+    const result = await agentService.executeAgent(agentConfig, message, {
+      userId,
+      sessionId: sessionId || `session_${Date.now()}`,
+      conversationHistory: [],
+      metadata: {
+        timestamp: new Date().toISOString(),
+        userAgent: request.headers.get('user-agent') || 'unknown',
+        model: agentConfig.model,
+      },
+    });
 
     return NextResponse.json(result);
   } catch (error) {
     console.error('Agent execution error:', error);
     return NextResponse.json(
-      { 
-        error: 'Failed to execute agent', 
+      {
+        error: 'Failed to execute agent',
         details: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       { status: 500 }
     );
@@ -89,10 +85,10 @@ Current date and time: ${new Date().toLocaleString()}`,
 export async function GET() {
   return NextResponse.json({
     message: 'Agent execution endpoint. Use POST to execute an agent.',
-    availableTools: agentService.getAvailableTools().map(tool => ({
+    availableTools: agentService.getAvailableTools().map((tool) => ({
       id: tool.id,
       name: tool.name,
-      description: tool.description
-    }))
+      description: tool.description,
+    })),
   });
-} 
+}

@@ -12,45 +12,44 @@ export interface DownloadOptions {
 export async function downloadFromUrl(url: string, filename: string): Promise<void> {
   try {
     if (!url) {
-      throw new Error('No URL provided for download')
+      throw new Error('No URL provided for download');
     }
 
     // Use server-side proxy for external URLs to avoid CORS
-    const isExternalUrl = url.startsWith('http') && !url.includes('localhost')
-    const downloadUrl = isExternalUrl 
+    const isExternalUrl = url.startsWith('http') && !url.includes('localhost');
+    const downloadUrl = isExternalUrl
       ? `/api/proxy-image?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`
-      : url
+      : url;
 
-    console.log('Download:', { original: url, proxy: downloadUrl, isExternal: isExternalUrl })
+    console.log('Download:', { original: url, proxy: downloadUrl, isExternal: isExternalUrl });
 
-    const response = await fetch(downloadUrl)
-    
+    const response = await fetch(downloadUrl);
+
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Download failed:', response.status, errorText)
-      throw new Error(`Failed to download: ${response.status}`)
+      const errorText = await response.text();
+      console.error('Download failed:', response.status, errorText);
+      throw new Error(`Failed to download: ${response.status}`);
     }
 
-    const blob = await response.blob()
-    
+    const blob = await response.blob();
+
     // Create download link
-    const downloadLink = document.createElement('a')
-    const objectUrl = URL.createObjectURL(blob)
-    
-    downloadLink.href = objectUrl
-    downloadLink.download = filename
-    downloadLink.style.display = 'none'
-    
-    document.body.appendChild(downloadLink)
-    downloadLink.click()
-    document.body.removeChild(downloadLink)
-    
+    const downloadLink = document.createElement('a');
+    const objectUrl = URL.createObjectURL(blob);
+
+    downloadLink.href = objectUrl;
+    downloadLink.download = filename;
+    downloadLink.style.display = 'none';
+
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+
     // Clean up
-    URL.revokeObjectURL(objectUrl)
-    
+    URL.revokeObjectURL(objectUrl);
   } catch (error) {
-    console.error('Download failed:', error)
-    throw new Error('Failed to download file. Please try again.')
+    console.error('Download failed:', error);
+    throw new Error('Failed to download file. Please try again.');
   }
 }
 
@@ -61,15 +60,15 @@ export function downloadAsTextFile(content: string, filename: string, mimeType =
   try {
     const blob = new Blob([content], { type: mimeType });
     const url = window.URL.createObjectURL(blob);
-    
+
     const link = document.createElement('a');
     link.href = url;
     link.download = filename;
-    
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error('Text download failed:', error);
@@ -80,26 +79,34 @@ export function downloadAsTextFile(content: string, filename: string, mimeType =
 /**
  * Download canvas as image
  */
-export function downloadCanvasAsImage(canvas: HTMLCanvasElement, filename: string, options: DownloadOptions = {}): void {
+export function downloadCanvasAsImage(
+  canvas: HTMLCanvasElement,
+  filename: string,
+  options: DownloadOptions = {}
+): void {
   try {
     const { mimeType = 'image/png', quality = 0.9 } = options;
-    
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        throw new Error('Failed to create image blob');
-      }
-      
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${filename}.${mimeType.split('/')[1]}`;
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      window.URL.revokeObjectURL(url);
-    }, mimeType, quality);
+
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          throw new Error('Failed to create image blob');
+        }
+
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${filename}.${mimeType.split('/')[1]}`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        window.URL.revokeObjectURL(url);
+      },
+      mimeType,
+      quality
+    );
   } catch (error) {
     console.error('Canvas download failed:', error);
     throw new Error('Failed to download image. Please try again.');
@@ -121,7 +128,7 @@ export function downloadAudioData(audioData: string, filename: string): void {
       const link = document.createElement('a');
       link.href = audioData;
       link.download = `${filename}.mp3`;
-      
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -147,7 +154,7 @@ export async function downloadMultipleFiles(files: Array<{ url: string; name: st
     for (const file of files) {
       await downloadFromUrl(file.url, file.name);
       // Add small delay between downloads to avoid overwhelming the browser
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
   } catch (error) {
     console.error('Multiple file download failed:', error);
@@ -222,11 +229,11 @@ function extractFilenameFromUrl(url: string): string {
  */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
-  
+
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
@@ -244,4 +251,4 @@ export function generateTimestamp(): string {
 export function generateUniqueFilename(baseName: string, extension: string): string {
   const timestamp = generateTimestamp();
   return `${baseName}_${timestamp}.${extension}`;
-} 
+}

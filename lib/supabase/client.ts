@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import { createBrowserClient } from '@supabase/ssr'
-import { type SupabaseClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr';
+import { type SupabaseClient } from '@supabase/supabase-js';
 
 // Singleton client instance to prevent multiple GoTrueClient instances
-let _client: SupabaseClient | null = null
+let _client: SupabaseClient | null = null;
 
 export const getSupabaseClient = () => {
   if (typeof window === 'undefined') {
@@ -30,39 +30,32 @@ export const getSupabaseClient = () => {
   return _client;
 };
 
-// Admin client for backend operations  
-let _adminClient: SupabaseClient | null = null
+// Admin client for backend operations
+let _adminClient: SupabaseClient | null = null;
 
 export function getSupabaseAdmin(): SupabaseClient {
   if (!_adminClient) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ttnkomdxbkmfmkaycjao.supabase.co'
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzE1NzAxOCwiZXhwIjoyMDY4NzMzMDE4fQ.UOE8fFmFYqnCHKiA-MlfHEfxDxViasspD64trjmsMLI'
-    
-    _adminClient = createBrowserClient(supabaseUrl, supabaseServiceKey)
-    
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ttnkomdxbkmfmkaycjao.supabase.co';
+    const supabaseServiceKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzE1NzAxOCwiZXhwIjoyMDY4NzMzMDE4fQ.UOE8fFmFYqnCHKiA-MlfHEfxDxViasspD64trjmsMLI';
+
+    _adminClient = createBrowserClient(supabaseUrl, supabaseServiceKey);
+
     // Store reference for debugging
     if (typeof window !== 'undefined') {
       (window as any).__supabaseAdminInstance = _adminClient;
     }
   }
-  
-  return _adminClient
+
+  return _adminClient;
 }
 
 // Enhanced database helpers for the One AI platform
 export const dbHelpers = {
   // User Management
-  async createUser(userData: {
-    email: string;
-    name: string;
-    role?: string;
-    subscription_plan?: string;
-  }) {
-    const { data, error } = await getSupabaseAdmin()
-      .from('users')
-      .insert(userData)
-      .select()
-      .single();
+  async createUser(userData: { email: string; name: string; role?: string; subscription_plan?: string }) {
+    const { data, error } = await getSupabaseAdmin().from('users').insert(userData).select().single();
 
     if (error) {
       console.error('Error creating user:', error);
@@ -72,11 +65,7 @@ export const dbHelpers = {
   },
 
   async getUserById(userId: string) {
-    const { data, error } = await getSupabaseClient()
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    const { data, error } = await getSupabaseClient().from('users').select('*').eq('id', userId).single();
 
     if (error) {
       console.error('Error fetching user:', error);
@@ -132,13 +121,13 @@ export const dbHelpers = {
             console.error('Error fetching messages for session:', String(session.id), messagesError);
             return {
               ...session,
-              chat_messages: []
+              chat_messages: [],
             };
           }
 
           return {
             ...session,
-            chat_messages: messages || []
+            chat_messages: messages || [],
           };
         })
       );
@@ -164,11 +153,14 @@ export const dbHelpers = {
     return data;
   },
 
-  async updateChatSession(sessionId: string, updates: {
-    title?: string;
-    model_id?: string;
-    agent_id?: string;
-  }) {
+  async updateChatSession(
+    sessionId: string,
+    updates: {
+      title?: string;
+      model_id?: string;
+      agent_id?: string;
+    }
+  ) {
     const { data, error } = await getSupabaseClient()
       .from('chat_sessions')
       .update(updates)
@@ -231,11 +223,7 @@ export const dbHelpers = {
     tools?: string[];
     model_config?: any;
   }) {
-    const { data, error } = await getSupabaseClient()
-      .from('ai_agents')
-      .insert(agentData)
-      .select()
-      .single();
+    const { data, error } = await getSupabaseClient().from('ai_agents').insert(agentData).select().single();
 
     if (error) {
       console.error('Error creating agent:', error);
@@ -244,15 +232,18 @@ export const dbHelpers = {
     return data;
   },
 
-  async updateAgent(agentId: string, agentData: Partial<{
-    name: string;
-    description: string;
-    type: string;
-    model: string;
-    system_prompt: string;
-    tools: string[];
-    model_config: any;
-  }>) {
+  async updateAgent(
+    agentId: string,
+    agentData: Partial<{
+      name: string;
+      description: string;
+      type: string;
+      model: string;
+      system_prompt: string;
+      tools: string[];
+      model_config: any;
+    }>
+  ) {
     const { data, error } = await getSupabaseClient()
       .from('ai_agents')
       .update(agentData)
@@ -315,8 +306,8 @@ export const dbHelpers = {
         metadata: {
           content: docData.content,
           embedding: docData.embedding,
-          ...docData.metadata
-        }
+          ...docData.metadata,
+        },
       })
       .select()
       .single();
@@ -367,8 +358,8 @@ export const dbHelpers = {
           dataset_name: anomalyData.dataset_name,
           algorithm: anomalyData.algorithm,
           config: anomalyData.config,
-          results: anomalyData.results
-        }
+          results: anomalyData.results,
+        },
       })
       .select()
       .single();
@@ -415,8 +406,8 @@ export const dbHelpers = {
           dataset_name: forecastData.dataset_name,
           model_type: forecastData.model_type,
           config: forecastData.config,
-          predictions: forecastData.predictions
-        }
+          predictions: forecastData.predictions,
+        },
       })
       .select()
       .single();
@@ -502,7 +493,7 @@ export const dbHelpers = {
       .eq('user_id', userId)
       .order('timestamp', { ascending: false })
       .limit(limit);
-    
+
     if (error) {
       console.error('Error fetching activities:', error);
       return [];
@@ -511,7 +502,14 @@ export const dbHelpers = {
   },
 
   // Add activity
-  async addActivity(userId: string, type: string, name: string, description?: string, icon?: string, metadata?: any) {
+  async addActivity(
+    userId: string,
+    type: string,
+    name: string,
+    description?: string,
+    icon?: string,
+    metadata?: any
+  ) {
     const { data, error } = await getSupabaseClient()
       .from('activities')
       .insert({
@@ -520,11 +518,11 @@ export const dbHelpers = {
         name,
         description,
         icon,
-        metadata: metadata || {}
+        metadata: metadata || {},
       })
       .select()
       .single();
-    
+
     if (error) {
       console.error('Error adding activity:', error);
       return null;
@@ -540,7 +538,7 @@ export const dbHelpers = {
       .eq('user_id', userId)
       .gte('recorded_at', new Date(Date.now() - this.getTimeRangeMs(timeRange)).toISOString())
       .order('recorded_at', { ascending: true });
-    
+
     if (error) {
       console.error('Error fetching analytics:', error);
       return [];
@@ -549,7 +547,14 @@ export const dbHelpers = {
   },
 
   // Add analytics data point
-  async addAnalyticsData(userId: string, metricName: string, metricValue: number, metricType: string, timePeriod: string, metadata?: any) {
+  async addAnalyticsData(
+    userId: string,
+    metricName: string,
+    metricValue: number,
+    metricType: string,
+    timePeriod: string,
+    metadata?: any
+  ) {
     const { data, error } = await getSupabaseClient()
       .from('analytics_data')
       .insert({
@@ -558,11 +563,11 @@ export const dbHelpers = {
         metric_value: metricValue,
         metric_type: metricType,
         time_period: timePeriod,
-        metadata: metadata || {}
+        metadata: metadata || {},
       })
       .select()
       .single();
-    
+
     if (error) {
       console.error('Error adding analytics data:', error);
       return null;
@@ -573,11 +578,16 @@ export const dbHelpers = {
   // Helper function to convert time range to milliseconds
   getTimeRangeMs(timeRange: string): number {
     switch (timeRange) {
-      case '7d': return 7 * 24 * 60 * 60 * 1000;
-      case '30d': return 30 * 24 * 60 * 60 * 1000;
-      case '90d': return 90 * 24 * 60 * 60 * 1000;
-      case '1y': return 365 * 24 * 60 * 60 * 1000;
-      default: return 7 * 24 * 60 * 60 * 1000;
+      case '7d':
+        return 7 * 24 * 60 * 60 * 1000;
+      case '30d':
+        return 30 * 24 * 60 * 60 * 1000;
+      case '90d':
+        return 90 * 24 * 60 * 60 * 1000;
+      case '1y':
+        return 365 * 24 * 60 * 60 * 1000;
+      default:
+        return 7 * 24 * 60 * 60 * 1000;
     }
   },
 
@@ -585,20 +595,20 @@ export const dbHelpers = {
   async initializeSchema() {
     try {
       console.log('Initializing database schema...');
-      
+
       // This would be better handled through Supabase migrations
       // For now, we'll create tables if they don't exist
-      
+
       // Enable Row Level Security and create policies through Supabase dashboard
       // The actual table creation should be done through Supabase SQL Editor
-      
+
       console.log('Schema initialization requires manual setup through Supabase dashboard');
       console.log('Please run the SQL in supabase/schema.sql through your Supabase SQL Editor');
-      
+
       return true;
     } catch (error) {
       console.error('Error initializing schema:', error);
       return false;
     }
-  }
-} 
+  },
+};

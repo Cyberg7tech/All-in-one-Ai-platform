@@ -57,7 +57,7 @@ export class EnhancedAgentService {
       description: 'Search the internet for current information',
       parameters: {
         query: { type: 'string', required: true, description: 'Search query' },
-        maxResults: { type: 'number', default: 5, description: 'Maximum results to return' }
+        maxResults: { type: 'number', default: 5, description: 'Maximum results to return' },
       },
       execute: async (params: { query: string; maxResults?: number }) => {
         try {
@@ -87,17 +87,17 @@ export class EnhancedAgentService {
 Would you like me to use my built-in knowledge to answer questions about "${params.query}" instead?`,
             source: 'demo_search',
             query: params.query,
-            note: 'Web search not available in simplified setup'
+            note: 'Web search not available in simplified setup',
           };
         } catch (error) {
           return {
             success: false,
             error: 'Failed to perform web search',
             message: error instanceof Error ? error.message : 'Unknown error',
-            fallback: `I apologize, but I cannot search the web right now. However, I can help you with information from my training data. What specific topic would you like to know about regarding "${params.query}"?`
+            fallback: `I apologize, but I cannot search the web right now. However, I can help you with information from my training data. What specific topic would you like to know about regarding "${params.query}"?`,
           };
         }
-      }
+      },
     });
 
     // Image Generation Tool
@@ -108,30 +108,30 @@ Would you like me to use my built-in knowledge to answer questions about "${para
       parameters: {
         prompt: { type: 'string', required: true, description: 'Image description' },
         size: { type: 'string', default: '1024x1024', description: 'Image size' },
-        style: { type: 'string', default: 'vivid', description: 'Image style' }
+        style: { type: 'string', default: 'vivid', description: 'Image style' },
       },
       execute: async (params: { prompt: string; size?: string; style?: string }) => {
         try {
           const imageUrls = await this.apiService.generateImageWithDALLE(params.prompt, {
             size: params.size || '1024x1024',
             style: params.style || 'vivid',
-            quality: 'standard'
+            quality: 'standard',
           });
-          
+
           return {
             success: true,
             images: imageUrls,
             prompt: params.prompt,
-            source: 'dall-e-3'
+            source: 'dall-e-3',
           };
         } catch (error) {
           return {
             success: false,
             error: 'Failed to generate image',
-            message: error instanceof Error ? error.message : 'Unknown error'
+            message: error instanceof Error ? error.message : 'Unknown error',
           };
         }
-      }
+      },
     });
 
     // Video Generation Tool
@@ -141,7 +141,7 @@ Would you like me to use my built-in knowledge to answer questions about "${para
       description: 'Create videos using Runway Gen-2',
       parameters: {
         prompt: { type: 'string', required: true, description: 'Video description' },
-        imageUrl: { type: 'string', description: 'Optional starting image' }
+        imageUrl: { type: 'string', description: 'Optional starting image' },
       },
       execute: async (params: { prompt: string; imageUrl?: string }) => {
         try {
@@ -154,18 +154,18 @@ Would you like me to use my built-in knowledge to answer questions about "${para
               video_url: null,
               thumbnail_url: 'https://via.placeholder.com/320x180/3B82F6/FFFFFF?text=Video+Concept',
               prompt: params.prompt,
-              note: 'Video generation not available in simplified setup. Consider using Runway ML, Pika Labs, or other AI video services.'
+              note: 'Video generation not available in simplified setup. Consider using Runway ML, Pika Labs, or other AI video services.',
             },
             prompt: params.prompt,
-            source: 'demo-video'
+            source: 'demo-video',
           };
         } catch (error) {
           return {
             success: false,
-            error: 'Video generation not available in simplified setup'
+            error: 'Video generation not available in simplified setup',
           };
         }
-      }
+      },
     });
 
     // Music Generation Tool
@@ -176,7 +176,7 @@ Would you like me to use my built-in knowledge to answer questions about "${para
       parameters: {
         prompt: { type: 'string', required: true, description: 'Music description' },
         duration: { type: 'number', default: 30, description: 'Duration in seconds' },
-        genre: { type: 'string', description: 'Music genre' }
+        genre: { type: 'string', description: 'Music genre' },
       },
       execute: async (params: { prompt: string; duration?: number; genre?: string }) => {
         try {
@@ -191,18 +191,18 @@ Would you like me to use my built-in knowledge to answer questions about "${para
               genre: params.genre || 'pop',
               duration: params.duration || 30,
               prompt: params.prompt,
-              note: 'Music generation not available in simplified setup. Consider using Suno AI, Mubert, or other AI music services.'
+              note: 'Music generation not available in simplified setup. Consider using Suno AI, Mubert, or other AI music services.',
             },
             prompt: params.prompt,
-            source: 'demo-music'
+            source: 'demo-music',
           };
         } catch (error) {
           return {
             success: false,
-            error: 'Music generation not available in simplified setup'
+            error: 'Music generation not available in simplified setup',
           };
         }
-      }
+      },
     });
 
     // Email Tool
@@ -214,7 +214,7 @@ Would you like me to use my built-in knowledge to answer questions about "${para
         to: { type: 'string', required: true, description: 'Recipient email' },
         subject: { type: 'string', required: true, description: 'Email subject' },
         content: { type: 'string', required: true, description: 'Email content' },
-        from: { type: 'string', description: 'Sender email' }
+        from: { type: 'string', description: 'Sender email' },
       },
       execute: async (params: { to: string; subject: string; content: string; from?: string }) => {
         try {
@@ -228,18 +228,18 @@ Would you like me to use my built-in knowledge to answer questions about "${para
               content: params.content.substring(0, 200) + (params.content.length > 200 ? '...' : ''),
               from: params.from || 'noreply@demo.com',
               sent_at: new Date().toISOString(),
-              note: 'Email sending not available in simplified setup. Consider using Resend, SendGrid, or other email services.'
+              note: 'Email sending not available in simplified setup. Consider using Resend, SendGrid, or other email services.',
             },
-            source: 'demo-email'
+            source: 'demo-email',
           };
         } catch (error) {
           return {
             success: false,
             error: 'Failed to send email',
-            message: error instanceof Error ? error.message : 'Unknown error'
+            message: error instanceof Error ? error.message : 'Unknown error',
           };
         }
-      }
+      },
     });
 
     // Code Execution Tool
@@ -249,7 +249,7 @@ Would you like me to use my built-in knowledge to answer questions about "${para
       description: 'Execute and analyze code',
       parameters: {
         code: { type: 'string', required: true, description: 'Code to execute' },
-        language: { type: 'string', default: 'python', description: 'Programming language' }
+        language: { type: 'string', default: 'python', description: 'Programming language' },
       },
       execute: async (params: { code: string; language?: string }) => {
         // For security, this would typically use a sandboxed environment
@@ -259,16 +259,16 @@ Would you like me to use my built-in knowledge to answer questions about "${para
             success: true,
             output: `Code executed successfully:\n\n${params.code}\n\nOutput: [Simulated execution result]`,
             language: params.language || 'python',
-            source: 'code_interpreter'
+            source: 'code_interpreter',
           };
         } catch (error) {
           return {
             success: false,
             error: 'Code execution failed',
-            message: error instanceof Error ? error.message : 'Unknown error'
+            message: error instanceof Error ? error.message : 'Unknown error',
           };
         }
-      }
+      },
     });
 
     // Data Analysis Tool
@@ -278,27 +278,27 @@ Would you like me to use my built-in knowledge to answer questions about "${para
       description: 'Perform data analysis and generate insights',
       parameters: {
         data: { type: 'object', required: true, description: 'Data to analyze' },
-        analysisType: { type: 'string', default: 'summary', description: 'Type of analysis' }
+        analysisType: { type: 'string', default: 'summary', description: 'Type of analysis' },
       },
       execute: async (params: { data: any; analysisType?: string }) => {
         try {
           // Simulate data analysis
           const insights = this.generateDataInsights(params.data, params.analysisType);
-          
+
           return {
             success: true,
             insights,
             analysisType: params.analysisType || 'summary',
-            source: 'data_analyzer'
+            source: 'data_analyzer',
           };
         } catch (error) {
           return {
             success: false,
             error: 'Data analysis failed',
-            message: error instanceof Error ? error.message : 'Unknown error'
+            message: error instanceof Error ? error.message : 'Unknown error',
           };
         }
-      }
+      },
     });
   }
 
@@ -311,8 +311,8 @@ Would you like me to use my built-in knowledge to answer questions about "${para
       insights: [
         'Data contains valid structure',
         'No missing critical values detected',
-        'Analysis completed successfully'
-      ]
+        'Analysis completed successfully',
+      ],
     };
   }
 
@@ -343,9 +343,16 @@ Would you like me to use my built-in knowledge to answer questions about "${para
           model = 'gpt-4o-mini';
           modelProvider = 'openai';
         }
-      } else if (model.includes('claude') || model.includes('gemini') || model.includes('grok') || 
-                 model.includes('deepseek') || model.includes('pplx') || model === 'o1-preview' || 
-                 model === 'o1-mini' || model === 'gpt-4.1') {
+      } else if (
+        model.includes('claude') ||
+        model.includes('gemini') ||
+        model.includes('grok') ||
+        model.includes('deepseek') ||
+        model.includes('pplx') ||
+        model === 'o1-preview' ||
+        model === 'o1-mini' ||
+        model === 'gpt-4.1'
+      ) {
         // Premium models via AI/ML API
         if (process.env.AIML_API_KEY) {
           modelProvider = 'aimlapi';
@@ -373,13 +380,13 @@ Would you like me to use my built-in knowledge to answer questions about "${para
       const messages = [
         {
           role: 'system',
-          content: this.buildSystemPrompt(agentConfig, context)
+          content: this.buildSystemPrompt(agentConfig, context),
         },
         ...context.conversationHistory,
         {
           role: 'user',
-          content: userMessage
-        }
+          content: userMessage,
+        },
       ];
 
       // Analyze if tools are needed
@@ -391,16 +398,16 @@ Would you like me to use my built-in knowledge to answer questions about "${para
       if (toolsToUse.length > 0) {
         // Execute tools first
         const toolResults = await this.executeTools(toolsToUse, userMessage, context);
-        toolsUsed.push(...toolResults.map(r => r.toolId));
+        toolsUsed.push(...toolResults.map((r) => r.toolId));
 
         // Add tool results to conversation
-        const toolContext = toolResults.map(result => 
-          `Tool: ${result.toolId}\nResult: ${JSON.stringify(result.result, null, 2)}`
-        ).join('\n\n');
+        const toolContext = toolResults
+          .map((result) => `Tool: ${result.toolId}\nResult: ${JSON.stringify(result.result, null, 2)}`)
+          .join('\n\n');
 
         messages.push({
           role: 'user',
-          content: `Tool Results:\n${toolContext}\n\nPlease provide a comprehensive response based on the tool results above.`
+          content: `Tool Results:\n${toolContext}\n\nPlease provide a comprehensive response based on the tool results above.`,
         });
       }
 
@@ -408,7 +415,7 @@ Would you like me to use my built-in knowledge to answer questions about "${para
       try {
         response = await this.apiService.chat(messages, model, {
           maxTokens: 1000,
-          temperature: 0.7
+          temperature: 0.7,
         });
 
         // Check if response has an error flag
@@ -417,17 +424,20 @@ Would you like me to use my built-in knowledge to answer questions about "${para
         }
 
         apiCalls++;
-        totalTokens += response.usage?.total_tokens || response.usage?.input_tokens + response.usage?.output_tokens || 0;
+        totalTokens +=
+          response.usage?.total_tokens || response.usage?.input_tokens + response.usage?.output_tokens || 0;
         cost += this.calculateOpenAICost(totalTokens, model);
         finalContent = response.content;
-
       } catch (apiError) {
         console.error('Primary API call failed, attempting fallback:', apiError);
-        
+
         // Try fallback models
         const fallbackModels = [
           { model: 'gpt-4o-mini', condition: () => process.env.OPENAI_API_KEY?.startsWith('sk-') },
-          { model: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo', condition: () => !!process.env.TOGETHER_API_KEY }
+          {
+            model: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+            condition: () => !!process.env.TOGETHER_API_KEY,
+          },
         ];
 
         let fallbackSuccess = false;
@@ -436,14 +446,19 @@ Would you like me to use my built-in knowledge to answer questions about "${para
             try {
               response = await this.apiService.chat(messages, fallback.model, {
                 maxTokens: 1000,
-                temperature: 0.7
+                temperature: 0.7,
               });
-              
+
               if (!response?.error) {
                 apiCalls++;
-                totalTokens += response.usage?.total_tokens || response.usage?.input_tokens + response.usage?.output_tokens || 0;
+                totalTokens +=
+                  response.usage?.total_tokens ||
+                  response.usage?.input_tokens + response.usage?.output_tokens ||
+                  0;
                 cost += this.calculateOpenAICost(totalTokens, fallback.model);
-                finalContent = response.content + '\n\n*Note: Responded using backup model due to primary model unavailability.*';
+                finalContent =
+                  response.content +
+                  '\n\n*Note: Responded using backup model due to primary model unavailability.*';
                 model = fallback.model;
                 fallbackSuccess = true;
                 break;
@@ -460,7 +475,10 @@ Would you like me to use my built-in knowledge to answer questions about "${para
 
 **What I tried:**
 - Primary model: ${model}
-- Fallback models: ${fallbackModels.filter(f => f.condition()).map(f => f.model).join(', ')}
+- Fallback models: ${fallbackModels
+            .filter((f) => f.condition())
+            .map((f) => f.model)
+            .join(', ')}
 
 **Possible solutions:**
 1. Check your API configuration at /api/health
@@ -480,18 +498,17 @@ Is there anything specific I can help you with using my built-in knowledge?`;
         usage: {
           tokensUsed: totalTokens,
           apiCalls,
-          cost
+          cost,
         },
         metadata: {
           model: model,
           responseTime: Date.now() - startTime,
-          confidence: response?.error ? 0.3 : 0.95
-        }
+          confidence: response?.error ? 0.3 : 0.95,
+        },
       };
-
     } catch (error) {
       console.error('Agent execution error:', error);
-      
+
       // Return a helpful error response instead of throwing
       return {
         content: `I encountered an error while processing your request: ${error instanceof Error ? error.message : 'Unknown error'}
@@ -510,23 +527,26 @@ What would you like help with?`,
         usage: {
           tokensUsed: 0,
           apiCalls: 0,
-          cost: 0
+          cost: 0,
         },
         metadata: {
           model: agentConfig.model || 'unknown',
           responseTime: Date.now() - startTime,
-          confidence: 0.1
-        }
+          confidence: 0.1,
+        },
       };
     }
   }
 
   private buildSystemPrompt(agentConfig: any, context: AgentExecutionContext): string {
     const basePrompt = agentConfig.systemPrompt || 'You are a helpful AI assistant.';
-    const availableTools = agentConfig.tools?.map((toolId: string) => {
-      const tool = this.tools.get(toolId);
-      return tool ? `- ${tool.name}: ${tool.description}` : '';
-    }).filter(Boolean).join('\n');
+    const availableTools = agentConfig.tools
+      ?.map((toolId: string) => {
+        const tool = this.tools.get(toolId);
+        return tool ? `- ${tool.name}: ${tool.description}` : '';
+      })
+      .filter(Boolean)
+      .join('\n');
 
     return `${basePrompt}
 
@@ -547,20 +567,20 @@ Instructions:
 
   private analyzeRequiredTools(userMessage: string, availableTools: string[]): string[] {
     const toolKeywords = {
-      'web_search': ['search', 'find', 'look up', 'current', 'latest', 'news', 'information'],
-      'generate_image': ['image', 'picture', 'draw', 'create image', 'generate image'],
-      'generate_video': ['video', 'create video', 'generate video', 'animation'],
-      'generate_music': ['music', 'song', 'create music', 'generate music', 'compose'],
-      'send_email': ['email', 'send email', 'contact', 'notify'],
-      'code_interpreter': ['code', 'execute', 'run code', 'program', 'script'],
-      'analyze_data': ['analyze', 'data', 'statistics', 'insights', 'report']
+      web_search: ['search', 'find', 'look up', 'current', 'latest', 'news', 'information'],
+      generate_image: ['image', 'picture', 'draw', 'create image', 'generate image'],
+      generate_video: ['video', 'create video', 'generate video', 'animation'],
+      generate_music: ['music', 'song', 'create music', 'generate music', 'compose'],
+      send_email: ['email', 'send email', 'contact', 'notify'],
+      code_interpreter: ['code', 'execute', 'run code', 'program', 'script'],
+      analyze_data: ['analyze', 'data', 'statistics', 'insights', 'report'],
     };
 
     const message = userMessage.toLowerCase();
     const requiredTools: string[] = [];
 
     for (const [toolId, keywords] of Object.entries(toolKeywords)) {
-      if (availableTools.includes(toolId) && keywords.some(keyword => message.includes(keyword))) {
+      if (availableTools.includes(toolId) && keywords.some((keyword) => message.includes(keyword))) {
         requiredTools.push(toolId);
       }
     }
@@ -568,7 +588,11 @@ Instructions:
     return requiredTools;
   }
 
-  private async executeTools(toolIds: string[], userMessage: string, context: AgentExecutionContext): Promise<any[]> {
+  private async executeTools(
+    toolIds: string[],
+    userMessage: string,
+    context: AgentExecutionContext
+  ): Promise<any[]> {
     const results = [];
 
     for (const toolId of toolIds) {
@@ -585,8 +609,8 @@ Instructions:
           toolId,
           result: {
             success: false,
-            error: `Tool execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-          }
+            error: `Tool execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          },
         });
       }
     }
@@ -615,7 +639,7 @@ Instructions:
     const costs = {
       'gpt-4': 0.03 / 1000, // $0.03 per 1K tokens
       'gpt-3.5-turbo': 0.002 / 1000, // $0.002 per 1K tokens
-      'dall-e-3': 0.04 // $0.04 per image
+      'dall-e-3': 0.04, // $0.04 per image
     };
     return tokens * (costs[model as keyof typeof costs] || costs['gpt-4']);
   }
@@ -623,7 +647,7 @@ Instructions:
   private calculateAnthropicCost(inputTokens: number, outputTokens: number): number {
     const inputCost = 0.003 / 1000; // $0.003 per 1K input tokens
     const outputCost = 0.015 / 1000; // $0.015 per 1K output tokens
-    return (inputTokens * inputCost) + (outputTokens * outputCost);
+    return inputTokens * inputCost + outputTokens * outputCost;
   }
 
   getAvailableTools(): EnhancedAgentTool[] {
@@ -633,4 +657,4 @@ Instructions:
   getTool(toolId: string): EnhancedAgentTool | undefined {
     return this.tools.get(toolId);
   }
-} 
+}

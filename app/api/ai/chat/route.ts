@@ -15,35 +15,33 @@ function getFallbackModel(): { model: string; provider: string } | null {
 export async function POST(request: NextRequest) {
   try {
     console.log('Chat API: Received request');
-    
+
     // Debug environment variables
     console.log('Environment check:', {
       hasTogetherKey: !!process.env.TOGETHER_API_KEY,
       togetherKeyLength: process.env.TOGETHER_API_KEY?.length || 0,
-      nodeEnv: process.env.NODE_ENV
+      nodeEnv: process.env.NODE_ENV,
     });
-    
+
     const body = await request.json();
-    const { 
-      messages, 
-      model = 'gpt-4o-mini', 
-      maxTokens = 1000, 
-      temperature = 0.7
-    } = body;
+    const { messages, model = 'gpt-4o-mini', maxTokens = 1000, temperature = 0.7 } = body;
 
     console.log('Chat API: Request details', {
       model,
       messagesCount: messages?.length,
       maxTokens,
-      temperature
+      temperature,
     });
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return NextResponse.json({
-        success: false,
-        content: 'No messages provided.',
-        error: 'Invalid request'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          content: 'No messages provided.',
+          error: 'Invalid request',
+        },
+        { status: 400 }
+      );
     }
 
     let response: any;
@@ -54,32 +52,31 @@ export async function POST(request: NextRequest) {
     // Try primary model first
     try {
       console.log(`Attempting ${usedProvider} with model ${usedModel}`);
-      
+
       response = await apiService.chat(messages, usedModel, {
         maxTokens,
-        temperature
+        temperature,
       });
 
       // Check if the response indicates an error
       if (response && 'error' in response && response.error) {
         throw new Error(`${usedProvider} error: ${response.content}`);
       }
-
     } catch (primaryError) {
       console.log('Primary model failed, attempting fallback...', primaryError);
-      
+
       // Try fallback model
       const fallback = getFallbackModel();
       if (fallback) {
         usedModel = fallback.model;
         usedProvider = fallback.provider;
-        
+
         console.log(`Trying fallback: ${usedModel} (${usedProvider})`);
-        
+
         try {
           response = await apiService.chat(messages, usedModel, {
             maxTokens,
-            temperature
+            temperature,
           });
         } catch (fallbackError) {
           console.error('Fallback also failed:', fallbackError);
@@ -91,10 +88,10 @@ export async function POST(request: NextRequest) {
     // If both primary and fallback failed, return helpful error
     if (!response || (response && 'error' in response && response.error)) {
       console.error('All models failed, returning error response');
-      
+
       const hasOpenAI = process.env.OPENAI_API_KEY?.startsWith('sk-');
       const hasTogether = process.env.TOGETHER_API_KEY;
-      
+
       if (!hasOpenAI && !hasTogether) {
         return NextResponse.json({
           success: false,
@@ -118,8 +115,8 @@ export async function POST(request: NextRequest) {
           provider: usedProvider,
           troubleshooting: {
             healthCheck: '/api/health',
-            documentation: 'Check README.md for setup instructions'
-          }
+            documentation: 'Check README.md for setup instructions',
+          },
         });
       }
     }
@@ -132,16 +129,16 @@ export async function POST(request: NextRequest) {
     // Calculate approximate cost (simplified)
     const inputTokens = response.usage?.input_tokens || response.usage?.prompt_tokens || 0;
     const outputTokens = response.usage?.output_tokens || response.usage?.completion_tokens || 0;
-    
+
     // Simplified cost calculation (actual rates vary by provider and model)
-    cost = (inputTokens * 0.0001) + (outputTokens * 0.0002);
+    cost = inputTokens * 0.0001 + outputTokens * 0.0002;
 
     console.log('Chat API: Success', {
       model: usedModel,
       provider: usedProvider,
       contentLength: response.content?.length || 0,
       tokens: inputTokens + outputTokens,
-      cost
+      cost,
     });
 
     return NextResponse.json({
@@ -151,28 +148,31 @@ export async function POST(request: NextRequest) {
       usage: response.usage || {
         prompt_tokens: inputTokens,
         completion_tokens: outputTokens,
-        total_tokens: inputTokens + outputTokens
+        total_tokens: inputTokens + outputTokens,
       },
       cost,
       provider: usedProvider,
       metadata: {
         originalModel: model,
         fallbackUsed: usedModel !== model,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
-
   } catch (error) {
     console.error('Chat API Error:', error);
-    
-    return NextResponse.json({
-      success: false,
-      content: 'I apologize, but I encountered an unexpected error. Please try again or contact support if the issue persists.',
-      error: error instanceof Error ? error.message : 'Unknown error',
-      model: 'unknown',
-      usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
-      cost: 0,
-      provider: 'error'
-    }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        success: false,
+        content:
+          'I apologize, but I encountered an unexpected error. Please try again or contact support if the issue persists.',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        model: 'unknown',
+        usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+        cost: 0,
+        provider: 'error',
+      },
+      { status: 500 }
+    );
   }
-} 
+}

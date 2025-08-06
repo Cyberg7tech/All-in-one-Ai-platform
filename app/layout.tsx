@@ -1,17 +1,17 @@
-import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
-import Script from 'next/script'
-import './globals.css'
-import { ThemeProvider } from '@/components/providers/theme-provider'
-import { QueryProvider } from '@/components/providers/query-provider'
-import { AuthProvider } from '@/contexts/auth-context'
-import { ErrorBoundary } from '@/components/providers/error-boundary'
-import { WebpackInitializer } from '@/components/webpack-initializer'
-import { SupabaseDebugger } from '@/components/dev/supabase-debugger'
-import { Toaster } from 'sonner'
-import SupabaseProvider from '@/components/providers/supabase-provider'
+import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
+import Script from 'next/script';
+import './globals.css';
+import { ThemeProvider } from '@/components/providers/theme-provider';
+import { QueryProvider } from '@/components/providers/query-provider';
+import { AuthProvider } from '@/contexts/auth-context';
+import { ErrorBoundary } from '@/components/providers/error-boundary';
+import { WebpackInitializer } from '@/components/webpack-initializer';
+import { SupabaseDebugger } from '@/components/dev/supabase-debugger';
+import { Toaster } from 'sonner';
+import SupabaseProvider from '@/components/providers/supabase-provider';
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'One Ai',
@@ -20,34 +20,30 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
-    apple: '/favicon.svg'
-  }
-}
+    apple: '/favicon.svg',
+  },
+};
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  viewportFit: 'cover'
-}
+  viewportFit: 'cover',
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang='en' suppressHydrationWarning>
       <head>
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <meta name="theme-color" content="#3B82F6" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="style-insertion-point" content="" />
+        <link rel='manifest' href='/manifest.json' />
+        <link rel='icon' href='/favicon.svg' type='image/svg+xml' />
+        <meta name='theme-color' content='#3B82F6' />
+        <meta name='viewport' content='width=device-width, initial-scale=1' />
+        <meta name='style-insertion-point' content='' />
       </head>
       <body className={inter.className} suppressHydrationWarning>
-        <Script id="webpack-patch" strategy="beforeInteractive">
+        <Script id='webpack-patch' strategy='beforeInteractive'>
           {`
             // Inline webpack patch to prevent module loading errors
             (function() {
@@ -111,12 +107,7 @@ export default function RootLayout({
         </Script>
         <WebpackInitializer />
         <ErrorBoundary>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
+          <ThemeProvider attribute='class' defaultTheme='system' enableSystem disableTransitionOnChange>
             <SupabaseProvider>
               <AuthProvider>
                 <QueryProvider>
@@ -130,5 +121,5 @@ export default function RootLayout({
         </ErrorBoundary>
       </body>
     </html>
-  )
-} 
+  );
+}

@@ -3,33 +3,23 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { 
-      url, 
-      formats = ['text'], 
-      onlyMainContent = true
-    } = body;
+    const { url, formats = ['text'], onlyMainContent = true } = body;
 
     if (!url) {
-      return NextResponse.json(
-        { error: 'URL is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
     // Validate URL format
     try {
       new URL(url);
     } catch {
-      return NextResponse.json(
-        { error: 'Invalid URL format' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 });
     }
 
     console.log('Web Scraping API: Request received', {
       url,
       formats,
-      onlyMainContent
+      onlyMainContent,
     });
 
     // Web scraping is not available in the simplified setup
@@ -73,21 +63,20 @@ export async function POST(request: NextRequest) {
           timestamp: new Date().toISOString(),
           formats_requested: formats,
           main_content_only: onlyMainContent,
-          simplified_setup: true
-        }
+          simplified_setup: true,
+        },
       },
-      note: 'Web scraping is not available in the simplified setup. See content for alternatives.'
+      note: 'Web scraping is not available in the simplified setup. See content for alternatives.',
     });
-
   } catch (error) {
     console.error('Web scraping error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Web scraping request failed',
         message: error instanceof Error ? error.message : 'Unknown error',
-        note: 'Web scraping is not available in the simplified OpenAI + Together AI setup.'
+        note: 'Web scraping is not available in the simplified OpenAI + Together AI setup.',
       },
       { status: 500 }
     );
   }
-} 
+}

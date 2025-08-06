@@ -7,18 +7,18 @@ export async function GET(request: NextRequest) {
     const duration = 1; // 1 second
     const frequency = 440; // A4 note
     const samples = sampleRate * duration;
-    
+
     // Create WAV file buffer
     const buffer = new ArrayBuffer(44 + samples * 2);
     const view = new DataView(buffer);
-    
+
     // WAV header
     const writeString = (offset: number, string: string) => {
       for (let i = 0; i < string.length; i++) {
         view.setUint8(offset + i, string.charCodeAt(i));
       }
     };
-    
+
     writeString(0, 'RIFF');
     view.setUint32(4, 36 + samples * 2, true);
     writeString(8, 'WAVE');
@@ -32,25 +32,21 @@ export async function GET(request: NextRequest) {
     view.setUint16(34, 16, true);
     writeString(36, 'data');
     view.setUint32(40, samples * 2, true);
-    
+
     // Generate audio samples
     for (let i = 0; i < samples; i++) {
-      const sample = Math.sin(2 * Math.PI * frequency * i / sampleRate) * 0.3;
+      const sample = Math.sin((2 * Math.PI * frequency * i) / sampleRate) * 0.3;
       view.setInt16(44 + i * 2, sample * 32767, true);
     }
-    
+
     return new NextResponse(buffer, {
       headers: {
         'Content-Type': 'audio/wav',
-        'Cache-Control': 'public, max-age=3600'
-      }
+        'Cache-Control': 'public, max-age=3600',
+      },
     });
-    
   } catch (error) {
     console.error('Demo audio generation error:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate demo audio' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to generate demo audio' }, { status: 500 });
   }
-} 
+}

@@ -16,14 +16,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   if (isLoading) return null;
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className='flex flex-col h-screen bg-background'>
       <TopNavigation />
-      <div className="flex flex-1 overflow-hidden">
+      <div className='flex flex-1 overflow-hidden'>
         <SideNavigation />
-        <main className="flex-1 overflow-auto p-6 bg-background">
-          {children}
-        </main>
+        <main className='flex-1 overflow-auto p-6 bg-background'>{children}</main>
       </div>
     </div>
   );
-} 
+}

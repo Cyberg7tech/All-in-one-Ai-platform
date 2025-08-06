@@ -9,14 +9,11 @@ export async function POST(request: NextRequest) {
       voiceId = 'alloy',
       style = 'Professional',
       duration = 30,
-      userId
+      userId,
     } = body;
 
     if (!script || typeof script !== 'string') {
-      return NextResponse.json(
-        { error: 'Script is required and must be a string' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Script is required and must be a string' }, { status: 400 });
     }
 
     console.log('Talking Video API: Request received', {
@@ -24,12 +21,12 @@ export async function POST(request: NextRequest) {
       avatarId,
       voiceId,
       style,
-      duration
+      duration,
     });
 
     // Check for HeyGen API key
     const heygenApiKey = process.env.HEYGEN_API_KEY;
-    
+
     if (!heygenApiKey) {
       console.log('Talking Video: No HeyGen API key found, returning demo response');
       return NextResponse.json({
@@ -67,8 +64,8 @@ export async function POST(request: NextRequest) {
         metadata: {
           needs_heygen_api_key: true,
           script_length: script.length,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
     }
 
@@ -84,12 +81,12 @@ export async function POST(request: NextRequest) {
       const [avatarsResponse, voicesResponse] = await Promise.all([
         fetch('https://api.heygen.com/v2/avatars', {
           method: 'GET',
-          headers: { 'X-API-KEY': heygenApiKey }
+          headers: { 'X-API-KEY': heygenApiKey },
         }),
         fetch('https://api.heygen.com/v2/voices', {
           method: 'GET',
-          headers: { 'X-API-KEY': heygenApiKey }
-        })
+          headers: { 'X-API-KEY': heygenApiKey },
+        }),
       ]);
 
       if (avatarsResponse.ok && voicesResponse.ok) {
@@ -98,20 +95,22 @@ export async function POST(request: NextRequest) {
 
         // Use first available avatar if our defaults aren't found
         if (avatarsData.data && avatarsData.data.length > 0) {
-          const avatar = avatarsData.data.find((a: any) => 
-            a.name?.toLowerCase().includes('kristin') || 
-            a.name?.toLowerCase().includes('emma') ||
-            a.gender === 'female'
-          ) || avatarsData.data[0];
+          const avatar =
+            avatarsData.data.find(
+              (a: any) =>
+                a.name?.toLowerCase().includes('kristin') ||
+                a.name?.toLowerCase().includes('emma') ||
+                a.gender === 'female'
+            ) || avatarsData.data[0];
           selectedAvatar = avatar.avatar_id;
         }
 
         // Use first available voice if our defaults aren't found
         if (voicesData.data && voicesData.data.length > 0) {
-          const voice = voicesData.data.find((v: any) => 
-            v.gender === 'female' || 
-            v.name?.toLowerCase().includes('alloy')
-          ) || voicesData.data[0];
+          const voice =
+            voicesData.data.find(
+              (v: any) => v.gender === 'female' || v.name?.toLowerCase().includes('alloy')
+            ) || voicesData.data[0];
           selectedVoice = voice.voice_id;
         }
 
@@ -119,7 +118,7 @@ export async function POST(request: NextRequest) {
           avatarSelected: selectedAvatar,
           voiceSelected: selectedVoice,
           totalAvatars: avatarsData.data?.length || 0,
-          totalVoices: voicesData.data?.length || 0
+          totalVoices: voicesData.data?.length || 0,
         });
       }
     } catch (fetchError) {
@@ -127,47 +126,49 @@ export async function POST(request: NextRequest) {
     }
 
     const heygenRequest = {
-      video_inputs: [{
-        character: {
-          type: "avatar",
-          avatar_id: selectedAvatar,
-          scale: 1.0
+      video_inputs: [
+        {
+          character: {
+            type: 'avatar',
+            avatar_id: selectedAvatar,
+            scale: 1.0,
+          },
+          voice: {
+            type: 'text',
+            input_text: script.trim(),
+            voice_id: selectedVoice,
+            speed: 1.0,
+          },
         },
-        voice: {
-          type: "text",
-          input_text: script.trim(),
-          voice_id: selectedVoice,
-          speed: 1.0
-        }
-      }],
+      ],
       dimension: {
         width: 1280,
-        height: 720
+        height: 720,
       },
-      aspect_ratio: "16:9",
+      aspect_ratio: '16:9',
       test: false,
-      caption: false
+      caption: false,
     };
 
-    console.log('HeyGen Request:', { 
-      avatar: selectedAvatar, 
-      voice: selectedVoice, 
-      scriptLength: script.length 
+    console.log('HeyGen Request:', {
+      avatar: selectedAvatar,
+      voice: selectedVoice,
+      scriptLength: script.length,
     });
 
     const heygenResponse = await fetch('https://api.heygen.com/v2/video/generate', {
       method: 'POST',
       headers: {
         'X-API-KEY': heygenApiKey,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(heygenRequest)
+      body: JSON.stringify(heygenRequest),
     });
 
     if (!heygenResponse.ok) {
       const errorText = await heygenResponse.text();
       console.error('HeyGen API Error:', heygenResponse.status, errorText);
-      
+
       // Return a demo response instead of error for better UX
       return NextResponse.json({
         success: true,
@@ -208,8 +209,8 @@ export async function POST(request: NextRequest) {
           error_status: heygenResponse.status,
           error_details: errorText.substring(0, 500),
           script_length: script.length,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
     }
 
@@ -245,8 +246,8 @@ Video will be ready in 1-3 minutes. You can check the status or get the final vi
           avatar_id: selectedAvatar,
           voice_id: selectedVoice,
           script_length: script.length,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
     }
 
@@ -256,7 +257,9 @@ Video will be ready in 1-3 minutes. You can check the status or get the final vi
       id: heygenData.data?.video_id || `heygen_${Date.now()}`,
       status: 'completed',
       video_url: heygenData.data?.video_url || null,
-      thumbnail_url: heygenData.data?.thumbnail_url || 'https://via.placeholder.com/320x180/3B82F6/FFFFFF?text=HeyGen+Video',
+      thumbnail_url:
+        heygenData.data?.thumbnail_url ||
+        'https://via.placeholder.com/320x180/3B82F6/FFFFFF?text=HeyGen+Video',
       title: `HeyGen Video: ${avatarId} - ${style}`,
       script,
       avatar: avatarId,
@@ -270,19 +273,18 @@ Video will be ready in 1-3 minutes. You can check the status or get the final vi
         avatar_id: selectedAvatar,
         voice_id: selectedVoice,
         script_length: script.length,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
-
   } catch (error) {
     console.error('Talking Video API error:', error);
     return NextResponse.json(
       {
         error: 'Talking video generation request failed',
         message: error instanceof Error ? error.message : 'Unknown error',
-        note: 'Check your HeyGen API key configuration and network connection.'
+        note: 'Check your HeyGen API key configuration and network connection.',
       },
       { status: 500 }
     );
   }
-} 
+}

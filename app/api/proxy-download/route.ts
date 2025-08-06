@@ -10,18 +10,12 @@ export async function GET(request: NextRequest) {
     const filename = searchParams.get('filename') || 'download';
 
     if (!url) {
-      return NextResponse.json(
-        { error: 'URL parameter is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'URL parameter is required' }, { status: 400 });
     }
 
     // Validate URL to prevent SSRF attacks
     if (!url.startsWith('https://')) {
-      return NextResponse.json(
-        { error: 'Only HTTPS URLs are allowed' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Only HTTPS URLs are allowed' }, { status: 400 });
     }
 
     // Allow specific domains
@@ -29,19 +23,16 @@ export async function GET(request: NextRequest) {
       'oaidalleapiprodscus.blob.core.windows.net',
       'via.placeholder.com',
       'images.unsplash.com',
-      'cdn.openai.com'
+      'cdn.openai.com',
     ];
 
     const urlObj = new URL(url);
-    const isAllowedDomain = allowedDomains.some(domain => 
-      urlObj.hostname === domain || urlObj.hostname.endsWith('.' + domain)
+    const isAllowedDomain = allowedDomains.some(
+      (domain) => urlObj.hostname === domain || urlObj.hostname.endsWith('.' + domain)
     );
 
     if (!isAllowedDomain) {
-      return NextResponse.json(
-        { error: 'Domain not allowed' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Domain not allowed' }, { status: 403 });
     }
 
     console.log('Proxying download:', { url: url.substring(0, 100), filename });
@@ -49,16 +40,13 @@ export async function GET(request: NextRequest) {
     // Fetch the file
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'OneAI-Platform/1.0'
-      }
+        'User-Agent': 'OneAI-Platform/1.0',
+      },
     });
 
     if (!response.ok) {
       console.error('Proxy download failed:', response.status, response.statusText);
-      return NextResponse.json(
-        { error: 'Failed to fetch file' },
-        { status: response.status }
-      );
+      return NextResponse.json({ error: 'Failed to fetch file' }, { status: response.status });
     }
 
     const blob = await response.blob();
@@ -70,15 +58,11 @@ export async function GET(request: NextRequest) {
         'Content-Type': contentType,
         'Content-Disposition': `attachment; filename="${filename}"`,
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'public, max-age=3600'
-      }
+        'Cache-Control': 'public, max-age=3600',
+      },
     });
-
   } catch (error) {
     console.error('Proxy download error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}
