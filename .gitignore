@@ -37,8 +37,24 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 
+# development files
 sandbox/*
-
 security-update.sh
+scripts/clear-*.js
+components/dev/
+lib/supabase/clear-*.ts
+
+# archives and backups
+*.tar.gz
+*.zip
+*.backup
+my-builderkit*
+
+# package managers
+pnpm-lock.yaml
+yarn.lock
+
+# logs
+logs
+*.log
