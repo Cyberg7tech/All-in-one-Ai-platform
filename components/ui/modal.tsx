@@ -27,7 +27,7 @@ export function Modal({
   size = 'md',
   showCloseButton = true,
   closeOnOverlay = true,
-  className = ''
+  className = '',
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -56,7 +56,7 @@ export function Modal({
     md: 'max-w-lg',
     lg: 'max-w-2xl',
     xl: 'max-w-4xl',
-    full: 'max-w-[90vw] max-h-[90vh]'
+    full: 'max-w-[90vw] max-h-[90vh]',
   };
 
   const handleOverlayClick = (e: React.MouseEvent) => {
@@ -66,41 +66,30 @@ export function Modal({
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className='fixed inset-0 z-50 flex items-center justify-center p-4'>
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={handleOverlayClick}
-      />
-      
+      <div className='absolute inset-0 bg-black/50 backdrop-blur-sm' onClick={handleOverlayClick} />
+
       {/* Modal */}
-      <Card 
+      <Card
         ref={modalRef}
-        className={`relative w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden shadow-2xl ${className}`}
-      >
+        className={`relative w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden shadow-2xl ${className}`}>
         {(title || showCloseButton) && (
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
             <div>
-              {title && <CardTitle className="text-xl">{title}</CardTitle>}
+              {title && <CardTitle className='text-xl'>{title}</CardTitle>}
               {description && <CardDescription>{description}</CardDescription>}
             </div>
             {showCloseButton && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="size-8 px-0"
-                onClick={onClose}
-              >
-                <X className="size-4" />
-                <span className="sr-only">Close</span>
+              <Button variant='ghost' size='sm' className='size-8 px-0' onClick={onClose}>
+                <X className='size-4' />
+                <span className='sr-only'>Close</span>
               </Button>
             )}
           </CardHeader>
         )}
-        
-        <CardContent className="overflow-y-auto max-h-[calc(90vh-8rem)]">
-          {children}
-        </CardContent>
+
+        <CardContent className='overflow-y-auto max-h-[calc(90vh-8rem)]'>{children}</CardContent>
       </Card>
     </div>
   );
@@ -128,7 +117,7 @@ export function ConfirmModal({
   message = 'Are you sure you want to continue?',
   confirmText = 'Confirm',
   cancelText = 'Cancel',
-  variant = 'default'
+  variant = 'default',
 }: ConfirmModalProps) {
   const handleConfirm = () => {
     onConfirm();
@@ -136,28 +125,25 @@ export function ConfirmModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="sm">
-      <div className="space-y-4">
-        <div className="flex items-start space-x-3">
+    <Modal isOpen={isOpen} onClose={onClose} size='sm'>
+      <div className='space-y-4'>
+        <div className='flex items-start space-x-3'>
           {variant === 'destructive' ? (
-            <AlertTriangle className="size-6 text-red-500 mt-0.5" />
+            <AlertTriangle className='size-6 text-red-500 mt-0.5' />
           ) : (
-            <Info className="size-6 text-blue-500 mt-0.5" />
+            <Info className='size-6 text-blue-500 mt-0.5' />
           )}
           <div>
-            <h3 className="text-lg font-semibold">{title}</h3>
-            <p className="text-muted-foreground mt-1">{message}</p>
+            <h3 className='text-lg font-semibold'>{title}</h3>
+            <p className='text-muted-foreground mt-1'>{message}</p>
           </div>
         </div>
-        
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button variant="outline" onClick={onClose}>
+
+        <div className='flex justify-end space-x-2 pt-4'>
+          <Button variant='outline' onClick={onClose}>
             {cancelText}
           </Button>
-          <Button 
-            variant={variant === 'destructive' ? 'destructive' : 'default'}
-            onClick={handleConfirm}
-          >
+          <Button variant={variant === 'destructive' ? 'destructive' : 'default'} onClick={handleConfirm}>
             {confirmText}
           </Button>
         </div>
@@ -175,23 +161,17 @@ interface AlertModalProps {
   type?: 'success' | 'error' | 'warning' | 'info';
 }
 
-export function AlertModal({
-  isOpen,
-  onClose,
-  title,
-  message,
-  type = 'info'
-}: AlertModalProps) {
+export function AlertModal({ isOpen, onClose, title, message, type = 'info' }: AlertModalProps) {
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="size-6 text-green-500" />;
+        return <CheckCircle className='size-6 text-green-500' />;
       case 'error':
-        return <AlertCircle className="size-6 text-red-500" />;
+        return <AlertCircle className='size-6 text-red-500' />;
       case 'warning':
-        return <AlertTriangle className="size-6 text-yellow-500" />;
+        return <AlertTriangle className='size-6 text-yellow-500' />;
       default:
-        return <Info className="size-6 text-blue-500" />;
+        return <Info className='size-6 text-blue-500' />;
     }
   };
 
@@ -210,20 +190,18 @@ export function AlertModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="sm">
-      <div className="space-y-4">
-        <div className="flex items-start space-x-3">
+    <Modal isOpen={isOpen} onClose={onClose} size='sm'>
+      <div className='space-y-4'>
+        <div className='flex items-start space-x-3'>
           {getIcon()}
           <div>
-            <h3 className="text-lg font-semibold">{getTitle()}</h3>
-            {message && <p className="text-muted-foreground mt-1">{message}</p>}
+            <h3 className='text-lg font-semibold'>{getTitle()}</h3>
+            {message && <p className='text-muted-foreground mt-1'>{message}</p>}
           </div>
         </div>
-        
-        <div className="flex justify-end pt-4">
-          <Button onClick={onClose}>
-            OK
-          </Button>
+
+        <div className='flex justify-end pt-4'>
+          <Button onClick={onClose}>OK</Button>
         </div>
       </div>
     </Modal>

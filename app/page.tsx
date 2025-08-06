@@ -169,10 +169,9 @@ export default function HomePage() {
           <div className='max-w-5xl mx-auto'>
             {/* Announcement Badge */}
             <div className='flex justify-center mb-8'>
-              <Badge 
-                variant='secondary' 
-                className='px-4 py-2 text-sm font-medium bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors'
-              >
+              <Badge
+                variant='secondary'
+                className='px-4 py-2 text-sm font-medium bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors'>
                 🚀 NEW: Advanced AI Agents & 18+ Tools Available
               </Badge>
             </div>
@@ -188,13 +187,16 @@ export default function HomePage() {
 
             {/* Subtitle */}
             <p className='text-xl sm:text-2xl text-muted-foreground mb-12 leading-relaxed max-w-3xl mx-auto'>
-              Transform your workflow with 18+ AI tools, intelligent agents, advanced analytics, and seamless 
+              Transform your workflow with 18+ AI tools, intelligent agents, advanced analytics, and seamless
               access to multiple AI models. Built for developers, designed for everyone.
             </p>
 
             {/* CTA Buttons */}
             <div className='flex flex-col sm:flex-row gap-4 justify-center mb-16'>
-              <Button size='lg' className='text-lg px-12 py-4 h-14 bg-primary hover:bg-primary/90 shadow-lg' asChild>
+              <Button
+                size='lg'
+                className='text-lg px-12 py-4 h-14 bg-primary hover:bg-primary/90 shadow-lg'
+                asChild>
                 <Link href='/login'>
                   <LogIn className='mr-2 size-5' />
                   Start Building Now
@@ -373,8 +375,7 @@ export default function HomePage() {
               <CardContent className='space-y-4'>
                 <ul className='space-y-3'>
                   <li className='flex items-center'>
-                    <Shield className='size-4 text-green-500 mr-3' />
-                    5 AI Tools Access
+                    <Shield className='size-4 text-green-500 mr-3' />5 AI Tools Access
                   </li>
                   <li className='flex items-center'>
                     <Shield className='size-4 text-green-500 mr-3' />
@@ -503,7 +504,8 @@ export default function HomePage() {
           <div className='max-w-3xl mx-auto'>
             <h2 className='text-3xl md:text-4xl font-bold mb-6'>Ready to Transform Your Workflow?</h2>
             <p className='text-xl text-muted-foreground mb-8'>
-              Join thousands of developers and businesses already using our AI platform to build amazing products.
+              Join thousands of developers and businesses already using our AI platform to build amazing
+              products.
             </p>
             <div className='flex flex-col sm:flex-row gap-4 justify-center'>
               <Button size='lg' className='text-lg px-8' asChild>

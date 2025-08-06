@@ -34,18 +34,18 @@ export function UploadMedia({
   onUpload,
   onRemove,
   className = '',
-  disabled = false
+  disabled = false,
 }: UploadMediaProps) {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getFileIcon = (file: File) => {
-    if (file.type.startsWith('image/')) return <Image className="size-6 text-blue-500" />;
-    if (file.type.startsWith('video/')) return <Video className="size-6 text-purple-500" />;
-    if (file.type.startsWith('audio/')) return <Music className="size-6 text-green-500" />;
-    if (file.type.includes('pdf')) return <FileText className="size-6 text-red-500" />;
-    return <File className="size-6 text-gray-500" />;
+    if (file.type.startsWith('image/')) return <Image className='size-6 text-blue-500' />;
+    if (file.type.startsWith('video/')) return <Video className='size-6 text-purple-500' />;
+    if (file.type.startsWith('audio/')) return <Music className='size-6 text-green-500' />;
+    if (file.type.includes('pdf')) return <FileText className='size-6 text-red-500' />;
+    return <File className='size-6 text-gray-500' />;
   };
 
   const formatFileSize = (bytes: number) => {
@@ -83,80 +83,94 @@ export function UploadMedia({
         if (progress >= 100) {
           progress = 100;
           clearInterval(interval);
-          setFiles(prev => prev.map(f => 
-            f.id === file.id 
-              ? { ...f, progress, status: 'completed' as const, url: `https://example.com/uploads/${file.file.name}` }
-              : f
-          ));
+          setFiles((prev) =>
+            prev.map((f) =>
+              f.id === file.id
+                ? {
+                    ...f,
+                    progress,
+                    status: 'completed' as const,
+                    url: `https://example.com/uploads/${file.file.name}`,
+                  }
+                : f
+            )
+          );
           resolve();
         } else {
-          setFiles(prev => prev.map(f => 
-            f.id === file.id ? { ...f, progress } : f
-          ));
+          setFiles((prev) => prev.map((f) => (f.id === file.id ? { ...f, progress } : f)));
         }
       }, 200);
     });
   };
 
-  const handleFiles = useCallback(async (fileList: FileList) => {
-    const newFiles = Array.from(fileList);
-    
-    if (files.length + newFiles.length > maxFiles) {
-      alert(`Maximum ${maxFiles} files allowed`);
-      return;
-    }
+  const handleFiles = useCallback(
+    async (fileList: FileList) => {
+      const newFiles = Array.from(fileList);
 
-    const validFiles: UploadedFile[] = [];
-
-    for (const file of newFiles) {
-      const error = validateFile(file);
-      if (error) {
-        alert(error);
-        continue;
+      if (files.length + newFiles.length > maxFiles) {
+        alert(`Maximum ${maxFiles} files allowed`);
+        return;
       }
 
-      const preview = await createFilePreview(file);
-      const uploadedFile: UploadedFile = {
-        id: Math.random().toString(36).substring(7),
-        file,
-        preview,
-        progress: 0,
-        status: 'uploading'
-      };
+      const validFiles: UploadedFile[] = [];
 
-      validFiles.push(uploadedFile);
-    }
+      for (const file of newFiles) {
+        const error = validateFile(file);
+        if (error) {
+          alert(error);
+          continue;
+        }
 
-    setFiles(prev => [...prev, ...validFiles]);
+        const preview = await createFilePreview(file);
+        const uploadedFile: UploadedFile = {
+          id: Math.random().toString(36).substring(7),
+          file,
+          preview,
+          progress: 0,
+          status: 'uploading',
+        };
 
-    // Simulate upload for each file
-    validFiles.forEach(file => {
-      simulateUpload(file);
-    });
+        validFiles.push(uploadedFile);
+      }
 
-    if (onUpload) {
-      onUpload(validFiles);
-    }
-  }, [files.length, maxFiles, maxSize, onUpload]);
+      setFiles((prev) => [...prev, ...validFiles]);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    
-    if (disabled) return;
-    
-    const droppedFiles = e.dataTransfer.files;
-    if (droppedFiles.length > 0) {
-      handleFiles(droppedFiles);
-    }
-  }, [handleFiles, disabled]);
+      // Simulate upload for each file
+      validFiles.forEach((file) => {
+        simulateUpload(file);
+      });
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    if (!disabled) {
-      setIsDragOver(true);
-    }
-  }, [disabled]);
+      if (onUpload) {
+        onUpload(validFiles);
+      }
+    },
+    [files.length, maxFiles, maxSize, onUpload]
+  );
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragOver(false);
+
+      if (disabled) return;
+
+      const droppedFiles = e.dataTransfer.files;
+      if (droppedFiles.length > 0) {
+        handleFiles(droppedFiles);
+      }
+    },
+    [handleFiles, disabled]
+  );
+
+  const handleDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      if (!disabled) {
+        setIsDragOver(true);
+      }
+    },
+    [disabled]
+  );
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -171,7 +185,7 @@ export function UploadMedia({
   };
 
   const removeFile = (id: string) => {
-    setFiles(prev => prev.filter(f => f.id !== id));
+    setFiles((prev) => prev.filter((f) => f.id !== id));
     if (onRemove) {
       onRemove(id);
     }
@@ -186,36 +200,31 @@ export function UploadMedia({
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Upload Area */}
-      <Card 
+      <Card
         className={`border-2 border-dashed transition-colors cursor-pointer ${
-          isDragOver 
-            ? 'border-primary bg-primary/5' 
-            : 'border-muted-foreground/25 hover:border-primary/50'
+          isDragOver ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-primary/50'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         onClick={openFileDialog}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-      >
-        <CardContent className="p-8 text-center">
-          <Upload className="size-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">
-            Drop files here or click to upload
-          </h3>
-          <p className="text-sm text-muted-foreground mb-4">
+        onDragLeave={handleDragLeave}>
+        <CardContent className='p-8 text-center'>
+          <Upload className='size-12 mx-auto text-muted-foreground mb-4' />
+          <h3 className='text-lg font-medium mb-2'>Drop files here or click to upload</h3>
+          <p className='text-sm text-muted-foreground mb-4'>
             Support for {accept.split(',').length} file types, up to {maxSize}MB each
           </p>
-          <Button variant="outline" size="sm" disabled={disabled}>
+          <Button variant='outline' size='sm' disabled={disabled}>
             Choose Files
           </Button>
-          
+
           <input
             ref={fileInputRef}
-            type="file"
+            type='file'
             accept={accept}
             multiple={multiple}
             onChange={handleFileInput}
-            className="hidden"
+            className='hidden'
             disabled={disabled}
           />
         </CardContent>
@@ -223,41 +232,33 @@ export function UploadMedia({
 
       {/* File List */}
       {files.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium">
+        <div className='space-y-2'>
+          <h4 className='text-sm font-medium'>
             Uploaded Files ({files.length}/{maxFiles})
           </h4>
-          
+
           {files.map((file) => (
-            <Card key={file.id} className="p-3">
-              <div className="flex items-center space-x-3">
+            <Card key={file.id} className='p-3'>
+              <div className='flex items-center space-x-3'>
                 {/* File Icon/Preview */}
-                <div className="flex-shrink-0">
+                <div className='flex-shrink-0'>
                   {file.preview ? (
-                    <img 
-                      src={file.preview} 
-                      alt={file.file.name}
-                      className="size-12 object-cover rounded"
-                    />
+                    <img src={file.preview} alt={file.file.name} className='size-12 object-cover rounded' />
                   ) : (
                     getFileIcon(file.file)
                   )}
                 </div>
 
                 {/* File Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
-                    {file.file.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatFileSize(file.file.size)}
-                  </p>
-                  
+                <div className='flex-1 min-w-0'>
+                  <p className='text-sm font-medium truncate'>{file.file.name}</p>
+                  <p className='text-xs text-muted-foreground'>{formatFileSize(file.file.size)}</p>
+
                   {/* Progress Bar */}
                   {file.status === 'uploading' && (
-                    <div className="w-full bg-muted rounded-full h-1.5 mt-1">
-                      <div 
-                        className="bg-primary h-1.5 rounded-full transition-all duration-300"
+                    <div className='w-full bg-muted rounded-full h-1.5 mt-1'>
+                      <div
+                        className='bg-primary h-1.5 rounded-full transition-all duration-300'
                         style={{ width: `${file.progress || 0}%` }}
                       />
                     </div>
@@ -265,26 +266,25 @@ export function UploadMedia({
                 </div>
 
                 {/* Status Badge */}
-                <div className="flex items-center space-x-2">
+                <div className='flex items-center space-x-2'>
                   {file.status === 'completed' && (
-                    <Badge variant="secondary" className="text-green-600">
+                    <Badge variant='secondary' className='text-green-600'>
                       Uploaded
                     </Badge>
                   )}
                   {file.status === 'error' && (
-                    <Badge variant="destructive">
-                      <AlertCircle className="size-3 mr-1" />
+                    <Badge variant='destructive'>
+                      <AlertCircle className='size-3 mr-1' />
                       Error
                     </Badge>
                   )}
-                  
+
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    className="size-8 px-0"
-                    onClick={() => removeFile(file.id)}
-                  >
-                    <X className="size-4" />
+                    variant='ghost'
+                    size='sm'
+                    className='size-8 px-0'
+                    onClick={() => removeFile(file.id)}>
+                    <X className='size-4' />
                   </Button>
                 </div>
               </div>

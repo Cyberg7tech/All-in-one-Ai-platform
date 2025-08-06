@@ -16,11 +16,11 @@ interface WaitlistProps {
 }
 
 export function Waitlist({
-  title = "Join the Waitlist",
-  description = "Be the first to know when we launch new AI features.",
-  buttonText = "Join Waitlist",
+  title = 'Join the Waitlist',
+  description = 'Be the first to know when we launch new AI features.',
+  buttonText = 'Join Waitlist',
   successMessage = "Thanks! We'll notify you when it's ready.",
-  className = ""
+  className = '',
 }: WaitlistProps) {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -34,8 +34,8 @@ export function Waitlist({
 
     try {
       // Simulate API call - replace with actual waitlist API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // In real implementation, call your waitlist API here
       // await fetch('/api/waitlist', {
       //   method: 'POST',
@@ -55,17 +55,17 @@ export function Waitlist({
   if (isSuccess) {
     return (
       <Card className={`max-w-md mx-auto ${className}`}>
-        <CardContent className="text-center py-8">
-          <CheckCircle className="size-16 text-green-500 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">You're on the list!</h3>
-          <p className="text-muted-foreground mb-4">{successMessage}</p>
-          <div className="flex items-center justify-center space-x-4 text-sm text-muted-foreground">
-            <div className="flex items-center">
-              <Users className="size-4 mr-1" />
+        <CardContent className='text-center py-8'>
+          <CheckCircle className='size-16 text-green-500 mx-auto mb-4' />
+          <h3 className='text-xl font-semibold mb-2'>You're on the list!</h3>
+          <p className='text-muted-foreground mb-4'>{successMessage}</p>
+          <div className='flex items-center justify-center space-x-4 text-sm text-muted-foreground'>
+            <div className='flex items-center'>
+              <Users className='size-4 mr-1' />
               1,250+ joined
             </div>
-            <div className="flex items-center">
-              <Star className="size-4 mr-1" />
+            <div className='flex items-center'>
+              <Star className='size-4 mr-1' />
               Early access
             </div>
           </div>
@@ -76,38 +76,36 @@ export function Waitlist({
 
   return (
     <Card className={`max-w-md mx-auto ${className}`}>
-      <CardHeader className="text-center">
-        <Badge variant="secondary" className="w-fit mx-auto mb-2">
-          <Bell className="size-3 mr-1" />
+      <CardHeader className='text-center'>
+        <Badge variant='secondary' className='w-fit mx-auto mb-2'>
+          <Bell className='size-3 mr-1' />
           Coming Soon
         </Badge>
-        <CardTitle className="text-2xl">{title}</CardTitle>
-        <CardDescription className="text-base">{description}</CardDescription>
+        <CardTitle className='text-2xl'>{title}</CardTitle>
+        <CardDescription className='text-base'>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="relative">
-            <Mail className="absolute left-3 top-3 size-4 text-muted-foreground" />
+        <form onSubmit={handleSubmit} className='space-y-4'>
+          <div className='relative'>
+            <Mail className='absolute left-3 top-3 size-4 text-muted-foreground' />
             <Input
-              type="email"
-              placeholder="Enter your email"
+              type='email'
+              placeholder='Enter your email'
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="pl-10"
+              className='pl-10'
               disabled={isLoading}
             />
           </div>
-          
-          {error && (
-            <p className="text-sm text-red-500">{error}</p>
-          )}
-          
-          <Button type="submit" className="w-full" disabled={isLoading || !email}>
+
+          {error && <p className='text-sm text-red-500'>{error}</p>}
+
+          <Button type='submit' className='w-full' disabled={isLoading || !email}>
             {isLoading ? 'Joining...' : buttonText}
           </Button>
-          
-          <div className="text-center text-xs text-muted-foreground">
+
+          <div className='text-center text-xs text-muted-foreground'>
             Join 1,250+ others waiting for early access
           </div>
         </form>
@@ -117,7 +115,7 @@ export function Waitlist({
 }
 
 // Inline Waitlist Component for landing pages
-export function InlineWaitlist({ className = "" }: { className?: string }) {
+export function InlineWaitlist({ className = '' }: { className?: string }) {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -125,9 +123,9 @@ export function InlineWaitlist({ className = "" }: { className?: string }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setIsSuccess(true);
     setEmail('');
     setIsLoading(false);
@@ -136,27 +134,27 @@ export function InlineWaitlist({ className = "" }: { className?: string }) {
   if (isSuccess) {
     return (
       <div className={`flex items-center justify-center space-x-2 ${className}`}>
-        <CheckCircle className="size-5 text-green-500" />
-        <span className="text-green-600 font-medium">Thanks! You're on the list.</span>
+        <CheckCircle className='size-5 text-green-500' />
+        <span className='text-green-600 font-medium'>Thanks! You're on the list.</span>
       </div>
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className={`flex flex-col sm:flex-row gap-3 max-w-md mx-auto ${className}`}>
-      <div className="relative flex-1">
-        <Mail className="absolute left-3 top-3 size-4 text-muted-foreground" />
+      <div className='relative flex-1'>
+        <Mail className='absolute left-3 top-3 size-4 text-muted-foreground' />
         <Input
-          type="email"
-          placeholder="Enter your email"
+          type='email'
+          placeholder='Enter your email'
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="pl-10"
+          className='pl-10'
           disabled={isLoading}
         />
       </div>
-      <Button type="submit" disabled={isLoading || !email} className="whitespace-nowrap">
+      <Button type='submit' disabled={isLoading || !email} className='whitespace-nowrap'>
         {isLoading ? 'Joining...' : 'Join Waitlist'}
       </Button>
     </form>
