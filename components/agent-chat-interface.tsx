@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Send, Bot, User, Loader2, Image, Code, Mail, Search, BarChart3 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
@@ -134,8 +134,8 @@ export default function AgentChatInterface({ agentId, agentName, agentModel, age
         <CardHeader className='pb-3'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center space-x-3'>
-              <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center'>
-                <Bot className='w-5 h-5 text-primary' />
+              <div className='size-10 rounded-full bg-primary/10 flex items-center justify-center'>
+                <Bot className='size-5 text-primary' />
               </div>
               <div>
                 <CardTitle className='text-lg'>{agentName}</CardTitle>
@@ -153,7 +153,7 @@ export default function AgentChatInterface({ agentId, agentName, agentModel, age
               const Icon = TOOL_ICONS[tool as keyof typeof TOOL_ICONS] || Bot;
               return (
                 <div key={tool} className='flex items-center space-x-1 px-2 py-1 bg-muted rounded-md text-xs'>
-                  <Icon className='w-3 h-3' />
+                  <Icon className='size-3' />
                   <span>{tool.replace('_', ' ')}</span>
                 </div>
               );
@@ -166,7 +166,7 @@ export default function AgentChatInterface({ agentId, agentName, agentModel, age
       <div className='flex-1 overflow-y-auto space-y-4 mb-4'>
         {messages.length === 0 ? (
           <div className='text-center py-8'>
-            <Bot className='w-12 h-12 text-muted-foreground mx-auto mb-4' />
+            <Bot className='size-12 text-muted-foreground mx-auto mb-4' />
             <h3 className='text-lg font-semibold mb-2'>Start chatting with {agentName}</h3>
             <p className='text-muted-foreground'>
               This agent can help you with various tasks using {agentTools.length} different tools.
@@ -181,10 +181,10 @@ export default function AgentChatInterface({ agentId, agentName, agentModel, age
                 <div
                   className={`flex items-start space-x-3 ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    className={`size-8 rounded-full flex items-center justify-center ${
                       message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
                     }`}>
-                    {message.role === 'user' ? <User className='w-4 h-4' /> : <Bot className='w-4 h-4' />}
+                    {message.role === 'user' ? <User className='size-4' /> : <Bot className='size-4' />}
                   </div>
 
                   <div
@@ -211,7 +211,7 @@ export default function AgentChatInterface({ agentId, agentName, agentModel, age
                                 <div
                                   key={tool}
                                   className='flex items-center space-x-1 px-2 py-1 bg-background/50 rounded text-xs'>
-                                  <Icon className='w-3 h-3' />
+                                  <Icon className='size-3' />
                                   <span>{tool.replace('_', ' ')}</span>
                                 </div>
                               );
@@ -245,12 +245,12 @@ export default function AgentChatInterface({ agentId, agentName, agentModel, age
         {isLoading && (
           <div className='flex justify-start'>
             <div className='flex items-start space-x-3'>
-              <div className='w-8 h-8 rounded-full bg-muted flex items-center justify-center'>
-                <Bot className='w-4 h-4' />
+              <div className='size-8 rounded-full bg-muted flex items-center justify-center'>
+                <Bot className='size-4' />
               </div>
               <div className='bg-muted px-4 py-3 rounded-lg'>
                 <div className='flex items-center space-x-2'>
-                  <Loader2 className='w-4 h-4 animate-spin' />
+                  <Loader2 className='size-4 animate-spin' />
                   <span className='text-sm'>Agent is thinking...</span>
                 </div>
               </div>
@@ -275,7 +275,7 @@ export default function AgentChatInterface({ agentId, agentName, agentModel, age
             />
           </div>
           <Button onClick={sendMessage} disabled={!inputMessage.trim() || isLoading} className='h-11'>
-            <Send className='w-4 h-4' />
+            <Send className='size-4' />
           </Button>
         </div>
         <div className='flex items-center justify-between mt-2 text-xs text-muted-foreground'>

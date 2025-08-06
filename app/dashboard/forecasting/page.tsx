@@ -14,7 +14,7 @@ export default function ForecastingPage() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <TrendingUp className='w-5 h-5' />
+              <TrendingUp className='size-5' />
               Create New Forecast
             </CardTitle>
             <CardDescription>Upload your data and generate AI-powered forecasts</CardDescription>
@@ -42,7 +42,7 @@ export default function ForecastingPage() {
                 </div>
               </div>
               <Button className='w-full'>
-                <TrendingUp className='w-4 h-4 mr-2' />
+                <TrendingUp className='size-4 mr-2' />
                 Generate Forecast
               </Button>
             </div>
@@ -52,14 +52,14 @@ export default function ForecastingPage() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <BarChart3 className='w-5 h-5' />
+              <BarChart3 className='size-5' />
               Recent Forecasts
             </CardTitle>
             <CardDescription>Your previously generated forecasts</CardDescription>
           </CardHeader>
           <CardContent>
             <div className='text-center py-8 text-muted-foreground'>
-              <BarChart3 className='w-12 h-12 mx-auto mb-4 opacity-50' />
+              <BarChart3 className='size-12 mx-auto mb-4 opacity-50' />
               <p>No forecasts found</p>
               <p className='text-sm'>Create your first forecast to get started</p>
             </div>

@@ -130,7 +130,7 @@ export default function HomePage() {
       <nav className='border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
         <div className='container mx-auto px-4 h-16 flex items-center justify-between'>
           <div className='flex items-center space-x-2'>
-            <div className='w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center'>
+            <div className='size-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center'>
               <AIIcon size={20} className='text-primary-foreground' />
             </div>
             <span className='font-bold text-xl'>One Ai</span>
@@ -180,7 +180,7 @@ export default function HomePage() {
           <div className='flex flex-col sm:flex-row gap-4 justify-center mb-12'>
             <Button size='lg' className='text-lg px-8' asChild>
               <Link href='/login'>
-                <LogIn className='mr-2 w-5 h-5' />
+                <LogIn className='mr-2 size-5' />
                 Try Login
               </Link>
             </Button>
@@ -228,7 +228,7 @@ export default function HomePage() {
                 <CardHeader>
                   <div className='flex items-center space-x-3'>
                     <div className={`p-2 rounded-lg bg-background ${feature.color}`}>
-                      <feature.icon className='w-6 h-6' />
+                      <feature.icon className='size-6' />
                     </div>
                     <CardTitle className='text-xl'>{feature.title}</CardTitle>
                   </div>
@@ -300,7 +300,7 @@ export default function HomePage() {
                 <CardHeader>
                   <div className='flex items-center space-x-3'>
                     <div className='p-3 rounded-lg bg-primary/10'>
-                      <useCase.icon className='w-6 h-6 text-primary' />
+                      <useCase.icon className='size-6 text-primary' />
                     </div>
                     <CardTitle className='text-xl'>{useCase.title}</CardTitle>
                   </div>
@@ -327,8 +327,8 @@ export default function HomePage() {
             <div className='flex flex-col sm:flex-row gap-4 justify-center'>
               <Button size='lg' className='text-lg px-8' asChild>
                 <Link href='/login'>
-                  <LogIn className='mr-2 w-5 h-5' />
-                  Login <ArrowRight className='ml-2 w-5 h-5' />
+                  <LogIn className='mr-2 size-5' />
+                  Login <ArrowRight className='ml-2 size-5' />
                 </Link>
               </Button>
               <Button size='lg' variant='outline' className='text-lg px-8' asChild>
@@ -345,7 +345,7 @@ export default function HomePage() {
           <div className='grid grid-cols-1 md:grid-cols-4 gap-8'>
             <div>
               <div className='flex items-center space-x-2 mb-4'>
-                <div className='w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center'>
+                <div className='size-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center'>
                   <AIIcon size={20} className='text-primary-foreground' />
                 </div>
                 <span className='font-bold text-xl'>One Ai</span>

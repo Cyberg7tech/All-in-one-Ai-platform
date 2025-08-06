@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Plus, Bot, Settings, Play, Trash2, Search, Filter } from 'lucide-react';
+import { Plus, Bot, Settings, Play, Trash2, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -234,7 +234,7 @@ export default function AgentsPage() {
         </div>
         <Button asChild>
           <Link href='/dashboard/agents/new'>
-            <Plus className='w-4 h-4 mr-2' />
+            <Plus className='size-4 mr-2' />
             Create Agent
           </Link>
         </Button>
@@ -243,7 +243,7 @@ export default function AgentsPage() {
       {/* Filters */}
       <div className='flex flex-col sm:flex-row gap-4 mb-6'>
         <div className='relative flex-1'>
-          <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground' />
+          <Search className='absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground' />
           <input
             type='text'
             placeholder='Search agents...'
@@ -285,7 +285,7 @@ export default function AgentsPage() {
                 <p className='text-sm text-muted-foreground'>Total Agents</p>
                 <p className='text-2xl font-bold'>{agents.length}</p>
               </div>
-              <Bot className='w-8 h-8 text-primary' />
+              <Bot className='size-8 text-primary' />
             </div>
           </CardContent>
         </Card>
@@ -299,8 +299,8 @@ export default function AgentsPage() {
                   {agents.filter((a) => a.status === 'active').length}
                 </p>
               </div>
-              <div className='w-8 h-8 rounded-full bg-green-100 flex items-center justify-center'>
-                <div className='w-3 h-3 bg-green-500 rounded-full'></div>
+              <div className='size-8 rounded-full bg-green-100 flex items-center justify-center'>
+                <div className='size-3 bg-green-500 rounded-full'></div>
               </div>
             </div>
           </CardContent>
@@ -315,8 +315,8 @@ export default function AgentsPage() {
                   {agents.reduce((sum, agent) => sum + agent.conversationCount, 0).toLocaleString()}
                 </p>
               </div>
-              <div className='w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center'>
-                <div className='w-3 h-3 bg-blue-500 rounded-full'></div>
+              <div className='size-8 rounded-full bg-blue-100 flex items-center justify-center'>
+                <div className='size-3 bg-blue-500 rounded-full'></div>
               </div>
             </div>
           </CardContent>
@@ -332,8 +332,8 @@ export default function AgentsPage() {
                   %
                 </p>
               </div>
-              <div className='w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center'>
-                <div className='w-3 h-3 bg-purple-500 rounded-full'></div>
+              <div className='size-8 rounded-full bg-purple-100 flex items-center justify-center'>
+                <div className='size-3 bg-purple-500 rounded-full'></div>
               </div>
             </div>
           </CardContent>
@@ -347,7 +347,7 @@ export default function AgentsPage() {
             <CardHeader className='pb-3'>
               <div className='flex items-center justify-between'>
                 <div className='flex items-center space-x-2'>
-                  <Bot className='w-5 h-5 text-primary' />
+                  <Bot className='size-5 text-primary' />
                   <CardTitle className='text-lg'>{agent.name}</CardTitle>
                 </div>
                 <Badge className={statusColors[agent.status]}>{agent.status}</Badge>
@@ -407,17 +407,17 @@ export default function AgentsPage() {
               <div className='flex gap-2 pt-2'>
                 <Button size='sm' variant='default' className='flex-1' asChild>
                   <Link href={`/dashboard/agents/${agent.id}/chat`}>
-                    <Play className='w-3 h-3 mr-1' />
+                    <Play className='size-3 mr-1' />
                     Chat
                   </Link>
                 </Button>
                 <Button size='sm' variant='outline' asChild>
                   <Link href={`/dashboard/agents/${agent.id}/edit`}>
-                    <Settings className='w-3 h-3' />
+                    <Settings className='size-3' />
                   </Link>
                 </Button>
                 <Button size='sm' variant='outline' className='text-red-600 hover:text-red-700'>
-                  <Trash2 className='w-3 h-3' />
+                  <Trash2 className='size-3' />
                 </Button>
               </div>
             </CardContent>
@@ -427,7 +427,7 @@ export default function AgentsPage() {
 
       {filteredAgents.length === 0 && (
         <div className='text-center py-12'>
-          <Bot className='w-16 h-16 text-muted-foreground mx-auto mb-4' />
+          <Bot className='size-16 text-muted-foreground mx-auto mb-4' />
           <h3 className='text-lg font-semibold mb-2'>No agents found</h3>
           <p className='text-muted-foreground mb-4'>
             {searchTerm || filterType !== 'all' || filterStatus !== 'all'
@@ -436,7 +436,7 @@ export default function AgentsPage() {
           </p>
           <Button asChild>
             <Link href='/dashboard/agents/new'>
-              <Plus className='w-4 h-4 mr-2' />
+              <Plus className='size-4 mr-2' />
               Create Your First Agent
             </Link>
           </Button>

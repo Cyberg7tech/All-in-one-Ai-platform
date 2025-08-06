@@ -345,19 +345,19 @@ export default function WorkflowsPage() {
       <div className='flex items-center mb-6'>
         <Button variant='ghost' asChild className='mr-4'>
           <Link href='/dashboard/explore'>
-            <ArrowLeft className='w-4 h-4 mr-2' />
+            <ArrowLeft className='size-4 mr-2' />
             Back to Explore
           </Link>
         </Button>
         <div className='flex-1'>
           <h1 className='text-3xl font-bold flex items-center'>
-            <Zap className='w-8 h-8 mr-3 text-primary' />
+            <Zap className='size-8 mr-3 text-primary' />
             Workflow Automation
           </h1>
           <p className='text-muted-foreground'>Create automated workflows to streamline your processes</p>
         </div>
         <Button onClick={createNewWorkflow}>
-          <Plus className='w-4 h-4 mr-2' />
+          <Plus className='size-4 mr-2' />
           Create Workflow
         </Button>
       </div>
@@ -365,17 +365,17 @@ export default function WorkflowsPage() {
       {/* Tabs */}
       <div className='flex space-x-4 mb-6'>
         <Button variant={activeTab === 'list' ? 'default' : 'outline'} onClick={() => setActiveTab('list')}>
-          <Settings className='w-4 h-4 mr-2' />
+          <Settings className='size-4 mr-2' />
           Workflows ({workflows.length})
         </Button>
         <Button
           variant={activeTab === 'builder' ? 'default' : 'outline'}
           onClick={() => setActiveTab('builder')}>
-          <Plus className='w-4 h-4 mr-2' />
+          <Plus className='size-4 mr-2' />
           Builder
         </Button>
         <Button variant={activeTab === 'logs' ? 'default' : 'outline'} onClick={() => setActiveTab('logs')}>
-          <BarChart3 className='w-4 h-4 mr-2' />
+          <BarChart3 className='size-4 mr-2' />
           Execution Logs
         </Button>
       </div>
@@ -391,7 +391,7 @@ export default function WorkflowsPage() {
                     <p className='text-sm text-muted-foreground'>Total Workflows</p>
                     <p className='text-2xl font-bold'>{workflows.length}</p>
                   </div>
-                  <Zap className='w-8 h-8 text-primary' />
+                  <Zap className='size-8 text-primary' />
                 </div>
               </CardContent>
             </Card>
@@ -405,7 +405,7 @@ export default function WorkflowsPage() {
                       {workflows.filter((w) => w.status === 'active').length}
                     </p>
                   </div>
-                  <CheckCircle className='w-8 h-8 text-green-600' />
+                  <CheckCircle className='size-8 text-green-600' />
                 </div>
               </CardContent>
             </Card>
@@ -419,7 +419,7 @@ export default function WorkflowsPage() {
                       {workflows.reduce((sum, w) => sum + w.executions, 0)}
                     </p>
                   </div>
-                  <Play className='w-8 h-8 text-blue-600' />
+                  <Play className='size-8 text-blue-600' />
                 </div>
               </CardContent>
             </Card>
@@ -431,7 +431,7 @@ export default function WorkflowsPage() {
                     <p className='text-sm text-muted-foreground'>Success Rate</p>
                     <p className='text-2xl font-bold text-green-600'>98.5%</p>
                   </div>
-                  <BarChart3 className='w-8 h-8 text-green-600' />
+                  <BarChart3 className='size-8 text-green-600' />
                 </div>
               </CardContent>
             </Card>
@@ -444,8 +444,8 @@ export default function WorkflowsPage() {
                 <CardHeader>
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center space-x-3'>
-                      <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center'>
-                        <workflow.trigger.icon className='w-5 h-5 text-primary' />
+                      <div className='size-10 rounded-full bg-primary/10 flex items-center justify-center'>
+                        <workflow.trigger.icon className='size-5 text-primary' />
                       </div>
                       <div>
                         <CardTitle className='text-lg'>{workflow.name}</CardTitle>
@@ -469,14 +469,14 @@ export default function WorkflowsPage() {
                   {/* Workflow Steps Preview */}
                   <div className='flex items-center space-x-2 overflow-x-auto pb-2'>
                     <div className='flex items-center space-x-1 p-2 bg-muted rounded-md min-w-0'>
-                      <workflow.trigger.icon className='w-4 h-4 text-primary' />
+                      <workflow.trigger.icon className='size-4 text-primary' />
                       <span className='text-xs font-medium truncate'>{workflow.trigger.name}</span>
                     </div>
                     {workflow.steps.map((step, index) => (
                       <div key={step.id} className='flex items-center space-x-1'>
-                        <ArrowRight className='w-3 h-3 text-muted-foreground' />
+                        <ArrowRight className='size-3 text-muted-foreground' />
                         <div className='flex items-center space-x-1 p-2 bg-muted rounded-md min-w-0'>
-                          <step.icon className='w-4 h-4 text-primary' />
+                          <step.icon className='size-4 text-primary' />
                           <span className='text-xs font-medium truncate'>{step.name}</span>
                         </div>
                       </div>
@@ -518,24 +518,24 @@ export default function WorkflowsPage() {
                       size='sm'
                       onClick={() => runWorkflow(workflow.id)}
                       disabled={workflow.status === 'draft'}>
-                      <Play className='w-3 h-3 mr-1' />
+                      <Play className='size-3 mr-1' />
                       Run
                     </Button>
                     <Button size='sm' variant='outline' onClick={() => toggleWorkflowStatus(workflow.id)}>
                       {workflow.status === 'active' ? (
                         <>
-                          <Pause className='w-3 h-3 mr-1' />
+                          <Pause className='size-3 mr-1' />
                           Pause
                         </>
                       ) : (
                         <>
-                          <Play className='w-3 h-3 mr-1' />
+                          <Play className='size-3 mr-1' />
                           Activate
                         </>
                       )}
                     </Button>
                     <Button size='sm' variant='outline' onClick={() => editWorkflow(workflow)}>
-                      <Edit className='w-3 h-3 mr-1' />
+                      <Edit className='size-3 mr-1' />
                       Edit
                     </Button>
                     <Button
@@ -543,7 +543,7 @@ export default function WorkflowsPage() {
                       variant='outline'
                       className='text-red-600 hover:text-red-700'
                       onClick={() => deleteWorkflow(workflow.id)}>
-                      <Trash2 className='w-3 h-3' />
+                      <Trash2 className='size-3' />
                     </Button>
                   </div>
                 </CardContent>
@@ -553,13 +553,13 @@ export default function WorkflowsPage() {
 
           {workflows.length === 0 && (
             <div className='text-center py-12'>
-              <Zap className='w-16 h-16 text-muted-foreground mx-auto mb-4' />
+              <Zap className='size-16 text-muted-foreground mx-auto mb-4' />
               <h3 className='text-lg font-semibold mb-2'>No workflows yet</h3>
               <p className='text-muted-foreground mb-4'>
                 Create your first workflow to automate your processes
               </p>
               <Button onClick={createNewWorkflow}>
-                <Plus className='w-4 h-4 mr-2' />
+                <Plus className='size-4 mr-2' />
                 Create Workflow
               </Button>
             </div>
@@ -582,7 +582,7 @@ export default function WorkflowsPage() {
                 <div className='min-h-96 border-2 border-dashed border-border rounded-lg p-6'>
                   {builderSteps.length === 0 ? (
                     <div className='text-center text-muted-foreground'>
-                      <Zap className='w-12 h-12 mx-auto mb-4' />
+                      <Zap className='size-12 mx-auto mb-4' />
                       <p>Start by selecting a trigger from the panel</p>
                     </div>
                   ) : (
@@ -590,14 +590,14 @@ export default function WorkflowsPage() {
                       {builderSteps.map((step, index) => (
                         <div key={step.id} className='flex items-center space-x-2'>
                           <div className='flex flex-col items-center space-y-2 p-4 border rounded-lg min-w-32'>
-                            <step.icon className='w-6 h-6 text-primary' />
+                            <step.icon className='size-6 text-primary' />
                             <span className='text-sm font-medium text-center'>{step.name}</span>
                             <span className='text-xs text-muted-foreground text-center'>
                               {step.description}
                             </span>
                           </div>
                           {index < builderSteps.length - 1 && (
-                            <ArrowRight className='w-4 h-4 text-muted-foreground' />
+                            <ArrowRight className='size-4 text-muted-foreground' />
                           )}
                         </div>
                       ))}
@@ -646,7 +646,7 @@ export default function WorkflowsPage() {
                       setBuilderSteps([triggerStep]);
                     }}>
                     <div className='flex items-center space-x-2'>
-                      <trigger.icon className='w-4 h-4 text-primary' />
+                      <trigger.icon className='size-4 text-primary' />
                       <div>
                         <p className='font-medium text-sm'>{trigger.name}</p>
                         <p className='text-xs text-muted-foreground'>{trigger.description}</p>
@@ -670,7 +670,7 @@ export default function WorkflowsPage() {
                     className='p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors'
                     onClick={() => addStepToBuilder(action)}>
                     <div className='flex items-center space-x-2'>
-                      <action.icon className='w-4 h-4 text-primary' />
+                      <action.icon className='size-4 text-primary' />
                       <div>
                         <p className='font-medium text-sm'>{action.name}</p>
                         <p className='text-xs text-muted-foreground'>{action.description}</p>
@@ -695,7 +695,7 @@ export default function WorkflowsPage() {
                     <p className='text-sm text-muted-foreground'>Total Executions</p>
                     <p className='text-2xl font-bold'>127</p>
                   </div>
-                  <Play className='w-8 h-8 text-blue-600' />
+                  <Play className='size-8 text-blue-600' />
                 </div>
               </CardContent>
             </Card>
@@ -707,7 +707,7 @@ export default function WorkflowsPage() {
                     <p className='text-sm text-muted-foreground'>Successful</p>
                     <p className='text-2xl font-bold text-green-600'>125</p>
                   </div>
-                  <CheckCircle className='w-8 h-8 text-green-600' />
+                  <CheckCircle className='size-8 text-green-600' />
                 </div>
               </CardContent>
             </Card>
@@ -719,7 +719,7 @@ export default function WorkflowsPage() {
                     <p className='text-sm text-muted-foreground'>Failed</p>
                     <p className='text-2xl font-bold text-red-600'>2</p>
                   </div>
-                  <AlertCircle className='w-8 h-8 text-red-600' />
+                  <AlertCircle className='size-8 text-red-600' />
                 </div>
               </CardContent>
             </Card>
@@ -763,7 +763,7 @@ export default function WorkflowsPage() {
                   <div key={execution.id} className='flex items-center justify-between p-4 border rounded-lg'>
                     <div className='flex items-center space-x-4'>
                       <div
-                        className={`w-3 h-3 rounded-full ${
+                        className={`size-3 rounded-full ${
                           execution.status === 'success'
                             ? 'bg-green-500'
                             : execution.status === 'failed'

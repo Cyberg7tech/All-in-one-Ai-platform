@@ -17,7 +17,7 @@ export default function BrandVoicePage() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <Mic className='w-5 h-5' />
+              <Mic className='size-5' />
               Create Brand Voice
             </CardTitle>
             <CardDescription>Define your brand's personality and tone</CardDescription>
@@ -64,7 +64,7 @@ export default function BrandVoicePage() {
               </div>
 
               <Button className='w-full'>
-                <Mic className='w-4 h-4 mr-2' />
+                <Mic className='size-4 mr-2' />
                 Generate Brand Voice
               </Button>
             </div>
@@ -74,7 +74,7 @@ export default function BrandVoicePage() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <Settings className='w-5 h-5' />
+              <Settings className='size-5' />
               Voice Settings
             </CardTitle>
             <CardDescription>Customize voice parameters</CardDescription>
@@ -116,7 +116,7 @@ export default function BrandVoicePage() {
           </CardHeader>
           <CardContent>
             <div className='text-center py-8 text-muted-foreground'>
-              <Mic className='w-12 h-12 mx-auto mb-4 opacity-50' />
+              <Mic className='size-12 mx-auto mb-4 opacity-50' />
               <p>No voice generated yet</p>
               <p className='text-sm'>Create your brand voice to get started</p>
             </div>

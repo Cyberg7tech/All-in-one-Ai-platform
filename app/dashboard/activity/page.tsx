@@ -1,5 +1,4 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Activity, Clock, TrendingUp, Users } from 'lucide-react';
 
 export default function ActivityPage() {
@@ -15,7 +14,7 @@ export default function ActivityPage() {
           <Card>
             <CardContent className='p-6'>
               <div className='flex items-center gap-3'>
-                <Activity className='w-8 h-8 text-blue-500' />
+                <Activity className='size-8 text-blue-500' />
                 <div>
                   <p className='text-2xl font-bold'>127</p>
                   <p className='text-sm text-muted-foreground'>Total Activities</p>
@@ -27,7 +26,7 @@ export default function ActivityPage() {
           <Card>
             <CardContent className='p-6'>
               <div className='flex items-center gap-3'>
-                <Clock className='w-8 h-8 text-green-500' />
+                <Clock className='size-8 text-green-500' />
                 <div>
                   <p className='text-2xl font-bold'>24</p>
                   <p className='text-sm text-muted-foreground'>This Week</p>
@@ -39,7 +38,7 @@ export default function ActivityPage() {
           <Card>
             <CardContent className='p-6'>
               <div className='flex items-center gap-3'>
-                <TrendingUp className='w-8 h-8 text-purple-500' />
+                <TrendingUp className='size-8 text-purple-500' />
                 <div>
                   <p className='text-2xl font-bold'>+15%</p>
                   <p className='text-sm text-muted-foreground'>Growth</p>
@@ -52,7 +51,7 @@ export default function ActivityPage() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <Activity className='w-5 h-5' />
+              <Activity className='size-5' />
               Recent Activity
             </CardTitle>
             <CardDescription>Your latest platform interactions</CardDescription>
@@ -61,7 +60,7 @@ export default function ActivityPage() {
             <div className='space-y-4'>
               <div className='flex items-center justify-between p-4 border rounded-lg'>
                 <div className='flex items-center gap-3'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <div>
                     <p className='font-medium'>AI Chat Session</p>
                     <p className='text-sm text-muted-foreground'>2 minutes ago</p>
@@ -72,7 +71,7 @@ export default function ActivityPage() {
 
               <div className='flex items-center justify-between p-4 border rounded-lg'>
                 <div className='flex items-center gap-3'>
-                  <div className='w-2 h-2 bg-blue-500 rounded-full'></div>
+                  <div className='size-2 bg-blue-500 rounded-full'></div>
                   <div>
                     <p className='font-medium'>Image Generated</p>
                     <p className='text-sm text-muted-foreground'>15 minutes ago</p>
@@ -83,7 +82,7 @@ export default function ActivityPage() {
 
               <div className='flex items-center justify-between p-4 border rounded-lg'>
                 <div className='flex items-center gap-3'>
-                  <div className='w-2 h-2 bg-purple-500 rounded-full'></div>
+                  <div className='size-2 bg-purple-500 rounded-full'></div>
                   <div>
                     <p className='font-medium'>Video Created</p>
                     <p className='text-sm text-muted-foreground'>1 hour ago</p>
@@ -98,7 +97,7 @@ export default function ActivityPage() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <Users className='w-5 h-5' />
+              <Users className='size-5' />
               Activity Summary
             </CardTitle>
             <CardDescription>Overview of your platform usage</CardDescription>

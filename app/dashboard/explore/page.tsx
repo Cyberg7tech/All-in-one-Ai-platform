@@ -321,7 +321,7 @@ export default function ExplorePage() {
       {/* Featured Tools */}
       <div className='mb-8'>
         <h2 className='text-2xl font-semibold mb-4 flex items-center'>
-          <Star className='w-6 h-6 mr-2 text-yellow-500' />
+          <Star className='size-6 mr-2 text-yellow-500' />
           Featured Tools
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
@@ -332,7 +332,7 @@ export default function ExplorePage() {
               <Link href={tool.comingSoon ? '#' : tool.href}>
                 <div className='absolute top-3 right-3 z-10'>
                   <Badge className='bg-yellow-500 text-yellow-50'>
-                    <Star className='w-3 h-3 mr-1' />
+                    <Star className='size-3 mr-1' />
                     Featured
                   </Badge>
                 </div>
@@ -341,7 +341,7 @@ export default function ExplorePage() {
                   <div className='flex items-start justify-between'>
                     <div className='flex items-center space-x-3'>
                       <div className='p-3 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors'>
-                        <tool.icon className='w-6 h-6 text-primary' />
+                        <tool.icon className='size-6 text-primary' />
                       </div>
                       <div className='flex-1'>
                         <CardTitle className='text-base leading-tight'>{tool.name}</CardTitle>
@@ -364,7 +364,7 @@ export default function ExplorePage() {
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`w-3 h-3 ${i < Math.floor(tool.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                            className={`size-3 ${i < Math.floor(tool.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
                           />
                         ))}
                         <span className='text-sm text-muted-foreground ml-1'>{tool.rating}</span>
@@ -391,7 +391,7 @@ export default function ExplorePage() {
       <div className='mb-6 space-y-4'>
         <div className='flex flex-col sm:flex-row gap-4'>
           <div className='relative flex-1'>
-            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground' />
+            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground' />
             <input
               type='text'
               placeholder='Search AI tools...'
@@ -406,14 +406,14 @@ export default function ExplorePage() {
               variant={showFeaturedOnly ? 'default' : 'outline'}
               size='sm'
               onClick={() => setShowFeaturedOnly(!showFeaturedOnly)}>
-              <Star className='w-4 h-4 mr-2' />
+              <Star className='size-4 mr-2' />
               Featured
             </Button>
             <Button
               variant={showPremiumOnly ? 'default' : 'outline'}
               size='sm'
               onClick={() => setShowPremiumOnly(!showPremiumOnly)}>
-              <Sparkles className='w-4 h-4 mr-2' />
+              <Sparkles className='size-4 mr-2' />
               Premium
             </Button>
           </div>
@@ -431,7 +431,7 @@ export default function ExplorePage() {
               {category !== 'All' &&
                 CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] &&
                 React.createElement(CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS], {
-                  className: 'w-4 h-4 mr-2',
+                  className: 'size-4 mr-2',
                 })}
               {category}
             </Button>
@@ -449,7 +449,7 @@ export default function ExplorePage() {
               {tool.featured && (
                 <div className='absolute top-2 right-2 z-10'>
                   <Badge className='bg-yellow-500 text-yellow-50'>
-                    <Star className='w-3 h-3 mr-1' />
+                    <Star className='size-3 mr-1' />
                     Featured
                   </Badge>
                 </div>
@@ -459,7 +459,7 @@ export default function ExplorePage() {
                 <div className='flex items-start justify-between'>
                   <div className='flex items-center space-x-3'>
                     <div className='p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors'>
-                      <tool.icon className='w-5 h-5 text-primary' />
+                      <tool.icon className='size-5 text-primary' />
                     </div>
                     <div className='flex-1'>
                       <CardTitle className='text-base leading-tight'>{tool.name}</CardTitle>
@@ -487,7 +487,7 @@ export default function ExplorePage() {
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-3 h-3 ${i < Math.floor(tool.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                          className={`size-3 ${i < Math.floor(tool.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
                         />
                       ))}
                       <span className='text-sm text-muted-foreground ml-1'>{tool.rating}</span>
@@ -517,7 +517,7 @@ export default function ExplorePage() {
       {/* No Results */}
       {filteredTools.length === 0 && (
         <div className='text-center py-12'>
-          <Search className='w-16 h-16 text-muted-foreground mx-auto mb-4' />
+          <Search className='size-16 text-muted-foreground mx-auto mb-4' />
           <h3 className='text-lg font-semibold mb-2'>No tools found</h3>
           <p className='text-muted-foreground mb-4'>Try adjusting your search criteria or browse all tools</p>
           <Button

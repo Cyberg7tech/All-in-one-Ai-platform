@@ -200,7 +200,7 @@ export default function NewAgentPage() {
         <div className='flex items-center mb-6'>
           <Button variant='ghost' asChild className='mr-4'>
             <Link href='/dashboard/agents'>
-              <ArrowLeft className='w-4 h-4 mr-2' />
+              <ArrowLeft className='size-4 mr-2' />
               Back to Agents
             </Link>
           </Button>
@@ -220,7 +220,7 @@ export default function NewAgentPage() {
               <CardHeader className='pb-3'>
                 <div className='flex items-center space-x-3'>
                   <div className='p-2 rounded-lg bg-primary/10'>
-                    <template.icon className='w-6 h-6 text-primary' />
+                    <template.icon className='size-6 text-primary' />
                   </div>
                   <div>
                     <CardTitle className='text-lg'>{template.name}</CardTitle>
@@ -264,7 +264,7 @@ export default function NewAgentPage() {
         {/* Custom Agent Option */}
         <Card className='mt-6 border-dashed border-2'>
           <CardContent className='p-6 text-center'>
-            <Bot className='w-12 h-12 text-muted-foreground mx-auto mb-4' />
+            <Bot className='size-12 text-muted-foreground mx-auto mb-4' />
             <h3 className='text-lg font-semibold mb-2'>Start from Scratch</h3>
             <p className='text-muted-foreground mb-4'>
               Create a completely custom agent with your own configuration
@@ -289,7 +289,7 @@ export default function NewAgentPage() {
         {/* Header */}
         <div className='flex items-center mb-6'>
           <Button variant='ghost' onClick={() => setStep(1)} className='mr-4'>
-            <ArrowLeft className='w-4 h-4 mr-2' />
+            <ArrowLeft className='size-4 mr-2' />
             Back to Templates
           </Button>
           <div>
@@ -427,7 +427,7 @@ export default function NewAgentPage() {
       {/* Header */}
       <div className='flex items-center mb-6'>
         <Button variant='ghost' onClick={() => setStep(2)} className='mr-4'>
-          <ArrowLeft className='w-4 h-4 mr-2' />
+          <ArrowLeft className='size-4 mr-2' />
           Back to Customize
         </Button>
         <div>
@@ -441,7 +441,7 @@ export default function NewAgentPage() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center space-x-2'>
-              <Bot className='w-5 h-5' />
+              <Bot className='size-5' />
               <span>{agentData.name}</span>
             </CardTitle>
             <CardDescription>{agentData.description}</CardDescription>
@@ -478,7 +478,7 @@ export default function NewAgentPage() {
             Edit Configuration
           </Button>
           <Button onClick={handleCreateAgent}>
-            <Bot className='w-4 h-4 mr-2' />
+            <Bot className='size-4 mr-2' />
             Create Agent
           </Button>
         </div>

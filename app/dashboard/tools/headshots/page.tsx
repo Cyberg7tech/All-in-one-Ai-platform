@@ -166,7 +166,7 @@ export default function HeadshotsPage() {
                       alt='Preview'
                       width={128}
                       height={128}
-                      className='w-32 h-32 object-cover rounded-lg mx-auto'
+                      className='size-32 object-cover rounded-lg mx-auto'
                     />
                   </div>
                 </div>

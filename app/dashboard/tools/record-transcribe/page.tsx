@@ -293,7 +293,7 @@ export default function RecordTranscribePage() {
       <div className='flex items-center justify-between'>
         <div>
           <h1 className='text-3xl font-bold flex items-center gap-2'>
-            <FileAudio className='w-8 h-8' />
+            <FileAudio className='size-8' />
             Record & Transcribe
           </h1>
           <p className='text-muted-foreground mt-1'>Record audio and get instant AI-powered transcriptions</p>
@@ -333,8 +333,8 @@ export default function RecordTranscribePage() {
               <div className='text-center space-y-6'>
                 {isRecording ? (
                   <div className='space-y-4'>
-                    <div className='w-32 h-32 bg-red-100 rounded-full flex items-center justify-center mx-auto animate-pulse'>
-                      <Mic className='w-12 h-12 text-red-500' />
+                    <div className='size-32 bg-red-100 rounded-full flex items-center justify-center mx-auto animate-pulse'>
+                      <Mic className='size-12 text-red-500' />
                     </div>
 
                     {/* Audio Waveform Visualization */}
@@ -358,14 +358,14 @@ export default function RecordTranscribePage() {
                     </div>
 
                     <Button onClick={stopRecording} variant='destructive' size='lg'>
-                      <Square className='w-5 h-5 mr-2' />
+                      <Square className='size-5 mr-2' />
                       Stop Recording
                     </Button>
                   </div>
                 ) : (
                   <div className='space-y-4'>
-                    <div className='w-32 h-32 bg-primary/10 rounded-full flex items-center justify-center mx-auto'>
-                      <Mic className='w-12 h-12 text-primary' />
+                    <div className='size-32 bg-primary/10 rounded-full flex items-center justify-center mx-auto'>
+                      <Mic className='size-12 text-primary' />
                     </div>
 
                     <div>
@@ -376,7 +376,7 @@ export default function RecordTranscribePage() {
                     </div>
 
                     <Button onClick={startRecording} size='lg' className='px-8'>
-                      <Mic className='w-5 h-5 mr-2' />
+                      <Mic className='size-5 mr-2' />
                       Start Recording
                     </Button>
                   </div>
@@ -438,23 +438,23 @@ export default function RecordTranscribePage() {
             <CardContent>
               <div className='space-y-2'>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>High-quality recording</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Real-time visualization</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Automatic transcription</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Multi-language support</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Export & download</span>
                 </div>
               </div>
@@ -496,14 +496,14 @@ export default function RecordTranscribePage() {
                 <div key={recording.id} className='border rounded-lg p-4 space-y-3'>
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center gap-3'>
-                      <div className='w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center'>
-                        <FileAudio className='w-5 h-5 text-primary' />
+                      <div className='size-10 bg-primary/10 rounded-lg flex items-center justify-center'>
+                        <FileAudio className='size-5 text-primary' />
                       </div>
                       <div>
                         <h3 className='font-medium text-sm'>{recording.name}</h3>
                         <div className='flex items-center gap-2 text-xs text-muted-foreground'>
                           <span className='flex items-center gap-1'>
-                            <Clock className='w-3 h-3' />
+                            <Clock className='size-3' />
                             {formatTime(recording.duration)}
                           </span>
                           <span>•</span>
@@ -520,7 +520,7 @@ export default function RecordTranscribePage() {
 
                     <div className='flex items-center gap-2'>
                       {recording.status === 'processing' ? (
-                        <Loader2 className='w-4 h-4 animate-spin' />
+                        <Loader2 className='size-4 animate-spin' />
                       ) : recording.status === 'completed' ? (
                         <>
                           <Button
@@ -528,25 +528,25 @@ export default function RecordTranscribePage() {
                             size='sm'
                             onClick={() => handlePlayPause(recording.id, recording.audioUrl)}>
                             {isPlaying === recording.id ? (
-                              <Pause className='w-4 h-4' />
+                              <Pause className='size-4' />
                             ) : (
-                              <Play className='w-4 h-4' />
+                              <Play className='size-4' />
                             )}
                           </Button>
                           <Button
                             variant='outline'
                             size='sm'
                             onClick={() => copyToClipboard(recording.transcript)}>
-                            <Copy className='w-4 h-4' />
+                            <Copy className='size-4' />
                           </Button>
                           <Button
                             variant='outline'
                             size='sm'
                             onClick={() => downloadTranscription(recording)}>
-                            <Download className='w-4 h-4' />
+                            <Download className='size-4' />
                           </Button>
                           <Button variant='outline' size='sm' onClick={() => downloadRecording(recording)}>
-                            <Download className='w-4 h-4' />
+                            <Download className='size-4' />
                           </Button>
                         </>
                       ) : (
@@ -565,7 +565,7 @@ export default function RecordTranscribePage() {
                   {recording.status === 'processing' && (
                     <div className='bg-muted/50 rounded-lg p-3 flex items-center justify-center'>
                       <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                        <Loader2 className='w-4 h-4 animate-spin' />
+                        <Loader2 className='size-4 animate-spin' />
                         <span>Transcribing audio...</span>
                       </div>
                     </div>

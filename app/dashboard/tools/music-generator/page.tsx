@@ -159,13 +159,13 @@ export default function MusicGeneratorPage() {
       <div className='flex items-center justify-between'>
         <div>
           <h1 className='text-3xl font-bold flex items-center gap-2'>
-            <Music className='w-8 h-8' />
+            <Music className='size-8' />
             AI Music Generator
           </h1>
           <p className='text-muted-foreground mt-1'>Create original music compositions using AI technology</p>
         </div>
         <Badge variant='secondary' className='px-3 py-1'>
-          <Wand2 className='w-4 h-4 mr-1' />
+          <Wand2 className='size-4 mr-1' />
           New
         </Badge>
       </div>
@@ -294,12 +294,12 @@ export default function MusicGeneratorPage() {
               <Button onClick={handleGenerate} disabled={!prompt.trim() || isGenerating} className='w-full'>
                 {isGenerating ? (
                   <>
-                    <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                    <Loader2 className='size-4 mr-2 animate-spin' />
                     Generating Music...
                   </>
                 ) : (
                   <>
-                    <Music className='w-4 h-4 mr-2' />
+                    <Music className='size-4 mr-2' />
                     Generate Music
                   </>
                 )}
@@ -387,12 +387,12 @@ export default function MusicGeneratorPage() {
                       <p className='font-medium text-sm mb-2'>{music.prompt}</p>
                       <div className='flex items-center gap-4 text-xs text-muted-foreground'>
                         <span className='flex items-center gap-1'>
-                          <Music className='w-3 h-3' />
+                          <Music className='size-3' />
                           {music.genre}
                         </span>
                         <span>{music.mood}</span>
                         <span className='flex items-center gap-1'>
-                          <Clock className='w-3 h-3' />
+                          <Clock className='size-3' />
                           {music.duration}s
                         </span>
                       </div>
@@ -401,7 +401,7 @@ export default function MusicGeneratorPage() {
                     <div className='flex items-center gap-2 ml-4'>
                       {music.status === 'generating' ? (
                         <div className='flex items-center gap-2'>
-                          <Loader2 className='w-4 h-4 animate-spin' />
+                          <Loader2 className='size-4 animate-spin' />
                           <span className='text-sm text-muted-foreground'>Generating...</span>
                         </div>
                       ) : music.status === 'completed' ? (
@@ -411,19 +411,19 @@ export default function MusicGeneratorPage() {
                             size='sm'
                             onClick={() => handlePlayPause(music.id, music.audioUrl)}>
                             {isPlaying === music.id ? (
-                              <Pause className='w-4 h-4' />
+                              <Pause className='size-4' />
                             ) : (
-                              <Play className='w-4 h-4' />
+                              <Play className='size-4' />
                             )}
                           </Button>
                           <Button
                             variant='outline'
                             size='sm'
                             onClick={() => downloadAudio(music.audioUrl, music.prompt)}>
-                            <Download className='w-4 h-4' />
+                            <Download className='size-4' />
                           </Button>
                           <Button variant='outline' size='sm' onClick={() => copyPrompt(music.prompt)}>
-                            <Copy className='w-4 h-4' />
+                            <Copy className='size-4' />
                           </Button>
                         </>
                       ) : (
@@ -435,7 +435,7 @@ export default function MusicGeneratorPage() {
                   {music.status === 'completed' && (
                     <div className='mt-3 p-3 bg-muted/50 rounded-lg'>
                       <div className='flex items-center gap-2'>
-                        <Volume2 className='w-4 h-4 text-muted-foreground' />
+                        <Volume2 className='size-4 text-muted-foreground' />
                         <div className='flex-1 h-2 bg-muted-foreground/20 rounded-full'>
                           <div className='h-full bg-primary rounded-full w-0 transition-all duration-300'></div>
                         </div>

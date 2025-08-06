@@ -305,13 +305,13 @@ export default function PlaygroundPage() {
       <div className='flex items-center mb-6'>
         <Button variant='ghost' asChild className='mr-4'>
           <Link href='/dashboard/explore'>
-            <ArrowLeft className='w-4 h-4 mr-2' />
+            <ArrowLeft className='size-4 mr-2' />
             Back to Explore
           </Link>
         </Button>
         <div>
           <h1 className='text-3xl font-bold flex items-center'>
-            <Brain className='w-8 h-8 mr-3 text-primary' />
+            <Brain className='size-8 mr-3 text-primary' />
             AI Model Playground
           </h1>
           <p className='text-muted-foreground'>Test and compare different AI models side by side</p>
@@ -321,20 +321,20 @@ export default function PlaygroundPage() {
       {/* Tabs */}
       <div className='flex space-x-4 mb-6'>
         <Button variant={activeTab === 'test' ? 'default' : 'outline'} onClick={() => setActiveTab('test')}>
-          <Play className='w-4 h-4 mr-2' />
+          <Play className='size-4 mr-2' />
           Test Models
         </Button>
         <Button
           variant={activeTab === 'compare' ? 'default' : 'outline'}
           onClick={() => setActiveTab('compare')}
           disabled={currentResponses.length === 0}>
-          <BarChart3 className='w-4 h-4 mr-2' />
+          <BarChart3 className='size-4 mr-2' />
           Compare Results
         </Button>
         <Button
           variant={activeTab === 'history' ? 'default' : 'outline'}
           onClick={() => setActiveTab('history')}>
-          <Clock className='w-4 h-4 mr-2' />
+          <Clock className='size-4 mr-2' />
           History ({results.length})
         </Button>
       </div>
@@ -371,12 +371,12 @@ export default function PlaygroundPage() {
                       disabled={!prompt.trim() || selectedModels.length === 0 || isRunning}>
                       {isRunning ? (
                         <>
-                          <RefreshCw className='w-4 h-4 mr-2 animate-spin' />
+                          <RefreshCw className='size-4 mr-2 animate-spin' />
                           Running...
                         </>
                       ) : (
                         <>
-                          <Play className='w-4 h-4 mr-2' />
+                          <Play className='size-4 mr-2' />
                           Run Test
                         </>
                       )}
@@ -403,7 +403,7 @@ export default function PlaygroundPage() {
                             </div>
                           </div>
                           <Button size='sm' variant='outline' onClick={() => copyResponse(response.content)}>
-                            <Copy className='w-3 h-3' />
+                            <Copy className='size-3' />
                           </Button>
                         </div>
                       </CardHeader>
@@ -564,7 +564,7 @@ export default function PlaygroundPage() {
                 </CardHeader>
                 <CardContent>
                   <Button onClick={exportResults} className='w-full'>
-                    <Download className='w-4 h-4 mr-2' />
+                    <Download className='size-4 mr-2' />
                     Download JSON
                   </Button>
                 </CardContent>
@@ -589,7 +589,7 @@ export default function PlaygroundPage() {
                           <p className='text-sm text-muted-foreground'>Avg Tokens</p>
                           <p className='text-2xl font-bold'>{Math.round(stats.avgTokens)}</p>
                         </div>
-                        <FileText className='w-8 h-8 text-blue-600' />
+                        <FileText className='size-8 text-blue-600' />
                       </div>
                     </CardContent>
                   </Card>
@@ -601,7 +601,7 @@ export default function PlaygroundPage() {
                           <p className='text-sm text-muted-foreground'>Avg Cost</p>
                           <p className='text-2xl font-bold'>${stats.avgCost.toFixed(4)}</p>
                         </div>
-                        <Zap className='w-8 h-8 text-green-600' />
+                        <Zap className='size-8 text-green-600' />
                       </div>
                     </CardContent>
                   </Card>
@@ -613,7 +613,7 @@ export default function PlaygroundPage() {
                           <p className='text-sm text-muted-foreground'>Avg Time</p>
                           <p className='text-2xl font-bold'>{stats.avgTime.toFixed(1)}s</p>
                         </div>
-                        <Clock className='w-8 h-8 text-purple-600' />
+                        <Clock className='size-8 text-purple-600' />
                       </div>
                     </CardContent>
                   </Card>
@@ -625,7 +625,7 @@ export default function PlaygroundPage() {
                           <p className='text-sm text-muted-foreground'>Models</p>
                           <p className='text-2xl font-bold'>{currentResponses.length}</p>
                         </div>
-                        <Brain className='w-8 h-8 text-orange-600' />
+                        <Brain className='size-8 text-orange-600' />
                       </div>
                     </CardContent>
                   </Card>
@@ -726,11 +726,11 @@ export default function PlaygroundPage() {
 
           {results.length === 0 && (
             <div className='text-center py-12'>
-              <Brain className='w-16 h-16 text-muted-foreground mx-auto mb-4' />
+              <Brain className='size-16 text-muted-foreground mx-auto mb-4' />
               <h3 className='text-lg font-semibold mb-2'>No test history</h3>
               <p className='text-muted-foreground mb-4'>Run your first test to see results here</p>
               <Button onClick={() => setActiveTab('test')}>
-                <Play className='w-4 h-4 mr-2' />
+                <Play className='size-4 mr-2' />
                 Start Testing
               </Button>
             </div>

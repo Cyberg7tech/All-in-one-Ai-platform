@@ -226,7 +226,7 @@ export default function TextToSpeechPage() {
       <div className='flex items-center justify-between'>
         <div>
           <h1 className='text-3xl font-bold flex items-center gap-2'>
-            <Volume2 className='w-8 h-8' />
+            <Volume2 className='size-8' />
             AI Text to Speech
           </h1>
           <p className='text-muted-foreground mt-1'>
@@ -368,12 +368,12 @@ export default function TextToSpeechPage() {
               <Button onClick={handleGenerate} disabled={!text.trim() || isGenerating} className='w-full'>
                 {isGenerating ? (
                   <>
-                    <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                    <Loader2 className='size-4 mr-2 animate-spin' />
                     Generating Speech...
                   </>
                 ) : (
                   <>
-                    <Volume2 className='w-4 h-4 mr-2' />
+                    <Volume2 className='size-4 mr-2' />
                     Generate Speech
                   </>
                 )}
@@ -392,7 +392,7 @@ export default function TextToSpeechPage() {
               {selectedVoiceData && (
                 <div className='space-y-3'>
                   <div className='text-center p-4 bg-muted/50 rounded-lg'>
-                    <Volume2 className='w-8 h-8 mx-auto mb-2 text-primary' />
+                    <Volume2 className='size-8 mx-auto mb-2 text-primary' />
                     <h3 className='font-medium'>{selectedVoiceData.name}</h3>
                     <p className='text-sm text-muted-foreground'>{selectedVoiceData.style} Style</p>
                   </div>
@@ -460,17 +460,17 @@ export default function TextToSpeechPage() {
 
                     <div className='flex items-center gap-2 ml-4'>
                       {audio.status === 'generating' ? (
-                        <Loader2 className='w-4 h-4 animate-spin' />
+                        <Loader2 className='size-4 animate-spin' />
                       ) : audio.status === 'completed' ? (
                         <>
                           <Button variant='outline' size='sm' onClick={() => handlePlayPause(audio.audioUrl)}>
-                            {isPlaying ? <Pause className='w-4 h-4' /> : <Play className='w-4 h-4' />}
+                            {isPlaying ? <Pause className='size-4' /> : <Play className='size-4' />}
                           </Button>
                           <Button
                             variant='outline'
                             size='sm'
                             onClick={() => handleDownload(audio.audioUrl, audio.text)}>
-                            <Download className='w-4 h-4' />
+                            <Download className='size-4' />
                           </Button>
                         </>
                       ) : (

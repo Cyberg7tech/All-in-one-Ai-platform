@@ -314,13 +314,13 @@ export default function ForecastingPage() {
       <div className='flex items-center mb-6'>
         <Button variant='ghost' asChild className='mr-4'>
           <Link href='/dashboard/explore'>
-            <ArrowLeft className='w-4 h-4 mr-2' />
+            <ArrowLeft className='size-4 mr-2' />
             Back to Explore
           </Link>
         </Button>
         <div>
           <h1 className='text-3xl font-bold flex items-center'>
-            <TrendingUp className='w-8 h-8 mr-3 text-primary' />
+            <TrendingUp className='size-8 mr-3 text-primary' />
             Forecasting & Anomaly Detection
           </h1>
           <p className='text-muted-foreground'>
@@ -334,21 +334,21 @@ export default function ForecastingPage() {
         <Button
           variant={activeTab === 'upload' ? 'default' : 'outline'}
           onClick={() => setActiveTab('upload')}>
-          <Upload className='w-4 h-4 mr-2' />
+          <Upload className='size-4 mr-2' />
           Upload Data
         </Button>
         <Button
           variant={activeTab === 'configure' ? 'default' : 'outline'}
           onClick={() => setActiveTab('configure')}
           disabled={uploadedData.length === 0}>
-          <Settings className='w-4 h-4 mr-2' />
+          <Settings className='size-4 mr-2' />
           Configure Models
         </Button>
         <Button
           variant={activeTab === 'results' ? 'default' : 'outline'}
           onClick={() => setActiveTab('results')}
           disabled={results.length === 0}>
-          <BarChart3 className='w-4 h-4 mr-2' />
+          <BarChart3 className='size-4 mr-2' />
           Results ({results.length})
         </Button>
       </div>
@@ -363,7 +363,7 @@ export default function ForecastingPage() {
             </CardHeader>
             <CardContent className='space-y-4'>
               <div className='border-2 border-dashed border-border rounded-lg p-8 text-center'>
-                <Upload className='w-12 h-12 text-muted-foreground mx-auto mb-4' />
+                <Upload className='size-12 text-muted-foreground mx-auto mb-4' />
                 <h3 className='text-lg font-semibold mb-2'>Drag & drop your data file</h3>
                 <p className='text-muted-foreground mb-4'>Support for CSV and JSON formats</p>
                 <input
@@ -577,12 +577,12 @@ export default function ForecastingPage() {
                   className='w-full'>
                   {isProcessing ? (
                     <>
-                      <div className='w-4 h-4 mr-2 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
+                      <div className='size-4 mr-2 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
                       Processing...
                     </>
                   ) : (
                     <>
-                      <Play className='w-4 h-4 mr-2' />
+                      <Play className='size-4 mr-2' />
                       Run Forecast
                     </>
                   )}
@@ -617,11 +617,11 @@ export default function ForecastingPage() {
             </div>
             <div className='flex space-x-2'>
               <Button variant='outline' onClick={downloadResults}>
-                <Download className='w-4 h-4 mr-2' />
+                <Download className='size-4 mr-2' />
                 Export Results
               </Button>
               <Button variant='outline'>
-                <FileText className='w-4 h-4 mr-2' />
+                <FileText className='size-4 mr-2' />
                 Generate Report
               </Button>
             </div>
@@ -636,7 +636,7 @@ export default function ForecastingPage() {
                     <p className='text-sm text-muted-foreground'>Accuracy</p>
                     <p className='text-2xl font-bold'>{currentResult.metrics.accuracy.toFixed(1)}%</p>
                   </div>
-                  <BarChart3 className='w-8 h-8 text-green-500' />
+                  <BarChart3 className='size-8 text-green-500' />
                 </div>
               </CardContent>
             </Card>
@@ -648,7 +648,7 @@ export default function ForecastingPage() {
                     <p className='text-sm text-muted-foreground'>Anomalies</p>
                     <p className='text-2xl font-bold text-red-500'>{currentResult.anomalies}</p>
                   </div>
-                  <AlertTriangle className='w-8 h-8 text-red-500' />
+                  <AlertTriangle className='size-8 text-red-500' />
                 </div>
               </CardContent>
             </Card>
@@ -660,7 +660,7 @@ export default function ForecastingPage() {
                     <p className='text-sm text-muted-foreground'>MAPE</p>
                     <p className='text-2xl font-bold'>{currentResult.metrics.mape.toFixed(1)}%</p>
                   </div>
-                  <TrendingUp className='w-8 h-8 text-blue-500' />
+                  <TrendingUp className='size-8 text-blue-500' />
                 </div>
               </CardContent>
             </Card>
@@ -672,7 +672,7 @@ export default function ForecastingPage() {
                     <p className='text-sm text-muted-foreground'>Trend</p>
                     <p className='text-sm font-medium capitalize'>{currentResult.trend}</p>
                   </div>
-                  <LineChart className='w-8 h-8 text-purple-500' />
+                  <LineChart className='size-8 text-purple-500' />
                 </div>
               </CardContent>
             </Card>
@@ -691,15 +691,15 @@ export default function ForecastingPage() {
 
               <div className='flex items-center justify-center space-x-6 mt-4 text-sm'>
                 <div className='flex items-center space-x-2'>
-                  <div className='w-4 h-4 bg-primary rounded'></div>
+                  <div className='size-4 bg-primary rounded'></div>
                   <span>Historical Data</span>
                 </div>
                 <div className='flex items-center space-x-2'>
-                  <div className='w-4 h-4 bg-blue-400 rounded'></div>
+                  <div className='size-4 bg-blue-400 rounded'></div>
                   <span>Forecast</span>
                 </div>
                 <div className='flex items-center space-x-2'>
-                  <div className='w-4 h-4 bg-red-500 rounded'></div>
+                  <div className='size-4 bg-red-500 rounded'></div>
                   <span>Anomalies</span>
                 </div>
               </div>

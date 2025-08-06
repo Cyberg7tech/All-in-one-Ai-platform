@@ -293,13 +293,13 @@ export default function ImageGeneratorPage() {
       <div className='flex items-center mb-6'>
         <Button variant='ghost' asChild className='mr-4'>
           <Link href='/dashboard/explore'>
-            <ArrowLeft className='w-4 h-4 mr-2' />
+            <ArrowLeft className='size-4 mr-2' />
             Back to Explore
           </Link>
         </Button>
         <div>
           <h1 className='text-3xl font-bold flex items-center'>
-            <ImageIcon className='w-8 h-8 mr-3 text-primary' />
+            <ImageIcon className='size-8 mr-3 text-primary' />
             AI Image Generator
           </h1>
           <p className='text-muted-foreground'>
@@ -313,13 +313,13 @@ export default function ImageGeneratorPage() {
         <Button
           variant={activeTab === 'generate' ? 'default' : 'outline'}
           onClick={() => setActiveTab('generate')}>
-          <Wand2 className='w-4 h-4 mr-2' />
+          <Wand2 className='size-4 mr-2' />
           Generate
         </Button>
         <Button
           variant={activeTab === 'gallery' ? 'default' : 'outline'}
           onClick={() => setActiveTab('gallery')}>
-          <Camera className='w-4 h-4 mr-2' />
+          <Camera className='size-4 mr-2' />
           Gallery ({generatedImages.length})
         </Button>
       </div>
@@ -347,12 +347,12 @@ export default function ImageGeneratorPage() {
                   <Button onClick={handleGenerate} disabled={!prompt.trim() || isGenerating}>
                     {isGenerating ? (
                       <>
-                        <div className='w-4 h-4 mr-2 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
+                        <div className='size-4 mr-2 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
                         Generating...
                       </>
                     ) : (
                       <>
-                        <Sparkles className='w-4 h-4 mr-2' />
+                        <Sparkles className='size-4 mr-2' />
                         Generate Image
                       </>
                     )}
@@ -386,7 +386,7 @@ export default function ImageGeneratorPage() {
               <Card>
                 <CardContent className='p-6'>
                   <div className='text-center'>
-                    <div className='w-16 h-16 mx-auto mb-4 animate-spin rounded-full border-4 border-primary border-t-transparent'></div>
+                    <div className='size-16 mx-auto mb-4 animate-spin rounded-full border-4 border-primary border-t-transparent'></div>
                     <h3 className='text-lg font-semibold mb-2'>Generating Your Image</h3>
                     <p className='text-muted-foreground'>This may take up to 30 seconds...</p>
                     <div className='w-full bg-muted rounded-full h-2 mt-4'>
@@ -443,7 +443,7 @@ export default function ImageGeneratorPage() {
                       size='sm'
                       onClick={() => setSelectedStyle(style.id)}
                       className='h-auto p-2 flex flex-col items-center'>
-                      <Palette className='w-4 h-4 mb-1' />
+                      <Palette className='size-4 mb-1' />
                       <span className='text-xs'>{style.name}</span>
                     </Button>
                   ))}
@@ -473,11 +473,11 @@ export default function ImageGeneratorPage() {
             <h2 className='text-2xl font-semibold'>Your Generated Images</h2>
             <div className='flex space-x-2'>
               <Button variant='outline' size='sm' onClick={downloadAllImages}>
-                <Download className='w-4 h-4 mr-2' />
+                <Download className='size-4 mr-2' />
                 Download All
               </Button>
               <Button variant='outline' size='sm' onClick={shareGallery}>
-                <Share className='w-4 h-4 mr-2' />
+                <Share className='size-4 mr-2' />
                 Share Gallery
               </Button>
             </div>
@@ -500,7 +500,7 @@ export default function ImageGeneratorPage() {
                       variant='secondary'
                       className='h-8 w-8 p-0'
                       onClick={() => toggleLike(image.id)}>
-                      <Heart className={`w-4 h-4 ${image.liked ? 'fill-red-500 text-red-500' : ''}`} />
+                      <Heart className={`size-4 ${image.liked ? 'fill-red-500 text-red-500' : ''}`} />
                     </Button>
                   </div>
                   <div className='absolute bottom-2 left-2'>
@@ -520,14 +520,14 @@ export default function ImageGeneratorPage() {
 
                   <div className='flex space-x-2'>
                     <Button size='sm' variant='outline' onClick={() => downloadImage(image)}>
-                      <Download className='w-3 h-3 mr-1' />
+                      <Download className='size-3 mr-1' />
                       Download
                     </Button>
                     <Button size='sm' variant='outline' onClick={() => copyPrompt(image.prompt)}>
-                      <Copy className='w-3 h-3' />
+                      <Copy className='size-3' />
                     </Button>
                     <Button size='sm' variant='outline' onClick={() => shareImage(image)}>
-                      <Share className='w-3 h-3' />
+                      <Share className='size-3' />
                     </Button>
                   </div>
                 </CardContent>
@@ -537,11 +537,11 @@ export default function ImageGeneratorPage() {
 
           {generatedImages.length === 0 && (
             <div className='text-center py-12'>
-              <ImageIcon className='w-16 h-16 text-muted-foreground mx-auto mb-4' />
+              <ImageIcon className='size-16 text-muted-foreground mx-auto mb-4' />
               <h3 className='text-lg font-semibold mb-2'>No images generated yet</h3>
               <p className='text-muted-foreground mb-4'>Start creating amazing images with AI</p>
               <Button onClick={() => setActiveTab('generate')}>
-                <Sparkles className='w-4 h-4 mr-2' />
+                <Sparkles className='size-4 mr-2' />
                 Generate Your First Image
               </Button>
             </div>

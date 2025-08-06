@@ -228,7 +228,7 @@ ${
       <div className='flex items-center justify-between'>
         <div>
           <h1 className='text-3xl font-bold flex items-center gap-2'>
-            <Mic className='w-8 h-8' />
+            <Mic className='size-8' />
             AI Speech to Text
           </h1>
           <p className='text-muted-foreground mt-1'>
@@ -278,25 +278,25 @@ ${
               <div className='text-center'>
                 {isRecording ? (
                   <div className='space-y-4'>
-                    <div className='w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto animate-pulse'>
-                      <Mic className='w-8 h-8 text-red-500' />
+                    <div className='size-24 bg-red-100 rounded-full flex items-center justify-center mx-auto animate-pulse'>
+                      <Mic className='size-8 text-red-500' />
                     </div>
                     <div>
                       <p className='text-lg font-medium'>Recording...</p>
                       <p className='text-2xl font-mono text-red-500'>{formatTime(recordingTime)}</p>
                     </div>
                     <Button onClick={stopRecording} variant='destructive'>
-                      <Pause className='w-4 h-4 mr-2' />
+                      <Pause className='size-4 mr-2' />
                       Stop Recording
                     </Button>
                   </div>
                 ) : (
                   <div className='space-y-4'>
-                    <div className='w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto'>
-                      <Mic className='w-8 h-8 text-primary' />
+                    <div className='size-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto'>
+                      <Mic className='size-8 text-primary' />
                     </div>
                     <Button onClick={startRecording} disabled={isProcessing}>
-                      <Mic className='w-4 h-4 mr-2' />
+                      <Mic className='size-4 mr-2' />
                       Start Recording
                     </Button>
                   </div>
@@ -314,12 +314,12 @@ ${
             <CardContent>
               <div className='space-y-4'>
                 <div className='border-2 border-dashed border-border rounded-lg p-8 text-center'>
-                  <Upload className='w-8 h-8 mx-auto mb-4 text-muted-foreground' />
+                  <Upload className='size-8 mx-auto mb-4 text-muted-foreground' />
                   <p className='text-sm text-muted-foreground mb-4'>
                     Drag and drop an audio file, or click to browse
                   </p>
                   <Button onClick={() => fileInputRef.current?.click()} disabled={isProcessing}>
-                    <Upload className='w-4 h-4 mr-2' />
+                    <Upload className='size-4 mr-2' />
                     Choose File
                   </Button>
                   <input
@@ -388,19 +388,19 @@ ${
             <CardContent>
               <div className='space-y-2'>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Real-time transcription</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Multi-language support</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Confidence scoring</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Timestamp segments</span>
                 </div>
               </div>
@@ -422,7 +422,7 @@ ${
                 <div key={transcription.id} className='border rounded-lg p-4 space-y-3'>
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center gap-3'>
-                      <FileAudio className='w-5 h-5 text-muted-foreground' />
+                      <FileAudio className='size-5 text-muted-foreground' />
                       <div>
                         <h3 className='font-medium text-sm'>{transcription.fileName}</h3>
                         <div className='flex items-center gap-2 text-xs text-muted-foreground'>
@@ -431,7 +431,7 @@ ${
                             <>
                               <span>•</span>
                               <span className='flex items-center gap-1'>
-                                <Clock className='w-3 h-3' />
+                                <Clock className='size-3' />
                                 {Math.round(transcription.duration)}s
                               </span>
                             </>
@@ -448,20 +448,20 @@ ${
 
                     <div className='flex items-center gap-2'>
                       {transcription.status === 'processing' ? (
-                        <Loader2 className='w-4 h-4 animate-spin' />
+                        <Loader2 className='size-4 animate-spin' />
                       ) : transcription.status === 'completed' ? (
                         <>
                           <Button
                             variant='outline'
                             size='sm'
                             onClick={() => copyTranscript(transcription.transcript)}>
-                            <Copy className='w-4 h-4' />
+                            <Copy className='size-4' />
                           </Button>
                           <Button
                             variant='outline'
                             size='sm'
                             onClick={() => downloadTranscription(transcription)}>
-                            <Download className='w-4 h-4' />
+                            <Download className='size-4' />
                           </Button>
                         </>
                       ) : (
@@ -479,7 +479,7 @@ ${
                   {transcription.status === 'processing' && (
                     <div className='bg-muted/50 rounded-lg p-3 flex items-center justify-center'>
                       <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                        <Loader2 className='w-4 h-4 animate-spin' />
+                        <Loader2 className='size-4 animate-spin' />
                         <span>Processing audio...</span>
                       </div>
                     </div>

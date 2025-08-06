@@ -14,7 +14,7 @@ export default function AnomaliesPage() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <AlertTriangle className='w-5 h-5' />
+              <AlertTriangle className='size-5' />
               Detect Anomalies
             </CardTitle>
             <CardDescription>Upload your data to identify unusual patterns and outliers</CardDescription>
@@ -41,7 +41,7 @@ export default function AnomaliesPage() {
                 </div>
               </div>
               <Button className='w-full'>
-                <Upload className='w-4 h-4 mr-2' />
+                <Upload className='size-4 mr-2' />
                 Upload Data & Detect
               </Button>
             </div>
@@ -51,14 +51,14 @@ export default function AnomaliesPage() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <Activity className='w-5 h-5' />
+              <Activity className='size-5' />
               Recent Detections
             </CardTitle>
             <CardDescription>Previously detected anomalies in your data</CardDescription>
           </CardHeader>
           <CardContent>
             <div className='text-center py-8 text-muted-foreground'>
-              <Activity className='w-12 h-12 mx-auto mb-4 opacity-50' />
+              <Activity className='size-12 mx-auto mb-4 opacity-50' />
               <p>No anomalies detected</p>
               <p className='text-sm'>Upload data to start anomaly detection</p>
             </div>
@@ -68,14 +68,14 @@ export default function AnomaliesPage() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <Shield className='w-5 h-5' />
+              <Shield className='size-5' />
               Monitoring Rules
             </CardTitle>
             <CardDescription>Set up automated monitoring for your data</CardDescription>
           </CardHeader>
           <CardContent>
             <div className='text-center py-8 text-muted-foreground'>
-              <Shield className='w-12 h-12 mx-auto mb-4 opacity-50' />
+              <Shield className='size-12 mx-auto mb-4 opacity-50' />
               <p>No monitoring rules configured</p>
               <p className='text-sm'>Create rules to automatically detect anomalies</p>
             </div>

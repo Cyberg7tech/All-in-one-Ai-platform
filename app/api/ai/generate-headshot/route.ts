@@ -12,7 +12,6 @@ export async function POST(request: NextRequest) {
       age_range,
       industry,
       mood = 'confident',
-      userId,
     } = body;
 
     if (!prompt || typeof prompt !== 'string') {

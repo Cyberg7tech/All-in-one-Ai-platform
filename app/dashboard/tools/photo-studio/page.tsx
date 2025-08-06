@@ -180,7 +180,7 @@ export default function PhotoStudioPage() {
       <div className='flex items-center justify-between'>
         <div>
           <h1 className='text-3xl font-bold flex items-center gap-2'>
-            <Camera className='w-8 h-8' />
+            <Camera className='size-8' />
             AI Photo Studio
           </h1>
           <p className='text-muted-foreground mt-1'>
@@ -218,13 +218,13 @@ export default function PhotoStudioPage() {
                   </div>
                 ) : (
                   <div className='border-2 border-dashed border-border rounded-lg p-12 text-center'>
-                    <Upload className='w-12 h-12 mx-auto mb-4 text-muted-foreground' />
+                    <Upload className='size-12 mx-auto mb-4 text-muted-foreground' />
                     <p className='text-lg font-medium mb-2'>Upload your photo</p>
                     <p className='text-sm text-muted-foreground mb-4'>
                       Drag and drop a photo, or click to browse
                     </p>
                     <Button onClick={() => fileInputRef.current?.click()} disabled={isProcessing} size='lg'>
-                      <Upload className='w-4 h-4 mr-2' />
+                      <Upload className='size-4 mr-2' />
                       Choose Photo
                     </Button>
                     <input
@@ -381,12 +381,12 @@ export default function PhotoStudioPage() {
                   size='lg'>
                   {isProcessing ? (
                     <>
-                      <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                      <Loader2 className='size-4 mr-2 animate-spin' />
                       Enhancing Photo...
                     </>
                   ) : (
                     <>
-                      <Sparkles className='w-4 h-4 mr-2' />
+                      <Sparkles className='size-4 mr-2' />
                       Enhance Photo
                     </>
                   )}
@@ -437,27 +437,27 @@ export default function PhotoStudioPage() {
             <CardContent>
               <div className='space-y-2'>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>AI auto-enhancement</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Professional filters</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Manual adjustments</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Noise reduction</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Color correction</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>High-resolution output</span>
                 </div>
               </div>
@@ -504,7 +504,7 @@ export default function PhotoStudioPage() {
                   {edit.status === 'processing' && (
                     <div className='aspect-square bg-muted rounded-lg flex items-center justify-center'>
                       <div className='text-center'>
-                        <Loader2 className='w-8 h-8 animate-spin mx-auto mb-2' />
+                        <Loader2 className='size-8 animate-spin mx-auto mb-2' />
                         <p className='text-sm text-muted-foreground'>Enhancing...</p>
                       </div>
                     </div>
@@ -548,11 +548,11 @@ export default function PhotoStudioPage() {
 
                       <div className='flex gap-2'>
                         <Button variant='outline' size='sm' className='flex-1'>
-                          <Download className='w-4 h-4 mr-1' />
+                          <Download className='size-4 mr-1' />
                           Download
                         </Button>
                         <Button variant='outline' size='sm' className='flex-1'>
-                          <ImageIcon className='w-4 h-4 mr-1' />
+                          <ImageIcon className='size-4 mr-1' />
                           Save
                         </Button>
                       </div>

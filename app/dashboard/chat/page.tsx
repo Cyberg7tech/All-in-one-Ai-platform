@@ -704,7 +704,7 @@ export default function ChatPage() {
         {/* Header */}
         <div className='p-4 border-b'>
           <Button onClick={createNewSession} className='w-full'>
-            <Plus className='w-4 h-4 mr-2' />
+            <Plus className='size-4 mr-2' />
             New Chat
           </Button>
         </div>
@@ -716,9 +716,9 @@ export default function ChatPage() {
               variant={showModelPicker ? 'default' : 'outline'}
               onClick={() => setShowModelPicker(!showModelPicker)}
               className='flex items-center space-x-2'>
-              <Brain className='w-4 h-4' />
+              <Brain className='size-4' />
               <span>{availableModels.find((m) => m.id === selectedModel)?.name || selectedModel}</span>
-              <ChevronDown className='w-4 h-4' />
+              <ChevronDown className='size-4' />
             </Button>
 
             {showModelPicker && (
@@ -791,12 +791,12 @@ export default function ChatPage() {
             <h3 className='text-sm font-medium text-muted-foreground mb-2 px-2'>Recent Chats</h3>
             {isLoadingSessions ? (
               <div className='flex justify-center items-center h-full'>
-                <div className='w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin'></div>
+                <div className='size-8 border-4 border-primary border-t-transparent rounded-full animate-spin'></div>
               </div>
             ) : sessions.length === 0 ? (
               <div className='flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto text-center'>
-                <div className='w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4'>
-                  <Bot className='w-8 h-8 text-primary' />
+                <div className='size-16 bg-primary/10 rounded-full flex items-center justify-center mb-4'>
+                  <Bot className='size-8 text-primary' />
                 </div>
                 <h2 className='text-2xl font-bold mb-2'>No recent chats</h2>
                 <p className='text-muted-foreground mb-8'>Start a new conversation to begin</p>
@@ -849,7 +849,7 @@ export default function ChatPage() {
                 <div className='flex items-center space-x-2'>
                   <Badge>{selectedModelInfo?.provider}</Badge>
                   <Button variant='ghost' size='sm'>
-                    <Settings className='w-4 h-4' />
+                    <Settings className='size-4' />
                   </Button>
                 </div>
               </div>
@@ -859,8 +859,8 @@ export default function ChatPage() {
             <div className='flex-1 overflow-y-auto p-4 space-y-4'>
               {currentSession.messages.length === 0 ? (
                 <div className='flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto text-center'>
-                  <div className='w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4'>
-                    <Bot className='w-8 h-8 text-primary' />
+                  <div className='size-16 bg-primary/10 rounded-full flex items-center justify-center mb-4'>
+                    <Bot className='size-8 text-primary' />
                   </div>
                   <h2 className='text-2xl font-bold mb-2'>How can I help you today?</h2>
                   <p className='text-muted-foreground mb-8'>
@@ -899,14 +899,10 @@ export default function ChatPage() {
                           <div
                             className={`flex items-start space-x-3 ${msg.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
                             <div
-                              className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                              className={`size-8 rounded-full flex items-center justify-center ${
                                 msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
                               }`}>
-                              {msg.role === 'user' ? (
-                                <User className='w-4 h-4' />
-                              ) : (
-                                <Bot className='w-4 h-4' />
-                              )}
+                              {msg.role === 'user' ? <User className='size-4' /> : <Bot className='size-4' />}
                             </div>
                             <div
                               className={`rounded-lg px-4 py-2 text-sm whitespace-pre-line ${
@@ -934,17 +930,17 @@ export default function ChatPage() {
                   {isLoading && (
                     <div className='flex justify-start'>
                       <div className='flex items-start space-x-3'>
-                        <div className='w-8 h-8 rounded-full bg-muted flex items-center justify-center'>
-                          <Bot className='w-4 h-4' />
+                        <div className='size-8 rounded-full bg-muted flex items-center justify-center'>
+                          <Bot className='size-4' />
                         </div>
                         <div className='bg-muted px-4 py-3 rounded-lg'>
                           <div className='flex space-x-1'>
-                            <div className='w-2 h-2 bg-muted-foreground rounded-full animate-bounce'></div>
+                            <div className='size-2 bg-muted-foreground rounded-full animate-bounce'></div>
                             <div
-                              className='w-2 h-2 bg-muted-foreground rounded-full animate-bounce'
+                              className='size-2 bg-muted-foreground rounded-full animate-bounce'
                               style={{ animationDelay: '0.1s' }}></div>
                             <div
-                              className='w-2 h-2 bg-muted-foreground rounded-full animate-bounce'
+                              className='size-2 bg-muted-foreground rounded-full animate-bounce'
                               style={{ animationDelay: '0.2s' }}></div>
                           </div>
                         </div>
@@ -979,7 +975,7 @@ export default function ChatPage() {
                           className='h-8 w-8 p-0'
                           onClick={() => imageInputRef.current?.click()}
                           title='Upload Image'>
-                          <ImageIcon className='w-4 h-4' />
+                          <ImageIcon className='size-4' />
                         </Button>
 
                         {/* File Upload Button */}
@@ -989,7 +985,7 @@ export default function ChatPage() {
                           className='h-8 w-8 p-0'
                           onClick={() => fileInputRef.current?.click()}
                           title='Upload File'>
-                          <FileText className='w-4 h-4' />
+                          <FileText className='size-4' />
                         </Button>
 
                         {/* Voice Recording Button */}
@@ -999,13 +995,13 @@ export default function ChatPage() {
                           className={`h-8 w-8 p-0 ${isRecording ? 'text-red-500 animate-pulse' : ''}`}
                           onClick={isRecording ? stopRecording : startRecording}
                           title={isRecording ? `Recording ${formatTime(recordingTime)}` : 'Voice Recording'}>
-                          {isRecording ? <Square className='w-4 h-4' /> : <Mic className='w-4 h-4' />}
+                          {isRecording ? <Square className='size-4' /> : <Mic className='size-4' />}
                         </Button>
                       </div>
                     </div>
                   </div>
                   <Button onClick={sendMessage} disabled={!message.trim() || isLoading} className='h-11'>
-                    <Send className='w-4 h-4' />
+                    <Send className='size-4' />
                   </Button>
                 </div>
 
@@ -1029,7 +1025,7 @@ export default function ChatPage() {
         ) : (
           <div className='flex-1 flex items-center justify-center'>
             <div className='text-center'>
-              <Bot className='w-16 h-16 text-muted-foreground mx-auto mb-4' />
+              <Bot className='size-16 text-muted-foreground mx-auto mb-4' />
               <h2 className='text-xl font-semibold mb-2'>Select a chat to continue</h2>
               <p className='text-muted-foreground'>Or start a new conversation</p>
             </div>

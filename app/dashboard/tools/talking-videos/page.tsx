@@ -255,7 +255,7 @@ export default function TalkingVideosPage() {
       <div className='flex items-center justify-between'>
         <div>
           <h1 className='text-3xl font-bold flex items-center gap-2'>
-            <User className='w-8 h-8' />
+            <User className='size-8' />
             AI Talking Videos
           </h1>
           <p className='text-muted-foreground mt-1'>
@@ -263,7 +263,7 @@ export default function TalkingVideosPage() {
           </p>
         </div>
         <Badge variant='secondary' className='px-3 py-1'>
-          <Video className='w-4 h-4 mr-1' />
+          <Video className='size-4 mr-1' />
           New
         </Badge>
       </div>
@@ -315,7 +315,7 @@ export default function TalkingVideosPage() {
                     }`}
                     onClick={() => setSelectedAvatar(avatar)}>
                     <div className='aspect-square bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg mb-2 flex items-center justify-center'>
-                      <User className='w-8 h-8 text-blue-600' />
+                      <User className='size-8 text-blue-600' />
                     </div>
                     <div className='text-center'>
                       <h3 className='font-medium text-sm'>{avatar.name}</h3>
@@ -325,8 +325,8 @@ export default function TalkingVideosPage() {
                       </Badge>
                     </div>
                     {selectedAvatar?.id === avatar.id && (
-                      <div className='absolute top-2 right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center'>
-                        <div className='w-2 h-2 bg-white rounded-full'></div>
+                      <div className='absolute top-2 right-2 size-6 bg-primary rounded-full flex items-center justify-center'>
+                        <div className='size-2 bg-white rounded-full'></div>
                       </div>
                     )}
                   </div>
@@ -357,7 +357,7 @@ export default function TalkingVideosPage() {
                             <Badge variant='outline' className='text-xs'>
                               {voice.accent}
                             </Badge>
-                            <Mic className='w-3 h-3' />
+                            <Mic className='size-3' />
                           </div>
                         </div>
                       </SelectItem>
@@ -372,12 +372,12 @@ export default function TalkingVideosPage() {
                 className='w-full mt-4'>
                 {isGenerating ? (
                   <>
-                    <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                    <Loader2 className='size-4 mr-2 animate-spin' />
                     Generating Video...
                   </>
                 ) : (
                   <>
-                    <Play className='w-4 h-4 mr-2' />
+                    <Play className='size-4 mr-2' />
                     Generate Talking Video
                   </>
                 )}
@@ -396,7 +396,7 @@ export default function TalkingVideosPage() {
               {selectedAvatar ? (
                 <div className='space-y-3'>
                   <div className='aspect-video bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center'>
-                    <User className='w-12 h-12 text-blue-600' />
+                    <User className='size-12 text-blue-600' />
                   </div>
                   <div className='text-center'>
                     <h3 className='font-medium'>{selectedAvatar.name}</h3>
@@ -420,7 +420,7 @@ export default function TalkingVideosPage() {
               ) : (
                 <div className='aspect-video bg-muted rounded-lg flex items-center justify-center'>
                   <div className='text-center'>
-                    <User className='w-8 h-8 text-muted-foreground mx-auto mb-2' />
+                    <User className='size-8 text-muted-foreground mx-auto mb-2' />
                     <p className='text-sm text-muted-foreground'>Select an avatar to preview</p>
                   </div>
                 </div>
@@ -459,7 +459,7 @@ export default function TalkingVideosPage() {
                   <div className='aspect-video bg-muted rounded-lg flex items-center justify-center'>
                     {video.status === 'generating' ? (
                       <div className='text-center'>
-                        <Loader2 className='w-8 h-8 animate-spin mx-auto mb-2' />
+                        <Loader2 className='size-8 animate-spin mx-auto mb-2' />
                         <p className='text-sm text-muted-foreground'>Generating...</p>
                       </div>
                     ) : video.status === 'completed' ? (
@@ -471,7 +471,7 @@ export default function TalkingVideosPage() {
                       </video>
                     ) : (
                       <div className='text-center'>
-                        <User className='w-8 h-8 mx-auto mb-2 text-muted-foreground' />
+                        <User className='size-8 mx-auto mb-2 text-muted-foreground' />
                         <p className='text-sm text-red-500'>Generation failed</p>
                       </div>
                     )}
@@ -493,13 +493,13 @@ export default function TalkingVideosPage() {
                           size='sm'
                           className='w-full'
                           onClick={() => downloadVideo(video.videoUrl, video.script)}>
-                          <Download className='w-4 h-4 mr-2' />
+                          <Download className='size-4 mr-2' />
                           Download
                         </Button>
                       ) : (
                         <div className='text-center'>
                           <Button variant='outline' size='sm' className='w-full' disabled>
-                            <Download className='w-4 h-4 mr-2' />
+                            <Download className='size-4 mr-2' />
                             Demo Mode - No Download
                           </Button>
                           <p className='text-xs text-muted-foreground mt-1'>

@@ -225,7 +225,7 @@ export default function DashboardPage() {
             <h2 className='text-2xl font-semibold'>Quick Actions</h2>
             <Button variant='ghost' size='sm' asChild>
               <Link href='/dashboard/explore'>
-                View All <ArrowRight className='w-4 h-4 ml-2' />
+                View All <ArrowRight className='size-4 ml-2' />
               </Link>
             </Button>
           </div>
@@ -237,7 +237,7 @@ export default function DashboardPage() {
                   <div className='flex items-center space-x-3'>
                     <div
                       className={`p-2 rounded-lg bg-background ${action.color} group-hover:scale-110 transition-transform`}>
-                      <action.icon className='w-5 h-5' />
+                      <action.icon className='size-5' />
                     </div>
                     <CardTitle className='text-lg'>{action.title}</CardTitle>
                   </div>
@@ -264,7 +264,7 @@ export default function DashboardPage() {
                     <p className='text-sm text-muted-foreground uppercase tracking-wide'>AI Agents</p>
                     <p className='text-2xl font-bold text-primary'>{stats?.aiAgents || 0}</p>
                   </div>
-                  <Bot className='w-8 h-8 text-muted-foreground' />
+                  <Bot className='size-8 text-muted-foreground' />
                 </div>
               </CardContent>
             </Card>
@@ -278,7 +278,7 @@ export default function DashboardPage() {
                       {stats?.apiCalls?.toLocaleString() || 0}
                     </p>
                   </div>
-                  <Brain className='w-8 h-8 text-muted-foreground' />
+                  <Brain className='size-8 text-muted-foreground' />
                 </div>
               </CardContent>
             </Card>
@@ -290,7 +290,7 @@ export default function DashboardPage() {
                     <p className='text-sm text-muted-foreground uppercase tracking-wide'>Forecasts</p>
                     <p className='text-2xl font-bold text-primary'>{stats?.forecasts || 0}</p>
                   </div>
-                  <TrendingUp className='w-8 h-8 text-muted-foreground' />
+                  <TrendingUp className='size-8 text-muted-foreground' />
                 </div>
               </CardContent>
             </Card>
@@ -302,7 +302,7 @@ export default function DashboardPage() {
                     <p className='text-sm text-muted-foreground uppercase tracking-wide'>Alerts</p>
                     <p className='text-2xl font-bold text-primary'>{stats?.alerts || 0}</p>
                   </div>
-                  <Shield className='w-8 h-8 text-muted-foreground' />
+                  <Shield className='size-8 text-muted-foreground' />
                 </div>
               </CardContent>
             </Card>
@@ -315,7 +315,7 @@ export default function DashboardPage() {
             <h2 className='text-2xl font-semibold'>Recent Activity</h2>
             <Button variant='ghost' size='sm' asChild>
               <Link href='/dashboard/activity'>
-                View All <ArrowRight className='w-4 h-4 ml-2' />
+                View All <ArrowRight className='size-4 ml-2' />
               </Link>
             </Button>
           </div>

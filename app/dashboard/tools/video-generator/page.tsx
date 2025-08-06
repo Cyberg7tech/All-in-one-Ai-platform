@@ -127,7 +127,7 @@ export default function VideoGeneratorPage() {
       <div className='flex items-center justify-between'>
         <div>
           <h1 className='text-3xl font-bold flex items-center gap-2'>
-            <Video className='w-8 h-8' />
+            <Video className='size-8' />
             AI Video Generator
           </h1>
           <p className='text-muted-foreground mt-1'>
@@ -135,7 +135,7 @@ export default function VideoGeneratorPage() {
           </p>
         </div>
         <Badge variant='secondary' className='px-3 py-1'>
-          <Wand2 className='w-4 h-4 mr-1' />
+          <Wand2 className='size-4 mr-1' />
           New
         </Badge>
       </div>
@@ -240,12 +240,12 @@ export default function VideoGeneratorPage() {
               <Button onClick={handleGenerate} disabled={!prompt.trim() || isGenerating} className='w-full'>
                 {isGenerating ? (
                   <>
-                    <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                    <Loader2 className='size-4 mr-2 animate-spin' />
                     Generating Video...
                   </>
                 ) : (
                   <>
-                    <Play className='w-4 h-4 mr-2' />
+                    <Play className='size-4 mr-2' />
                     Generate Video
                   </>
                 )}
@@ -259,7 +259,7 @@ export default function VideoGeneratorPage() {
           <Card>
             <CardHeader>
               <CardTitle className='flex items-center gap-2'>
-                <Settings className='w-5 h-5' />
+                <Settings className='size-5' />
                 Quick Settings
               </CardTitle>
             </CardHeader>
@@ -316,7 +316,7 @@ export default function VideoGeneratorPage() {
                   <div className='aspect-video bg-muted rounded-lg flex items-center justify-center'>
                     {video.status === 'generating' ? (
                       <div className='text-center'>
-                        <Loader2 className='w-8 h-8 animate-spin mx-auto mb-2' />
+                        <Loader2 className='size-8 animate-spin mx-auto mb-2' />
                         <p className='text-sm text-muted-foreground'>Generating...</p>
                       </div>
                     ) : video.status === 'completed' ? (
@@ -328,7 +328,7 @@ export default function VideoGeneratorPage() {
                       </video>
                     ) : (
                       <div className='text-center'>
-                        <Video className='w-8 h-8 mx-auto mb-2 text-muted-foreground' />
+                        <Video className='size-8 mx-auto mb-2 text-muted-foreground' />
                         <p className='text-sm text-red-500'>Generation failed</p>
                       </div>
                     )}
@@ -338,7 +338,7 @@ export default function VideoGeneratorPage() {
                     <p className='font-medium text-sm truncate'>{video.prompt}</p>
                     <div className='flex items-center justify-between mt-2 text-xs text-muted-foreground'>
                       <span className='flex items-center gap-1'>
-                        <Clock className='w-3 h-3' />
+                        <Clock className='size-3' />
                         {video.duration}s
                       </span>
                       <span className='capitalize'>{video.style}</span>
@@ -353,13 +353,13 @@ export default function VideoGeneratorPage() {
                           size='sm'
                           className='w-full'
                           onClick={() => downloadVideo(video.videoUrl, video.prompt)}>
-                          <Download className='w-4 h-4 mr-2' />
+                          <Download className='size-4 mr-2' />
                           Download
                         </Button>
                       ) : (
                         <div className='text-center'>
                           <Button variant='outline' size='sm' className='w-full' disabled>
-                            <Download className='w-4 h-4 mr-2' />
+                            <Download className='size-4 mr-2' />
                             Demo Mode - No Download
                           </Button>
                           <p className='text-xs text-muted-foreground mt-1'>

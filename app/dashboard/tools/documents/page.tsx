@@ -255,13 +255,13 @@ export default function DocumentProcessingPage() {
       <div className='flex items-center mb-6'>
         <Button variant='ghost' asChild className='mr-4'>
           <Link href='/dashboard/explore'>
-            <ArrowLeft className='w-4 h-4 mr-2' />
+            <ArrowLeft className='size-4 mr-2' />
             Back to Explore
           </Link>
         </Button>
         <div>
           <h1 className='text-3xl font-bold flex items-center'>
-            <FileText className='w-8 h-8 mr-3 text-primary' />
+            <FileText className='size-8 mr-3 text-primary' />
             Document Processing
           </h1>
           <p className='text-muted-foreground'>Upload and analyze documents with AI-powered insights</p>
@@ -273,20 +273,20 @@ export default function DocumentProcessingPage() {
         <Button
           variant={activeTab === 'upload' ? 'default' : 'outline'}
           onClick={() => setActiveTab('upload')}>
-          <Upload className='w-4 h-4 mr-2' />
+          <Upload className='size-4 mr-2' />
           Upload
         </Button>
         <Button
           variant={activeTab === 'documents' ? 'default' : 'outline'}
           onClick={() => setActiveTab('documents')}>
-          <FileText className='w-4 h-4 mr-2' />
+          <FileText className='size-4 mr-2' />
           Documents ({documents.length})
         </Button>
         {selectedDocument && (
           <Button
             variant={activeTab === 'viewer' ? 'default' : 'outline'}
             onClick={() => setActiveTab('viewer')}>
-            <Eye className='w-4 h-4 mr-2' />
+            <Eye className='size-4 mr-2' />
             Viewer
           </Button>
         )}
@@ -303,7 +303,7 @@ export default function DocumentProcessingPage() {
               </CardHeader>
               <CardContent className='space-y-6'>
                 <div className='border-2 border-dashed border-border rounded-lg p-8 text-center'>
-                  <Upload className='w-16 h-16 text-muted-foreground mx-auto mb-4' />
+                  <Upload className='size-16 text-muted-foreground mx-auto mb-4' />
                   <h3 className='text-xl font-semibold mb-2'>Drop your documents here</h3>
                   <p className='text-muted-foreground mb-4'>Or click to browse and select files</p>
                   <input
@@ -325,7 +325,7 @@ export default function DocumentProcessingPage() {
                   <div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
                     {SUPPORTED_FORMATS.map((format) => (
                       <div key={format.ext} className='flex items-center space-x-2 p-2 border rounded'>
-                        <FileText className='w-4 h-4 text-primary' />
+                        <FileText className='size-4 text-primary' />
                         <div>
                           <p className='font-medium text-sm'>{format.ext}</p>
                           <p className='text-xs text-muted-foreground'>{format.description}</p>
@@ -356,7 +356,7 @@ export default function DocumentProcessingPage() {
                     />
                     <div className='flex-1'>
                       <div className='flex items-center space-x-2'>
-                        <feature.icon className='w-4 h-4 text-primary' />
+                        <feature.icon className='size-4 text-primary' />
                         <span className='font-medium text-sm'>{feature.name}</span>
                       </div>
                       <p className='text-xs text-muted-foreground mt-1'>{feature.description}</p>
@@ -380,7 +380,7 @@ export default function DocumentProcessingPage() {
           {/* Search and Filters */}
           <div className='flex flex-col sm:flex-row gap-4 mb-6'>
             <div className='relative flex-1'>
-              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground' />
+              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground' />
               <input
                 type='text'
                 placeholder='Search documents...'
@@ -408,7 +408,7 @@ export default function DocumentProcessingPage() {
                 <CardHeader className='pb-3'>
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center space-x-2'>
-                      <FileText className='w-5 h-5 text-primary' />
+                      <FileText className='size-5 text-primary' />
                       <CardTitle className='text-base truncate'>{doc.name}</CardTitle>
                     </div>
                     <Badge
@@ -473,19 +473,19 @@ export default function DocumentProcessingPage() {
                   <div className='flex space-x-2 pt-2'>
                     {doc.status === 'completed' && (
                       <Button size='sm' onClick={() => viewDocument(doc)} className='flex-1'>
-                        <Eye className='w-3 h-3 mr-1' />
+                        <Eye className='size-3 mr-1' />
                         View
                       </Button>
                     )}
                     <Button size='sm' variant='outline'>
-                      <Download className='w-3 h-3' />
+                      <Download className='size-3' />
                     </Button>
                     <Button
                       size='sm'
                       variant='outline'
                       className='text-red-600 hover:text-red-700'
                       onClick={() => deleteDocument(doc.id)}>
-                      <Trash2 className='w-3 h-3' />
+                      <Trash2 className='size-3' />
                     </Button>
                   </div>
                 </CardContent>
@@ -495,7 +495,7 @@ export default function DocumentProcessingPage() {
 
           {filteredDocuments.length === 0 && (
             <div className='text-center py-12'>
-              <FileText className='w-16 h-16 text-muted-foreground mx-auto mb-4' />
+              <FileText className='size-16 text-muted-foreground mx-auto mb-4' />
               <h3 className='text-lg font-semibold mb-2'>No documents found</h3>
               <p className='text-muted-foreground mb-4'>
                 {searchTerm || filterStatus !== 'all'
@@ -503,7 +503,7 @@ export default function DocumentProcessingPage() {
                   : 'Upload your first document to get started'}
               </p>
               <Button onClick={() => setActiveTab('upload')}>
-                <Upload className='w-4 h-4 mr-2' />
+                <Upload className='size-4 mr-2' />
                 Upload Documents
               </Button>
             </div>
@@ -521,11 +521,11 @@ export default function DocumentProcessingPage() {
                   <span>{selectedDocument.name}</span>
                   <div className='flex space-x-2'>
                     <Button size='sm' variant='outline'>
-                      <Download className='w-4 h-4 mr-2' />
+                      <Download className='size-4 mr-2' />
                       Download
                     </Button>
                     <Button size='sm' variant='outline'>
-                      <Bot className='w-4 h-4 mr-2' />
+                      <Bot className='size-4 mr-2' />
                       Chat with Document
                     </Button>
                   </div>

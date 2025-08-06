@@ -44,7 +44,7 @@ export default function SignupPage() {
     <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/20 p-4'>
       <Card className='w-full max-w-md mx-auto'>
         <CardHeader className='text-center'>
-          <div className='w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center mx-auto mb-4'>
+          <div className='size-12 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center mx-auto mb-4'>
             <AIIcon size={28} className='text-primary-foreground' />
           </div>
           <CardTitle className='text-2xl'>Create Your Account</CardTitle>

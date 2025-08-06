@@ -210,11 +210,11 @@ export default function AnalyticsPage() {
                   <div className='flex items-center mt-2'>
                     {metric.trend === 'up' ? (
                       <TrendingUp
-                        className={`w-4 h-4 mr-1 ${metric.change > 0 ? 'text-green-500' : 'text-red-500'}`}
+                        className={`size-4 mr-1 ${metric.change > 0 ? 'text-green-500' : 'text-red-500'}`}
                       />
                     ) : (
                       <TrendingDown
-                        className={`w-4 h-4 mr-1 ${metric.change > 0 ? 'text-red-500' : 'text-green-500'}`}
+                        className={`size-4 mr-1 ${metric.change > 0 ? 'text-red-500' : 'text-green-500'}`}
                       />
                     )}
                     <span className={`text-sm ${metric.change > 0 ? 'text-green-500' : 'text-red-500'}`}>
@@ -224,7 +224,7 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
                 <div className='p-3 rounded-lg bg-primary/10'>
-                  <metric.icon className='w-6 h-6 text-primary' />
+                  <metric.icon className='size-6 text-primary' />
                 </div>
               </div>
               <p className='text-xs text-muted-foreground mt-3'>{metric.description}</p>
@@ -270,7 +270,7 @@ export default function AnalyticsPage() {
               {modelUsage.map((model, index) => (
                 <div key={index} className='flex items-center justify-between'>
                   <div className='flex items-center space-x-3'>
-                    <div className='w-4 h-4 rounded-full' style={{ backgroundColor: model.fill }}></div>
+                    <div className='size-4 rounded-full' style={{ backgroundColor: model.fill }}></div>
                     <span className='font-medium'>{model.name}</span>
                   </div>
                   <div className='flex items-center space-x-2'>
@@ -348,19 +348,19 @@ export default function AnalyticsPage() {
           <CardContent>
             <div className='space-y-3'>
               <Button variant='outline' className='w-full justify-start'>
-                <TrendingUp className='w-4 h-4 mr-2' />
+                <TrendingUp className='size-4 mr-2' />
                 Export Usage Report
               </Button>
               <Button variant='outline' className='w-full justify-start'>
-                <AlertTriangle className='w-4 h-4 mr-2' />
+                <AlertTriangle className='size-4 mr-2' />
                 View Error Logs
               </Button>
               <Button variant='outline' className='w-full justify-start'>
-                <DollarSign className='w-4 h-4 mr-2' />
+                <DollarSign className='size-4 mr-2' />
                 Cost Breakdown
               </Button>
               <Button variant='outline' className='w-full justify-start'>
-                <Users className='w-4 h-4 mr-2' />
+                <Users className='size-4 mr-2' />
                 User Activity
               </Button>
             </div>
@@ -373,7 +373,7 @@ export default function AnalyticsPage() {
         <Card className='mt-6 border-yellow-200 bg-yellow-50'>
           <CardContent className='p-4'>
             <div className='flex items-center space-x-3'>
-              <AlertTriangle className='w-5 h-5 text-yellow-600' />
+              <AlertTriangle className='size-5 text-yellow-600' />
               <div>
                 <h4 className='font-medium text-yellow-800'>Usage Alert</h4>
                 <p className='text-sm text-yellow-700'>

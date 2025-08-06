@@ -162,7 +162,7 @@ export default function InteriorDesignPage() {
       <div className='flex items-center justify-between'>
         <div>
           <h1 className='text-3xl font-bold flex items-center gap-2'>
-            <PaintBucket className='w-8 h-8' />
+            <PaintBucket className='size-8' />
             AI Interior Designer
           </h1>
           <p className='text-muted-foreground mt-1'>
@@ -283,12 +283,12 @@ export default function InteriorDesignPage() {
                   </div>
                 ) : (
                   <div className='border-2 border-dashed border-border rounded-lg p-8 text-center'>
-                    <Upload className='w-8 h-8 mx-auto mb-4 text-muted-foreground' />
+                    <Upload className='size-8 mx-auto mb-4 text-muted-foreground' />
                     <p className='text-sm text-muted-foreground mb-4'>
                       Drag and drop a room photo, or click to browse
                     </p>
                     <Button onClick={() => fileInputRef.current?.click()} disabled={isGenerating}>
-                      <Upload className='w-4 h-4 mr-2' />
+                      <Upload className='size-4 mr-2' />
                       Choose Photo
                     </Button>
                     <input
@@ -314,12 +314,12 @@ export default function InteriorDesignPage() {
             size='lg'>
             {isGenerating ? (
               <>
-                <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                <Loader2 className='size-4 mr-2 animate-spin' />
                 Generating Design...
               </>
             ) : (
               <>
-                <Wand2 className='w-4 h-4 mr-2' />
+                <Wand2 className='size-4 mr-2' />
                 Generate Interior Design
               </>
             )}
@@ -357,23 +357,23 @@ export default function InteriorDesignPage() {
             <CardContent>
               <div className='space-y-2'>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>AI-powered suggestions</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Color palette recommendations</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Furniture placement ideas</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Lighting recommendations</span>
                 </div>
                 <div className='flex items-center gap-2 text-sm'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='size-2 bg-green-500 rounded-full'></div>
                   <span>Style-specific suggestions</span>
                 </div>
               </div>
@@ -423,7 +423,7 @@ export default function InteriorDesignPage() {
                   {project.status === 'generating' && (
                     <div className='flex items-center justify-center py-8'>
                       <div className='text-center'>
-                        <Loader2 className='w-8 h-8 animate-spin mx-auto mb-2' />
+                        <Loader2 className='size-8 animate-spin mx-auto mb-2' />
                         <p className='text-sm text-muted-foreground'>Creating your design...</p>
                       </div>
                     </div>
@@ -436,7 +436,7 @@ export default function InteriorDesignPage() {
                         {project.originalImageUrl && (
                           <div>
                             <h4 className='font-medium text-sm mb-2 flex items-center gap-2'>
-                              <Eye className='w-4 h-4' />
+                              <Eye className='size-4' />
                               Current Room
                             </h4>
                             <Image
@@ -450,7 +450,7 @@ export default function InteriorDesignPage() {
                         )}
                         <div>
                           <h4 className='font-medium text-sm mb-2 flex items-center gap-2'>
-                            <Wand2 className='w-4 h-4' />
+                            <Wand2 className='size-4' />
                             AI Design Suggestion
                           </h4>
                           <Image
@@ -467,14 +467,14 @@ export default function InteriorDesignPage() {
                       {project.colorPalette.length > 0 && (
                         <div>
                           <h4 className='font-medium text-sm mb-2 flex items-center gap-2'>
-                            <Palette className='w-4 h-4' />
+                            <Palette className='size-4' />
                             Recommended Color Palette
                           </h4>
                           <div className='flex gap-2'>
                             {project.colorPalette.map((color, index) => (
                               <div
                                 key={index}
-                                className='w-8 h-8 rounded-full border-2 border-white shadow-md'
+                                className='size-8 rounded-full border-2 border-white shadow-md'
                                 style={{ backgroundColor: color }}
                                 title={color}
                               />
@@ -500,11 +500,11 @@ export default function InteriorDesignPage() {
 
                       <div className='flex gap-2'>
                         <Button variant='outline' size='sm'>
-                          <Download className='w-4 h-4 mr-2' />
+                          <Download className='size-4 mr-2' />
                           Download Design
                         </Button>
                         <Button variant='outline' size='sm'>
-                          <ImageIcon className='w-4 h-4 mr-2' />
+                          <ImageIcon className='size-4 mr-2' />
                           Save to Gallery
                         </Button>
                       </div>

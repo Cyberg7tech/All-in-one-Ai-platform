@@ -11,7 +11,7 @@ export default function DocsPage() {
         <div className='mb-8'>
           <Link href='/'>
             <Button variant='ghost' className='mb-4'>
-              <ArrowLeft className='w-4 h-4 mr-2' />
+              <ArrowLeft className='size-4 mr-2' />
               Back to Home
             </Button>
           </Link>
@@ -23,7 +23,7 @@ export default function DocsPage() {
         <Card className='mb-8 bg-gray-800 border-gray-700'>
           <CardHeader>
             <CardTitle className='text-white flex items-center'>
-              <Zap className='w-5 h-5 mr-2 text-blue-400' />
+              <Zap className='size-5 mr-2 text-blue-400' />
               Quick Start
             </CardTitle>
             <CardDescription className='text-gray-300'>
@@ -33,7 +33,7 @@ export default function DocsPage() {
           <CardContent>
             <div className='space-y-4'>
               <div className='flex items-start space-x-3'>
-                <div className='w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold'>
+                <div className='size-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold'>
                   1
                 </div>
                 <div>
@@ -42,7 +42,7 @@ export default function DocsPage() {
                 </div>
               </div>
               <div className='flex items-start space-x-3'>
-                <div className='w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold'>
+                <div className='size-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold'>
                   2
                 </div>
                 <div>
@@ -51,7 +51,7 @@ export default function DocsPage() {
                 </div>
               </div>
               <div className='flex items-start space-x-3'>
-                <div className='w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold'>
+                <div className='size-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold'>
                   3
                 </div>
                 <div>
@@ -68,7 +68,7 @@ export default function DocsPage() {
           <Card className='bg-gray-800 border-gray-700'>
             <CardHeader>
               <CardTitle className='text-white flex items-center'>
-                <BookOpen className='w-5 h-5 mr-2 text-green-400' />
+                <BookOpen className='size-5 mr-2 text-green-400' />
                 AI Chat
               </CardTitle>
             </CardHeader>
@@ -83,7 +83,7 @@ export default function DocsPage() {
           <Card className='bg-gray-800 border-gray-700'>
             <CardHeader>
               <CardTitle className='text-white flex items-center'>
-                <Code className='w-5 h-5 mr-2 text-purple-400' />
+                <Code className='size-5 mr-2 text-purple-400' />
                 AI Agents
               </CardTitle>
             </CardHeader>
@@ -97,7 +97,7 @@ export default function DocsPage() {
           <Card className='bg-gray-800 border-gray-700'>
             <CardHeader>
               <CardTitle className='text-white flex items-center'>
-                <Database className='w-5 h-5 mr-2 text-orange-400' />
+                <Database className='size-5 mr-2 text-orange-400' />
                 Analytics
               </CardTitle>
             </CardHeader>
@@ -113,7 +113,7 @@ export default function DocsPage() {
         <Card className='mb-8 bg-gray-800 border-gray-700'>
           <CardHeader>
             <CardTitle className='text-white flex items-center'>
-              <Globe className='w-5 h-5 mr-2 text-cyan-400' />
+              <Globe className='size-5 mr-2 text-cyan-400' />
               API Reference
             </CardTitle>
             <CardDescription className='text-gray-300'>
@@ -145,7 +145,7 @@ export default function DocsPage() {
         <Card className='bg-gray-800 border-gray-700'>
           <CardHeader>
             <CardTitle className='text-white flex items-center'>
-              <Shield className='w-5 h-5 mr-2 text-red-400' />
+              <Shield className='size-5 mr-2 text-red-400' />
               Security & Privacy
             </CardTitle>
           </CardHeader>
