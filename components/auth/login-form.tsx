@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, User, Eye, EyeOff, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
 import { useSupabaseClient } from '@/components/providers/supabase-provider';
@@ -11,10 +11,12 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { AIIcon } from '@/components/ui/ai-icon';
+import { MagicLink } from './magic-link';
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showMagicLink, setShowMagicLink] = useState(false);
 
   useEffect(() => {
     // Check if we should start in signup mode
@@ -68,6 +70,24 @@ export default function LoginForm() {
       setError('Failed to sign in with Google. Please try again.');
     }
   };
+
+  // Show Magic Link component if requested
+  if (showMagicLink) {
+    return (
+      <div className='min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
+        <div className='sm:mx-auto sm:w-full sm:max-w-md'>
+          <MagicLink 
+            onBack={() => setShowMagicLink(false)}
+            redirectTo={
+              process.env.NODE_ENV === 'production'
+                ? 'https://one-ai.sgbizsolution.com/dashboard'
+                : `${window.location.origin}/dashboard`
+            }
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
@@ -238,6 +258,20 @@ export default function LoginForm() {
                 )}
               </Button>
             </form>
+
+            {/* Magic Link Option */}
+            <div className='text-center'>
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={() => setShowMagicLink(true)}
+                className='text-primary hover:text-primary/80'
+              >
+                <Sparkles className='size-4 mr-2' />
+                Try Magic Link instead
+              </Button>
+            </div>
 
             <div className='text-center text-sm text-muted-foreground'>
               {isSignUp ? (
