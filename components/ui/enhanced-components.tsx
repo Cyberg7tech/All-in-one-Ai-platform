@@ -48,7 +48,7 @@ import {
 } from 'lucide-react';
 
 // Enhanced Input with copy functionality
-interface EnhancedInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'prefix'> {
+interface EnhancedInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'prefix' | 'onCopy'> {
   copyable?: boolean;
   showPassword?: boolean;
   onCopy?: (value: string) => void;
@@ -313,7 +313,7 @@ export function EnhancedTextarea({
       />
       {showCount && maxLength && (
         <div className='absolute bottom-2 right-2 text-xs text-muted-foreground'>
-                     {String(value).length}/{maxLength}
+          {String(value).length}/{maxLength}
         </div>
       )}
     </div>
