@@ -56,7 +56,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed successfully');
+      } else if (event === 'SIGNED_OUT') {
+        console.log('User signed out');
+      }
       setUser(getUserFromSession(session));
     });
 
@@ -76,14 +81,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = async () => {
     if (!mounted) return;
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
-    if (error || !session?.user) {
+    try {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Error refreshing session:', error);
+        // If there's an auth error, clear the user and try to refresh
+        if (error.message.includes('Invalid Refresh Token')) {
+          await supabase.auth.signOut();
+        }
+        setUser(null);
+      } else if (!session?.user) {
+        setUser(null);
+      } else {
+        setUser(getUserFromSession(session));
+      }
+    } catch (error) {
+      console.error('Error in refreshUser:', error);
       setUser(null);
-    } else {
-      setUser(getUserFromSession(session));
     }
   };
 

@@ -1,15 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Bot, Brain, TrendingUp, Shield, Sparkles, Plus, LogOut, Settings } from 'lucide-react';
+import { ArrowRight, Bot, Brain, TrendingUp, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth-context';
-import { useRouter } from 'next/navigation';
+
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { dbHelpers } from '@/lib/supabase/client';
 import { toast } from 'sonner';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { formatDate } from '@/lib/utils';
 
 // Remove metadata export since this is now a client component
@@ -46,8 +46,7 @@ const quickActions = [
 ];
 
 export default function DashboardPage() {
-  const { user, logout, refreshUser } = useAuth();
-  const router = useRouter();
+  const { user, refreshUser } = useAuth();
   const [showNameModal, setShowNameModal] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -160,16 +159,11 @@ export default function DashboardPage() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    router.push('/login');
-  };
-
   return (
     <div className='min-h-screen bg-background'>
       {/* Display Name Modal */}
       {showNameModal && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
           <div className='bg-background p-8 rounded-lg shadow-lg w-full max-w-sm'>
             <h2 className='text-xl font-bold mb-4'>Set Your Display Name</h2>
             <form onSubmit={handleSaveName} className='space-y-4'>

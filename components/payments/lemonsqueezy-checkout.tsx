@@ -1,9 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, CreditCard, Shield, Zap, Users, Database, Crown, Star } from 'lucide-react';
+import { Check, Shield, Zap, Users, Database, Crown, Star } from 'lucide-react';
 
 interface LemonSqueezyProduct {
   id: string;
@@ -72,7 +72,6 @@ const products: LemonSqueezyProduct[] = [
 interface LemonSqueezyCheckoutProps {
   userId?: string;
   userEmail?: string;
-  onSuccess?: (subscriptionId: string) => void;
   onError?: (error: string) => void;
   className?: string;
 }
@@ -80,7 +79,6 @@ interface LemonSqueezyCheckoutProps {
 export function LemonSqueezyCheckout({
   userId,
   userEmail,
-  onSuccess,
   onError,
   className = '',
 }: LemonSqueezyCheckoutProps) {
@@ -180,7 +178,7 @@ export function LemonSqueezyCheckout({
               disabled={loading === product.id || !product.lemonSqueezyVariantId}>
               {loading === product.id ? (
                 <div className='flex items-center'>
-                  <div className='w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2' />
+                  <div className='size-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2' />
                   Processing...
                 </div>
               ) : product.price === 0 ? (
@@ -245,7 +243,7 @@ export function LemonSqueezyCustomerPortal({ customerId }: { customerId: string 
     <Button onClick={handleManageSubscription} disabled={loading} variant='outline' className='w-full'>
       {loading ? (
         <div className='flex items-center'>
-          <div className='w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2' />
+          <div className='size-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2' />
           Loading...
         </div>
       ) : (

@@ -5,9 +5,9 @@ import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, CreditCard, Star, CheckCircle, AlertCircle, Calendar, DollarSign } from 'lucide-react';
+import { Loader2, CreditCard, Star, CheckCircle, AlertCircle, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SubscriptionPlan {
@@ -140,21 +140,21 @@ export default function PaymentManager() {
       case 'active':
         return (
           <Badge className='bg-green-100 text-green-800'>
-            <CheckCircle className='w-3 h-3 mr-1' />
+            <CheckCircle className='size-3 mr-1' />
             Active
           </Badge>
         );
       case 'inactive':
         return (
           <Badge variant='secondary'>
-            <AlertCircle className='w-3 h-3 mr-1' />
+            <AlertCircle className='size-3 mr-1' />
             Inactive
           </Badge>
         );
       case 'canceled':
         return (
           <Badge variant='destructive'>
-            <AlertCircle className='w-3 h-3 mr-1' />
+            <AlertCircle className='size-3 mr-1' />
             Canceled
           </Badge>
         );
@@ -166,7 +166,7 @@ export default function PaymentManager() {
   if (loading) {
     return (
       <div className='flex items-center justify-center p-8'>
-        <Loader2 className='w-6 h-6 animate-spin' />
+        <Loader2 className='size-6 animate-spin' />
       </div>
     );
   }
@@ -178,7 +178,7 @@ export default function PaymentManager() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <CreditCard className='w-5 h-5' />
+              <CreditCard className='size-5' />
               Current Subscription
             </CardTitle>
           </CardHeader>
@@ -200,7 +200,7 @@ export default function PaymentManager() {
             {userSubscription.status === 'active' && (
               <div className='mt-4 pt-4 border-t'>
                 <Button variant='outline' onClick={handleCancelSubscription} disabled={processing}>
-                  {processing ? <Loader2 className='w-4 h-4 mr-2 animate-spin' /> : null}
+                  {processing ? <Loader2 className='size-4 mr-2 animate-spin' /> : null}
                   Cancel Subscription
                 </Button>
               </div>
@@ -221,11 +221,11 @@ export default function PaymentManager() {
             onValueChange={(value) => setPaymentProvider(value as 'stripe' | 'lemonsqueezy')}>
             <TabsList className='grid w-full grid-cols-2'>
               <TabsTrigger value='stripe' className='flex items-center gap-2'>
-                <CreditCard className='w-4 h-4' />
+                <CreditCard className='size-4' />
                 Stripe
               </TabsTrigger>
               <TabsTrigger value='lemonsqueezy' className='flex items-center gap-2'>
-                <Star className='w-4 h-4' />
+                <Star className='size-4' />
                 LemonSqueezy
               </TabsTrigger>
             </TabsList>
@@ -238,7 +238,7 @@ export default function PaymentManager() {
         {plans.map((plan) => (
           <Card key={plan.id} className='relative'>
             {plan.name === 'Pro' && (
-              <div className='absolute -top-3 left-1/2 transform -translate-x-1/2'>
+              <div className='absolute -top-3 left-1/2 -translate-x-1/2'>
                 <Badge className='bg-gradient-to-r from-purple-500 to-pink-500 text-white'>
                   Most Popular
                 </Badge>
@@ -249,7 +249,7 @@ export default function PaymentManager() {
               <CardDescription className='text-center'>{plan.description}</CardDescription>
               <div className='text-center'>
                 <div className='flex items-center justify-center gap-2'>
-                  <DollarSign className='w-4 h-4' />
+                  <DollarSign className='size-4' />
                   <span className='text-3xl font-bold'>
                     ${billingCycle === 'monthly' ? plan.price_monthly : plan.price_yearly}
                   </span>
@@ -268,7 +268,7 @@ export default function PaymentManager() {
               <ul className='space-y-2 mb-6'>
                 {plan.features.map((feature, index) => (
                   <li key={index} className='flex items-center gap-2'>
-                    <CheckCircle className='w-4 h-4 text-green-500' />
+                    <CheckCircle className='size-4 text-green-500' />
                     <span className='text-sm'>{feature}</span>
                   </li>
                 ))}
@@ -281,7 +281,7 @@ export default function PaymentManager() {
                   (userSubscription?.status === 'active' && userSubscription?.plan === plan.name)
                 }>
                 {processing ? (
-                  <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                  <Loader2 className='size-4 mr-2 animate-spin' />
                 ) : userSubscription?.status === 'active' && userSubscription?.plan === plan.name ? (
                   'Current Plan'
                 ) : (
@@ -312,7 +312,7 @@ export default function PaymentManager() {
 
       {/* Security Notice */}
       <Alert>
-        <AlertCircle className='h-4 w-4' />
+        <AlertCircle className='size-4' />
         <AlertDescription>
           All payments are processed securely through{' '}
           {paymentProvider === 'stripe' ? 'Stripe' : 'LemonSqueezy'}. Your payment information is never stored

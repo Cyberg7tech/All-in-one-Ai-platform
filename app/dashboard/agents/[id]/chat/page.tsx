@@ -73,7 +73,7 @@ export default function AgentChatPage() {
       <div className='mb-6'>
         <Link href='/dashboard/agents'>
           <Button variant='ghost' className='mb-4'>
-            <ArrowLeft className='w-4 h-4 mr-2' />
+            <ArrowLeft className='size-4 mr-2' />
             Back to Agents
           </Button>
         </Link>
@@ -84,7 +84,7 @@ export default function AgentChatPage() {
       <Card className='h-[600px] flex flex-col'>
         <CardHeader>
           <CardTitle className='flex items-center gap-2'>
-            <MessageSquare className='w-5 h-5' />
+            <MessageSquare className='size-5' />
             Agent Chat
           </CardTitle>
         </CardHeader>
@@ -107,7 +107,7 @@ export default function AgentChatPage() {
               <div className='flex justify-start'>
                 <div className='bg-muted p-3 rounded-lg'>
                   <div className='flex items-center space-x-2'>
-                    <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-primary'></div>
+                    <div className='animate-spin rounded-full size-4 border-b-2 border-primary'></div>
                     <span>Agent is typing...</span>
                   </div>
                 </div>
@@ -126,7 +126,7 @@ export default function AgentChatPage() {
               disabled={isLoading}
             />
             <Button onClick={sendMessage} disabled={!inputMessage.trim() || isLoading} className='self-end'>
-              <Send className='w-4 h-4' />
+              <Send className='size-4' />
             </Button>
           </div>
         </CardContent>

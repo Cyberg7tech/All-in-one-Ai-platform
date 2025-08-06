@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { Music, Play, Pause, Download, Loader2, Copy, RotateCcw, Clock, Volume2, Wand2 } from 'lucide-react';
+import { Music, Play, Pause, Download, Loader2, Copy, Clock, Volume2, Wand2 } from 'lucide-react';
 import { downloadAudioData, copyToClipboard, generateUniqueFilename } from '@/lib/utils/download';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
@@ -123,7 +123,7 @@ export default function MusicGeneratorPage() {
     }
   };
 
-  const handlePlayPause = (musicId: string, audioUrl: string) => {
+  const handlePlayPause = (musicId: string) => {
     if (isPlaying === musicId) {
       setIsPlaying(null);
       // Pause audio logic here
@@ -406,10 +406,7 @@ export default function MusicGeneratorPage() {
                         </div>
                       ) : music.status === 'completed' ? (
                         <>
-                          <Button
-                            variant='outline'
-                            size='sm'
-                            onClick={() => handlePlayPause(music.id, music.audioUrl)}>
+                          <Button variant='outline' size='sm' onClick={() => handlePlayPause(music.id)}>
                             {isPlaying === music.id ? (
                               <Pause className='size-4' />
                             ) : (

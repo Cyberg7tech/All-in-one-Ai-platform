@@ -140,7 +140,7 @@ export default function HeadshotsPage() {
           <Card>
             <CardHeader>
               <CardTitle className='flex items-center gap-2'>
-                <Camera className='h-5 w-5' />
+                <Camera className='size-5' />
                 Upload Your Photo
               </CardTitle>
               <CardDescription>Upload a clear photo of yourself for AI headshot generation</CardDescription>
@@ -227,12 +227,12 @@ export default function HeadshotsPage() {
               <Button onClick={handleGenerate} disabled={isGenerating || !imageFile} className='w-full'>
                 {isGenerating ? (
                   <>
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    <Loader2 className='mr-2 size-4 animate-spin' />
                     Generating Headshot...
                   </>
                 ) : (
                   <>
-                    <Camera className='mr-2 h-4 w-4' />
+                    <Camera className='mr-2 size-4' />
                     Generate Professional Headshot
                   </>
                 )}
@@ -246,7 +246,7 @@ export default function HeadshotsPage() {
           <Card>
             <CardHeader>
               <CardTitle className='flex items-center gap-2'>
-                <User className='h-5 w-5' />
+                <User className='size-5' />
                 Generated Headshots
               </CardTitle>
               <CardDescription>Your AI-generated professional headshots</CardDescription>
@@ -254,7 +254,7 @@ export default function HeadshotsPage() {
             <CardContent>
               {generatedHeadshots.length === 0 ? (
                 <div className='text-center py-12 text-gray-500'>
-                  <Camera className='h-12 w-12 mx-auto mb-4 opacity-50' />
+                  <Camera className='size-12 mx-auto mb-4 opacity-50' />
                   <p>No headshots generated yet</p>
                   <p className='text-sm'>Upload a photo and generate your first professional headshot</p>
                 </div>
@@ -296,7 +296,7 @@ export default function HeadshotsPage() {
                           <p className='text-sm font-medium mb-2'>Professional Headshot</p>
                           {headshot.status === 'processing' ? (
                             <div className='w-full h-32 bg-gray-100 rounded border flex items-center justify-center'>
-                              <Loader2 className='h-6 w-6 animate-spin' />
+                              <Loader2 className='size-6 animate-spin' />
                             </div>
                           ) : (
                             <Image
@@ -321,7 +321,7 @@ export default function HeadshotsPage() {
                           <Button
                             size='sm'
                             onClick={() => downloadHeadshot(headshot.headshot_url, headshot.style)}>
-                            <Download className='mr-2 h-4 w-4' />
+                            <Download className='mr-2 size-4' />
                             Download
                           </Button>
                           <Button
@@ -333,7 +333,7 @@ export default function HeadshotsPage() {
                                 url: headshot.headshot_url,
                               }) || toast.info('Sharing not supported on this device');
                             }}>
-                            <Share2 className='mr-2 h-4 w-4' />
+                            <Share2 className='mr-2 size-4' />
                             Share
                           </Button>
                         </div>

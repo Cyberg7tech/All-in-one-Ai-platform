@@ -498,7 +498,7 @@ export default function ImageGeneratorPage() {
                     <Button
                       size='sm'
                       variant='secondary'
-                      className='h-8 w-8 p-0'
+                      className='size-8 p-0'
                       onClick={() => toggleLike(image.id)}>
                       <Heart className={`size-4 ${image.liked ? 'fill-red-500 text-red-500' : ''}`} />
                     </Button>

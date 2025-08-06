@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { Volume2, Play, Pause, Download, Loader2, Copy, RotateCcw } from 'lucide-react';
+import { Volume2, Play, Pause, Download, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { downloadAudioData, generateUniqueFilename } from '@/lib/utils/download';
 import { toast } from 'sonner';

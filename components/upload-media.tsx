@@ -144,7 +144,7 @@ export function UploadMedia({
         onUpload(validFiles);
       }
     },
-    [files.length, maxFiles, maxSize, onUpload]
+    [files.length, maxFiles, onUpload, validateFile, createFilePreview, simulateUpload]
   );
 
   const handleDrop = useCallback(
@@ -241,9 +241,13 @@ export function UploadMedia({
             <Card key={file.id} className='p-3'>
               <div className='flex items-center space-x-3'>
                 {/* File Icon/Preview */}
-                <div className='flex-shrink-0'>
+                <div className='shrink-0'>
                   {file.preview ? (
-                    <img src={file.preview} alt={file.file.name} className='size-12 object-cover rounded' />
+                    <img
+                      src={file.preview}
+                      alt={`Preview of ${file.file.name}`}
+                      className='size-12 object-cover rounded'
+                    />
                   ) : (
                     getFileIcon(file.file)
                   )}

@@ -121,7 +121,7 @@ export function MagicLink({
           <Button type='submit' className='w-full' disabled={isLoading || !email}>
             {isLoading ? (
               <div className='flex items-center'>
-                <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2' />
+                <div className='size-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2' />
                 Sending magic link...
               </div>
             ) : (

@@ -12,7 +12,6 @@ import {
   Eye,
   Trash2,
   Search,
-  Filter,
   Bot,
   Brain,
   Languages,
@@ -20,7 +19,6 @@ import {
   BarChart3,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth } from '@/contexts/auth-context';
 
 interface ProcessedDocument {
   id: string;
@@ -146,7 +144,6 @@ const SUPPORTED_FORMATS = [
 ];
 
 export default function DocumentProcessingPage() {
-  const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [documents, setDocuments] = useState<ProcessedDocument[]>(SAMPLE_DOCUMENTS);
   const [selectedDocument, setSelectedDocument] = useState<ProcessedDocument | null>(null);
@@ -193,7 +190,6 @@ export default function DocumentProcessingPage() {
     file: File
   ): Promise<ProcessedDocument> => {
     // Simulate API calls for document processing
-    const enabledFeatures = processingFeatures.filter((f) => f.enabled);
 
     return {
       ...doc,
@@ -380,7 +376,7 @@ export default function DocumentProcessingPage() {
           {/* Search and Filters */}
           <div className='flex flex-col sm:flex-row gap-4 mb-6'>
             <div className='relative flex-1'>
-              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground' />
+              <Search className='absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground' />
               <input
                 type='text'
                 placeholder='Search documents...'

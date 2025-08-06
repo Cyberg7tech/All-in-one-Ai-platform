@@ -8,16 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import {
-  Upload,
-  Download,
-  Loader2,
-  Camera,
-  Wand2,
-  Image as ImageIcon,
-  Palette,
-  Sparkles,
-} from 'lucide-react';
+import { Upload, Download, Loader2, Camera, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 
 interface PhotoEdit {

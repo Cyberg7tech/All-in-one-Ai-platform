@@ -213,7 +213,7 @@ export async function shareContent(data: { title?: string; text?: string; url?: 
 /**
  * Extract filename from URL
  */
-function extractFilenameFromUrl(url: string): string {
+export function extractFilenameFromUrl(url: string): string {
   try {
     const urlObj = new URL(url);
     const pathname = urlObj.pathname;

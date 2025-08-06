@@ -490,7 +490,7 @@ export default function InteriorDesignPage() {
                           <div className='space-y-2'>
                             {project.suggestions.map((suggestion, index) => (
                               <div key={index} className='flex items-start gap-2 text-sm'>
-                                <div className='w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0'></div>
+                                <div className='size-1.5 bg-primary rounded-full mt-2 shrink-0'></div>
                                 <span>{suggestion}</span>
                               </div>
                             ))}

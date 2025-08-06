@@ -338,7 +338,6 @@ export class AIAPIService {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
         return {
           error: true,
           content: 'Text-to-speech generation failed. Please check your API key.',

@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, BarChart3, Calendar, Download } from 'lucide-react';
+import { TrendingUp, BarChart3 } from 'lucide-react';
 
 export default function ForecastingPage() {
   return (

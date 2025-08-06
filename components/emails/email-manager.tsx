@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/auth-context';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -29,7 +29,6 @@ interface EmailHistory {
 }
 
 export default function EmailManager() {
-  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('compose');
   const [sending, setSending] = useState(false);
   const [emailHistory, setEmailHistory] = useState<EmailHistory[]>([]);
@@ -125,14 +124,14 @@ export default function EmailManager() {
       case 'sent':
         return (
           <Badge className='bg-green-100 text-green-800'>
-            <CheckCircle className='w-3 h-3 mr-1' />
+            <CheckCircle className='size-3 mr-1' />
             Sent
           </Badge>
         );
       case 'failed':
         return (
           <Badge variant='destructive'>
-            <AlertCircle className='w-3 h-3 mr-1' />
+            <AlertCircle className='size-3 mr-1' />
             Failed
           </Badge>
         );
@@ -146,15 +145,15 @@ export default function EmailManager() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className='grid w-full grid-cols-3'>
           <TabsTrigger value='compose' className='flex items-center gap-2'>
-            <Send className='w-4 h-4' />
+            <Send className='size-4' />
             Compose
           </TabsTrigger>
           <TabsTrigger value='templates' className='flex items-center gap-2'>
-            <FileText className='w-4 h-4' />
+            <FileText className='size-4' />
             Templates
           </TabsTrigger>
           <TabsTrigger value='history' className='flex items-center gap-2'>
-            <History className='w-4 h-4' />
+            <History className='size-4' />
             History
           </TabsTrigger>
         </TabsList>
@@ -163,7 +162,7 @@ export default function EmailManager() {
           <Card>
             <CardHeader>
               <CardTitle className='flex items-center gap-2'>
-                <Mail className='w-5 h-5' />
+                <Mail className='size-5' />
                 Compose Email
               </CardTitle>
               <CardDescription>Send emails using Resend</CardDescription>
@@ -230,12 +229,12 @@ export default function EmailManager() {
               <Button onClick={handleSendEmail} disabled={sending} className='w-full'>
                 {sending ? (
                   <>
-                    <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                    <Loader2 className='size-4 mr-2 animate-spin' />
                     Sending...
                   </>
                 ) : (
                   <>
-                    <Send className='w-4 h-4 mr-2' />
+                    <Send className='size-4 mr-2' />
                     Send Email
                   </>
                 )}
@@ -248,7 +247,7 @@ export default function EmailManager() {
           <Card>
             <CardHeader>
               <CardTitle className='flex items-center gap-2'>
-                <FileText className='w-5 h-5' />
+                <FileText className='size-5' />
                 Email Templates
               </CardTitle>
               <CardDescription>Choose from pre-built email templates</CardDescription>
@@ -277,7 +276,7 @@ export default function EmailManager() {
           <Card>
             <CardHeader>
               <CardTitle className='flex items-center gap-2'>
-                <History className='w-5 h-5' />
+                <History className='size-5' />
                 Email History
               </CardTitle>
               <CardDescription>View your sent emails</CardDescription>
@@ -285,7 +284,7 @@ export default function EmailManager() {
             <CardContent>
               {emailHistory.length === 0 ? (
                 <div className='text-center py-8 text-gray-500'>
-                  <Mail className='w-12 h-12 mx-auto mb-4 opacity-50' />
+                  <Mail className='size-12 mx-auto mb-4 opacity-50' />
                   <p>No emails sent yet</p>
                 </div>
               ) : (
@@ -310,7 +309,7 @@ export default function EmailManager() {
       </Tabs>
 
       <Alert>
-        <AlertCircle className='h-4 w-4' />
+        <AlertCircle className='size-4' />
         <AlertDescription>
           Emails are sent using Resend. Make sure your domain is verified in your Resend dashboard for best
           deliverability.

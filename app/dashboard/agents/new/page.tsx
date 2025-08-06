@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Bot, Brain, Zap, Search, MessageSquare, Code, Mail, Image } from 'lucide-react';
+import { ArrowLeft, Bot, Brain, Search, MessageSquare, Code, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -159,7 +159,7 @@ const availableTools = [
 
 export default function NewAgentPage() {
   const router = useRouter();
-  const [selectedTemplate, setSelectedTemplate] = useState<AgentTemplate | null>(null);
+  const [, setSelectedTemplate] = useState<AgentTemplate | null>(null);
   const [step, setStep] = useState(1); // 1: template, 2: customize, 3: review
   const [agentData, setAgentData] = useState({
     name: '',

@@ -6,19 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import {
-  Mic,
-  MicOff,
-  Upload,
-  Download,
-  Copy,
-  Clock,
-  FileAudio,
-  Play,
-  Pause,
-  RotateCcw,
-  Loader2,
-} from 'lucide-react';
+import { Mic, Upload, Download, Copy, Clock, FileAudio, Pause, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { downloadAsTextFile, copyToClipboard, generateUniqueFilename } from '@/lib/utils/download';
 import { toast } from 'sonner';
@@ -195,7 +183,7 @@ ${transcription.transcript}
 
 Segments:
 ${
-  transcription.segments?.map((seg, i) => `[${seg.start}s - ${seg.end}s] ${seg.text}`).join('\n') ||
+  transcription.segments?.map((seg) => `[${seg.start}s - ${seg.end}s] ${seg.text}`).join('\n') ||
   'No segments available'
 }`;
 

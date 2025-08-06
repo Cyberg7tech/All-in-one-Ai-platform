@@ -25,7 +25,6 @@ import {
   Link as LinkIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth } from '@/contexts/auth-context';
 
 interface WorkflowStep {
   id: string;
@@ -248,7 +247,6 @@ const SAMPLE_WORKFLOWS: Workflow[] = [
 ];
 
 export default function WorkflowsPage() {
-  const { user } = useAuth();
   const [workflows, setWorkflows] = useState<Workflow[]>(SAMPLE_WORKFLOWS);
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
   const [activeTab, setActiveTab] = useState<'list' | 'builder' | 'logs'>('list');
@@ -472,7 +470,7 @@ export default function WorkflowsPage() {
                       <workflow.trigger.icon className='size-4 text-primary' />
                       <span className='text-xs font-medium truncate'>{workflow.trigger.name}</span>
                     </div>
-                    {workflow.steps.map((step, index) => (
+                    {workflow.steps.map((step) => (
                       <div key={step.id} className='flex items-center space-x-1'>
                         <ArrowRight className='size-3 text-muted-foreground' />
                         <div className='flex items-center space-x-1 p-2 bg-muted rounded-md min-w-0'>

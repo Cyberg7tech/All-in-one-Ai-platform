@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { useSupabaseClient } from '@/components/providers/supabase-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { AIIcon } from '@/components/ui/ai-icon';
 import { MagicLink } from './magic-link';
@@ -220,7 +220,7 @@ export default function LoginForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className='pl-10 pr-10 h-11'
+                    className='px-10 h-11'
                     disabled={isLoading}
                   />
                   <Button
@@ -250,7 +250,7 @@ export default function LoginForm() {
                 disabled={isLoading}>
                 {isLoading ? (
                   <div className='flex items-center'>
-                    <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2' />
+                    <div className='size-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2' />
                     {isSignUp ? 'Creating account...' : 'Signing in...'}
                   </div>
                 ) : (

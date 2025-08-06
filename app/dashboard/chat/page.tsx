@@ -10,12 +10,8 @@ import {
   Image as ImageIcon,
   FileText,
   Mic,
-  Camera,
-  Code,
   Brain,
-  Sparkles,
   ChevronDown,
-  Upload,
   Square,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -100,8 +96,8 @@ export default function ChatPage() {
       speed: string;
     }>
   >([]);
-  const [isLoadingModels, setIsLoadingModels] = useState(false);
-  const [modelGroups, setModelGroups] = useState<{
+  const [, setIsLoadingModels] = useState(false);
+  const [, setModelGroups] = useState<{
     reasoning: any[];
     chat: any[];
     search: any[];
@@ -598,8 +594,7 @@ export default function ChatPage() {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
-      reader.onload = (e) => {
-        const imageUrl = e.target?.result as string;
+      reader.onload = () => {
         setMessage((prev) => prev + `\n[Image uploaded: ${file.name}]`);
         // In real implementation, you'd upload the file and get a URL
       };
@@ -629,9 +624,6 @@ export default function ChatPage() {
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(chunks, { type: 'audio/wav' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-
         // In real implementation, you'd:
         // 1. Upload the audio file
         // 2. Convert speech to text using the speech-to-text API
@@ -972,7 +964,7 @@ export default function ChatPage() {
                         <Button
                           variant='ghost'
                           size='sm'
-                          className='h-8 w-8 p-0'
+                          className='size-8 p-0'
                           onClick={() => imageInputRef.current?.click()}
                           title='Upload Image'>
                           <ImageIcon className='size-4' />
@@ -982,7 +974,7 @@ export default function ChatPage() {
                         <Button
                           variant='ghost'
                           size='sm'
-                          className='h-8 w-8 p-0'
+                          className='size-8 p-0'
                           onClick={() => fileInputRef.current?.click()}
                           title='Upload File'>
                           <FileText className='size-4' />
@@ -992,7 +984,7 @@ export default function ChatPage() {
                         <Button
                           variant='ghost'
                           size='sm'
-                          className={`h-8 w-8 p-0 ${isRecording ? 'text-red-500 animate-pulse' : ''}`}
+                          className={`size-8 p-0 ${isRecording ? 'text-red-500 animate-pulse' : ''}`}
                           onClick={isRecording ? stopRecording : startRecording}
                           title={isRecording ? `Recording ${formatTime(recordingTime)}` : 'Voice Recording'}>
                           {isRecording ? <Square className='size-4' /> : <Mic className='size-4' />}

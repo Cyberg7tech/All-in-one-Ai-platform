@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Mail, Send, Users, CheckCircle, AlertCircle, Clock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Send, Users, Eye, EyeOff } from 'lucide-react';
 
 interface EmailTemplate {
   id: string;
@@ -106,8 +106,8 @@ interface EmailSystemProps {
   className?: string;
 }
 
-export function EmailSystem({ provider = 'loops', apiKey, onSend, className = '' }: EmailSystemProps) {
-  const [templates, setTemplates] = useState<EmailTemplate[]>(defaultTemplates);
+export function EmailSystem({ provider = 'loops', onSend, className = '' }: EmailSystemProps) {
+  const [templates] = useState<EmailTemplate[]>(defaultTemplates);
   const [campaigns, setCampaigns] = useState<EmailCampaign[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [recipients, setRecipients] = useState<string>('');
@@ -321,7 +321,7 @@ export function EmailSystem({ provider = 'loops', apiKey, onSend, className = ''
             className='w-full'>
             {loading ? (
               <div className='flex items-center'>
-                <div className='w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2' />
+                <div className='size-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2' />
                 Sending...
               </div>
             ) : (
@@ -370,16 +370,7 @@ export function EmailSystem({ provider = 'loops', apiKey, onSend, className = ''
 // Email template management component
 export function EmailTemplateManager() {
   const [templates, setTemplates] = useState<EmailTemplate[]>(defaultTemplates);
-  const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
-
-  const handleSaveTemplate = (template: EmailTemplate) => {
-    if (editingTemplate) {
-      setTemplates((prev) => prev.map((t) => (t.id === template.id ? template : t)));
-    } else {
-      setTemplates((prev) => [...prev, { ...template, id: Date.now().toString() }]);
-    }
-    setEditingTemplate(null);
-  };
+  const [, setEditingTemplate] = useState<EmailTemplate | null>(null);
 
   const handleDeleteTemplate = (templateId: string) => {
     setTemplates((prev) => prev.filter((t) => t.id !== templateId));

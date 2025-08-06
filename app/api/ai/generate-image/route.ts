@@ -4,7 +4,7 @@ import { AIAPIService } from '@/lib/ai/api-integration';
 const apiService = AIAPIService.getInstance();
 
 // Handle CORS preflight requests
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {

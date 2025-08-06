@@ -3,15 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      prompt,
-      imageUrl,
-      style,
-      duration = 5,
-      resolution = '1280x720',
-      aspectRatio = '16:9',
-      userId,
-    } = body;
+    const { prompt, imageUrl, style, duration = 5, resolution = '1280x720', aspectRatio = '16:9' } = body;
 
     if (!prompt) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });

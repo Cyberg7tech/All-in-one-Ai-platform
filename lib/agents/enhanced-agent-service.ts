@@ -330,18 +330,17 @@ Would you like me to use my built-in knowledge to answer questions about "${para
     try {
       // Determine which model to use with enhanced fallback logic including AI/ML API
       let model = agentConfig.model || 'gpt-4o-mini';
-      let modelProvider = 'openai';
+      // let modelProvider = 'openai';
 
       // Optimized API routing: Together AI first for chat/LLM, then AI/ML API for multimedia
       if (model.includes('meta-llama') || model.includes('mistral') || model.includes('qwen')) {
         // Open-source models - prefer Together AI (faster and cheaper)
         if (process.env.TOGETHER_API_KEY) {
-          modelProvider = 'together';
+          // modelProvider = 'together';
         } else if (process.env.AIML_API_KEY) {
-          modelProvider = 'aimlapi';
+          // modelProvider = 'aimlapi';
         } else if (process.env.OPENAI_API_KEY?.startsWith('sk-')) {
           model = 'gpt-4o-mini';
-          modelProvider = 'openai';
         }
       } else if (
         model.includes('claude') ||
@@ -355,24 +354,20 @@ Would you like me to use my built-in knowledge to answer questions about "${para
       ) {
         // Premium models via AI/ML API
         if (process.env.AIML_API_KEY) {
-          modelProvider = 'aimlapi';
+          // modelProvider = 'aimlapi';
         } else if (process.env.TOGETHER_API_KEY) {
           // Fallback to best Together AI model
           model = 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo';
-          modelProvider = 'together';
         } else if (process.env.OPENAI_API_KEY?.startsWith('sk-')) {
           model = 'gpt-4o-mini';
-          modelProvider = 'openai';
         }
       } else if (model.startsWith('gpt') && !process.env.OPENAI_API_KEY?.startsWith('sk-')) {
         // OpenAI not available, use optimized fallback
         if (process.env.TOGETHER_API_KEY) {
           // Prefer Together AI for chat/LLM
           model = 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo';
-          modelProvider = 'together';
         } else if (process.env.AIML_API_KEY) {
           model = 'gpt-4.1';
-          modelProvider = 'aimlapi';
         }
       }
 

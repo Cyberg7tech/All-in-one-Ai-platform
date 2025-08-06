@@ -13,12 +13,10 @@ import {
   AlertTriangle,
   BarChart3,
   LineChart,
-  Calendar,
   FileText,
   Settings,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth } from '@/contexts/auth-context';
 
 interface DataPoint {
   date: string;
@@ -114,7 +112,6 @@ const ANOMALY_METHODS = [
 ];
 
 export default function ForecastingPage() {
-  const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState<'upload' | 'configure' | 'results'>('upload');
   const [uploadedData, setUploadedData] = useState<DataPoint[]>([]);
@@ -147,7 +144,6 @@ export default function ForecastingPage() {
 
   const parseCsvData = (content: string) => {
     const lines = content.split('\n').filter((line) => line.trim());
-    const headers = lines[0].split(',').map((h) => h.trim());
 
     const data: DataPoint[] = [];
     for (let i = 1; i < lines.length; i++) {

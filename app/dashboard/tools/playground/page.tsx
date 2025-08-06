@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,12 +14,9 @@ import {
   Clock,
   Zap,
   Brain,
-  Settings,
-  Code,
   FileText,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth } from '@/contexts/auth-context';
 
 interface ModelResponse {
   id: string;
@@ -160,7 +157,6 @@ const SAMPLE_RESULTS: TestResult[] = [
 ];
 
 export default function PlaygroundPage() {
-  const { user } = useAuth();
   const [selectedModels, setSelectedModels] = useState<string[]>(['gpt-4', 'claude-3-opus']);
   const [prompt, setPrompt] = useState('');
   const [isRunning, setIsRunning] = useState(false);

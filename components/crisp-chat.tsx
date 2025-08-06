@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MessageCircle, X, Minimize2, Maximize2 } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 declare global {
@@ -27,8 +27,6 @@ export function CrispChat({
   className = '',
 }: CrispChatProps) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
 
   useEffect(() => {
     if (!websiteId || !autoload) return;
@@ -59,10 +57,6 @@ export function CrispChat({
       setIsLoaded(true);
 
       // Set up event listeners
-      window.$crisp.push(['on', 'chat:opened', () => setIsVisible(true)]);
-      window.$crisp.push(['on', 'chat:closed', () => setIsVisible(false)]);
-      window.$crisp.push(['on', 'chat:minimized', () => setIsMinimized(true)]);
-      window.$crisp.push(['on', 'chat:maximized', () => setIsMinimized(false)]);
     };
 
     document.head.appendChild(script);
@@ -82,35 +76,6 @@ export function CrispChat({
     if (window.$crisp) {
       window.$crisp.push(['do', 'chat:open']);
       window.$crisp.push(['do', 'chat:show']);
-    }
-  };
-
-  const closeChat = () => {
-    if (window.$crisp) {
-      window.$crisp.push(['do', 'chat:close']);
-      window.$crisp.push(['do', 'chat:hide']);
-    }
-  };
-
-  const toggleChat = () => {
-    if (window.$crisp) {
-      if (isVisible) {
-        closeChat();
-      } else {
-        openChat();
-      }
-    }
-  };
-
-  const minimizeChat = () => {
-    if (window.$crisp) {
-      window.$crisp.push(['do', 'chat:minimize']);
-    }
-  };
-
-  const maximizeChat = () => {
-    if (window.$crisp) {
-      window.$crisp.push(['do', 'chat:maximize']);
     }
   };
 

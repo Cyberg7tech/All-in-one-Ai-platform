@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   TrendingUp,
   TrendingDown,
   Users,
   Bot,
   Brain,
-  Zap,
   AlertTriangle,
   CheckCircle,
   Clock,

@@ -8,7 +8,7 @@ const LEMON_SQUEEZY_STORE_ID = process.env.LEMON_SQUEEZY_STORE_ID!;
 
 export async function POST(request: NextRequest) {
   try {
-    const { variantId, successUrl, cancelUrl } = await request.json();
+    const { variantId, successUrl } = await request.json();
 
     // Get user from Supabase
     const cookieStore = cookies();

@@ -1,6 +1,5 @@
 'use client';
 
-import { Metadata } from 'next';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -100,7 +99,7 @@ const useCases = [
 ];
 
 export default function HomePage() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const lastRefresh = useRef<number>(0);
 
@@ -216,9 +215,9 @@ export default function HomePage() {
               <p className='text-sm text-muted-foreground'>Trusted by developers worldwide</p>
               <div className='flex items-center space-x-8 opacity-60'>
                 <div className='text-sm font-medium'>500+ Projects</div>
-                <div className='w-1 h-1 rounded-full bg-muted-foreground' />
+                <div className='size-1 rounded-full bg-muted-foreground' />
                 <div className='text-sm font-medium'>50+ Countries</div>
-                <div className='w-1 h-1 rounded-full bg-muted-foreground' />
+                <div className='size-1 rounded-full bg-muted-foreground' />
                 <div className='text-sm font-medium'>99.9% Uptime</div>
               </div>
             </div>
@@ -398,7 +397,7 @@ export default function HomePage() {
 
             {/* Pro Plan */}
             <Card className='relative border-2 border-primary shadow-lg scale-105'>
-              <div className='absolute -top-3 left-1/2 transform -translate-x-1/2'>
+              <div className='absolute -top-3 left-1/2 -translate-x-1/2'>
                 <Badge className='bg-primary text-primary-foreground px-3 py-1'>Most Popular</Badge>
               </div>
               <CardHeader className='text-center pb-8'>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,6 @@ import Link from 'next/link';
 
 export default function AgentEditPage() {
   const params = useParams();
-  const router = useRouter();
   const agentId = params.id as string;
 
   const [agentData, setAgentData] = useState({
@@ -66,7 +65,7 @@ export default function AgentEditPage() {
       <div className='mb-6'>
         <Link href='/dashboard/agents'>
           <Button variant='ghost' className='mb-4'>
-            <ArrowLeft className='w-4 h-4 mr-2' />
+            <ArrowLeft className='size-4 mr-2' />
             Back to Agents
           </Button>
         </Link>
@@ -79,7 +78,7 @@ export default function AgentEditPage() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <Settings className='w-5 h-5' />
+              <Settings className='size-5' />
               Basic Information
             </CardTitle>
           </CardHeader>
@@ -183,7 +182,7 @@ export default function AgentEditPage() {
           </Link>
 
           <Button onClick={handleSave} disabled={isLoading}>
-            <Save className='w-4 h-4 mr-2' />
+            <Save className='size-4 mr-2' />
             {isLoading ? 'Saving...' : isSaved ? 'Saved!' : 'Save Changes'}
           </Button>
         </div>

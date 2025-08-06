@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Plus,
   Edit3,
   Trash2,
   Copy,
   Search,
-  Filter,
   Star,
   StarOff,
   MessageSquare,

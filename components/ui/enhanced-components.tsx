@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card';
 import { Button } from './button';
 import { Input } from './input';
@@ -7,37 +7,17 @@ import { Label } from './label';
 import { Badge } from './badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 import { Textarea } from './textarea';
-import { Checkbox } from './checkbox';
-import { RadioGroup, RadioGroupItem } from './radio-group';
 import { Switch } from './switch';
 import { Slider } from './slider';
-import { Progress } from './progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './accordion';
 import { Alert, AlertDescription, AlertTitle } from './alert';
-import {
-  Toast,
-  ToastAction,
-  ToastClose,
-  ToastDescription,
-  ToastProvider,
-  ToastTitle,
-  ToastViewport,
-} from './toast';
-import { useToast } from './use-toast';
 import {
   Copy,
   Check,
   Eye,
   EyeOff,
   Search,
-  Filter,
-  SortAsc,
-  SortDesc,
-  Download,
-  Upload,
-  Plus,
-  Minus,
   X,
   AlertCircle,
   Info,
@@ -96,14 +76,14 @@ export function EnhancedInput({
             type='button'
             variant='ghost'
             size='sm'
-            className='h-6 w-6 p-0'
+            className='size-6 p-0'
             onClick={() => setShowValue(!showValue)}>
-            {showValue ? <EyeOff className='h-3 w-3' /> : <Eye className='h-3 w-3' />}
+            {showValue ? <EyeOff className='size-3' /> : <Eye className='size-3' />}
           </Button>
         )}
         {copyable && (
-          <Button type='button' variant='ghost' size='sm' className='h-6 w-6 p-0' onClick={handleCopy}>
-            {copied ? <Check className='h-3 w-3 text-green-500' /> : <Copy className='h-3 w-3' />}
+          <Button type='button' variant='ghost' size='sm' className='size-6 p-0' onClick={handleCopy}>
+            {copied ? <Check className='size-3 text-green-500' /> : <Copy className='size-3' />}
           </Button>
         )}
       </div>
@@ -133,7 +113,7 @@ export function EnhancedButton({
     <Button disabled={disabled || loading} className={className} {...props}>
       {loading ? (
         <>
-          <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+          <Loader2 className='mr-2 size-4 animate-spin' />
           {loadingText || children}
         </>
       ) : (
@@ -182,7 +162,7 @@ export function EnhancedCard({
             {actions}
             {collapsible && (
               <Button variant='ghost' size='sm' onClick={() => setCollapsed(!collapsed)}>
-                {collapsed ? <ChevronDown className='h-4 w-4' /> : <ChevronUp className='h-4 w-4' />}
+                {collapsed ? <ChevronDown className='size-4' /> : <ChevronUp className='size-4' />}
               </Button>
             )}
           </div>
@@ -215,8 +195,6 @@ export function EnhancedSelect({
   className = '',
 }: EnhancedSelectProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedValues, setSelectedValues] = useState<string[]>(value ? [value] : []);
-
   const filteredOptions = searchable
     ? options.filter(
         (option) =>
@@ -225,17 +203,7 @@ export function EnhancedSelect({
       )
     : options;
 
-  const handleSelect = (selectedValue: string) => {
-    if (multiple) {
-      const newValues = selectedValues.includes(selectedValue)
-        ? selectedValues.filter((v) => v !== selectedValue)
-        : [...selectedValues, selectedValue];
-      setSelectedValues(newValues);
-      onValueChange?.(newValues.join(','));
-    } else {
-      onValueChange?.(selectedValue);
-    }
-  };
+
 
   return (
     <div className={className}>
@@ -247,7 +215,7 @@ export function EnhancedSelect({
           {searchable && (
             <div className='p-2'>
               <div className='relative'>
-                <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
+                <Search className='absolute left-2 top-2.5 size-4 text-muted-foreground' />
                 <Input
                   placeholder='Search options...'
                   value={searchTerm}
@@ -365,15 +333,15 @@ export function EnhancedAlert({
   const getIcon = () => {
     switch (variant) {
       case 'destructive':
-        return <AlertCircle className='h-4 w-4' />;
+        return <AlertCircle className='size-4' />;
       case 'warning':
-        return <AlertCircle className='h-4 w-4' />;
+        return <AlertCircle className='size-4' />;
       case 'info':
-        return <Info className='h-4 w-4' />;
+        return <Info className='size-4' />;
       case 'success':
-        return <CheckCircle className='h-4 w-4' />;
+        return <CheckCircle className='size-4' />;
       default:
-        return <Info className='h-4 w-4' />;
+        return <Info className='size-4' />;
     }
   };
 
@@ -388,8 +356,8 @@ export function EnhancedAlert({
         <div className='flex items-center space-x-2'>
           {actions}
           {dismissible && (
-            <Button variant='ghost' size='sm' onClick={handleDismiss} className='h-6 w-6 p-0'>
-              <X className='h-3 w-3' />
+            <Button variant='ghost' size='sm' onClick={handleDismiss} className='size-6 p-0'>
+              <X className='size-3' />
             </Button>
           )}
         </div>
@@ -493,7 +461,7 @@ export function EnhancedBadge({ children, variant = 'default', status, className
       <Badge variant={variant} className={className}>
         {children}
       </Badge>
-      {status && <div className={`w-2 h-2 rounded-full ${getStatusColor()}`} />}
+      {status && <div className={`size-2 rounded-full ${getStatusColor()}`} />}
     </div>
   );
 }

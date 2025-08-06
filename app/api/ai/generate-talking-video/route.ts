@@ -3,14 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      script,
-      avatarId = 'Emma',
-      voiceId = 'alloy',
-      style = 'Professional',
-      duration = 30,
-      userId,
-    } = body;
+    const { script, avatarId = 'Emma', voiceId = 'alloy', style = 'Professional', duration = 30 } = body;
 
     if (!script || typeof script !== 'string') {
       return NextResponse.json({ error: 'Script is required and must be a string' }, { status: 400 });

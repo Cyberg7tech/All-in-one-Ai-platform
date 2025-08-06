@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
+
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Play, Download, Loader2, Video, Clock, Settings, Wand2 } from 'lucide-react';
@@ -321,7 +321,7 @@ export default function VideoGeneratorPage() {
                       </div>
                     ) : video.status === 'completed' ? (
                       <video
-                        className='w-full h-full object-cover rounded'
+                        className='size-full object-cover rounded'
                         controls
                         poster='/api/placeholder/320/180'>
                         <source src={video.videoUrl} type='video/mp4' />

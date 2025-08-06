@@ -5,7 +5,6 @@ import React from 'react';
 import Link from 'next/link';
 import {
   Search,
-  Filter,
   Star,
   Zap,
   Image,
@@ -16,7 +15,6 @@ import {
   BarChart3,
   MessageSquare,
   Mic,
-  Camera,
   Palette,
   Globe,
   Mail,
@@ -391,7 +389,7 @@ export default function ExplorePage() {
       <div className='mb-6 space-y-4'>
         <div className='flex flex-col sm:flex-row gap-4'>
           <div className='relative flex-1'>
-            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground' />
+            <Search className='absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground' />
             <input
               type='text'
               placeholder='Search AI tools...'

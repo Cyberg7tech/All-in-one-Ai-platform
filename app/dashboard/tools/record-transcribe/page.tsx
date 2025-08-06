@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Mic, Square, Play, Pause, Download, Copy, Loader2, FileAudio, Clock, Volume2 } from 'lucide-react';
+import { Mic, Square, Play, Pause, Download, Copy, Loader2, FileAudio, Clock } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { toast } from 'sonner';
 
@@ -34,7 +34,6 @@ export default function RecordTranscribePage() {
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioStreamRef = useRef<MediaStream | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -281,10 +280,6 @@ export default function RecordTranscribePage() {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const deleteRecording = (recordingId: string) => {
-    setRecordings((prev) => prev.filter((r) => r.id !== recordingId));
   };
 
   return (

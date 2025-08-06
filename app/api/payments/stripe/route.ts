@@ -9,7 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: NextRequest) {
   try {
-    const { priceId, successUrl, cancelUrl, customerEmail } = await request.json();
+    const { priceId, successUrl, cancelUrl } = await request.json();
 
     // Get user from Supabase
     const cookieStore = cookies();

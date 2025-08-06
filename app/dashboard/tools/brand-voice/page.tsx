@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Mic, Play, Download, Settings } from 'lucide-react';
+import { Mic, Settings } from 'lucide-react';
 
 export default function BrandVoicePage() {
   return (

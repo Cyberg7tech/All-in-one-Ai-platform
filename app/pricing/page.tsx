@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
@@ -10,19 +10,11 @@ import { LemonSqueezyCheckout } from '@/components/payments/lemonsqueezy-checkou
 import { useAuth } from '@/contexts/auth-context';
 import {
   Check,
-  Shield,
-  Zap,
-  Users,
-  Database,
-  Crown,
-  Bot,
   Image,
   Video,
   Music,
   FileText,
   MessageSquare,
-  BarChart3,
-  Settings,
   CreditCard,
   Star,
   ArrowRight,
@@ -112,7 +104,7 @@ export default function PricingPage() {
 
   const pricing = getPricing();
 
-  const handleCheckout = (plan: string) => {
+  const handleCheckout = () => {
     if (!user) {
       // Redirect to login
       window.location.href = '/login?redirect=/pricing';
@@ -231,7 +223,7 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <Button className='w-full mt-6' onClick={() => handleCheckout('pro')}>
+              <Button className='w-full mt-6' onClick={() => handleCheckout()}>
                 Start Pro Trial
                 <ArrowRight className='ml-2 size-4' />
               </Button>

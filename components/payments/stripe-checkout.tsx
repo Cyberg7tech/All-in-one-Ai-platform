@@ -1,7 +1,7 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Check, CreditCard, Shield, Zap, Users, Database, Crown } from 'lucide-react';
@@ -75,18 +75,11 @@ const plans: PricingPlan[] = [
 interface StripeCheckoutProps {
   userId?: string;
   userEmail?: string;
-  onSuccess?: (subscriptionId: string) => void;
   onError?: (error: string) => void;
   className?: string;
 }
 
-export function StripeCheckout({
-  userId,
-  userEmail,
-  onSuccess,
-  onError,
-  className = '',
-}: StripeCheckoutProps) {
+export function StripeCheckout({ userId, userEmail, onError, className = '' }: StripeCheckoutProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -193,7 +186,7 @@ export function StripeCheckout({
               disabled={loading === plan.id || !plan.stripePriceId}>
               {loading === plan.id ? (
                 <div className='flex items-center'>
-                  <div className='w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2' />
+                  <div className='size-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2' />
                   Processing...
                 </div>
               ) : plan.price === 0 ? (
@@ -258,7 +251,7 @@ export function StripeCustomerPortal({ customerId }: { customerId: string }) {
     <Button onClick={handleManageSubscription} disabled={loading} variant='outline' className='w-full'>
       {loading ? (
         <div className='flex items-center'>
-          <div className='w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2' />
+          <div className='size-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2' />
           Loading...
         </div>
       ) : (

@@ -4,7 +4,7 @@ import { AIAPIService } from '@/lib/ai/api-integration';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { prompt, room_type = 'living room', style = 'modern', budget = 'medium', userId } = body;
+    const { prompt, room_type = 'living room', style = 'modern', budget = 'medium' } = body;
 
     if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json({ error: 'Prompt is required and must be a string' }, { status: 400 });

@@ -67,7 +67,7 @@ export function SideNavigation() {
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`}>
                 <div className='flex items-center space-x-3'>
-                  <item.icon className='w-5 h-5' />
+                  <item.icon className='size-5' />
                   <span>{item.name}</span>
                 </div>
                 {item.badge && (
@@ -87,7 +87,7 @@ export function SideNavigation() {
           variant='ghost'
           className='w-full justify-start text-muted-foreground hover:text-foreground'
           onClick={logout}>
-          <LogOut className='w-4 h-4 mr-3' />
+          <LogOut className='size-4 mr-3' />
           Logout
         </Button>
       </div>
