@@ -22,6 +22,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { AIIcon } from '@/components/ui/ai-icon';
 import { usePageVisibility } from '@/hooks/usePageVisibility';
+import { ThemeToggle } from '@/components/theme-switcher';
 
 // Remove metadata since this is now a client component
 
@@ -150,6 +151,7 @@ export default function HomePage() {
             </Link>
           </div>
           <div className='flex items-center space-x-3'>
+            <ThemeToggle />
             <Button variant='ghost' asChild>
               <Link href='/test'>Test Platform</Link>
             </Button>
@@ -160,34 +162,64 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className='container mx-auto px-4 py-20 text-center'>
-        <div className='max-w-4xl mx-auto'>
-          <Badge variant='secondary' className='mb-4'>
-            🚀 Now featuring AI Agents & Advanced Analytics
-          </Badge>
-          <h1 className='text-4xl sm:text-6xl font-bold tracking-tight mb-6'>
-            <span className='bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent'>
-              One Ai
-            </span>
-            <br />
-            for Modern Business
-          </h1>
-          <p className='text-xl text-muted-foreground mb-8 leading-relaxed'>
-            Transform your workflow with intelligent AI agents, advanced forecasting, anomaly detection, and
-            seamless access to multiple AI models. Built for developers, designed for everyone.
-          </p>
-          <div className='flex flex-col sm:flex-row gap-4 justify-center mb-12'>
-            <Button size='lg' className='text-lg px-8' asChild>
-              <Link href='/login'>
-                <LogIn className='mr-2 size-5' />
-                Try Login
-              </Link>
-            </Button>
-            <Button size='lg' variant='outline' className='text-lg px-8' asChild>
-              <Link href='/test'>Test Platform</Link>
-            </Button>
-          </div>
+      {/* Hero Section - BuilderKit Pro Style */}
+      <section className='relative overflow-hidden bg-gradient-to-br from-background via-background to-muted/20'>
+        <div className='absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]' />
+        <div className='relative container mx-auto px-4 py-24 text-center'>
+          <div className='max-w-5xl mx-auto'>
+            {/* Announcement Badge */}
+            <div className='flex justify-center mb-8'>
+              <Badge 
+                variant='secondary' 
+                className='px-4 py-2 text-sm font-medium bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors'
+              >
+                🚀 NEW: Advanced AI Agents & 18+ Tools Available
+              </Badge>
+            </div>
+
+            {/* Main Headline */}
+            <h1 className='text-5xl sm:text-7xl font-bold tracking-tight mb-8 leading-tight'>
+              The Complete
+              <span className='block bg-gradient-to-r from-primary via-purple-600 to-cyan-600 bg-clip-text text-transparent'>
+                AI Platform
+              </span>
+              for Business
+            </h1>
+
+            {/* Subtitle */}
+            <p className='text-xl sm:text-2xl text-muted-foreground mb-12 leading-relaxed max-w-3xl mx-auto'>
+              Transform your workflow with 18+ AI tools, intelligent agents, advanced analytics, and seamless 
+              access to multiple AI models. Built for developers, designed for everyone.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className='flex flex-col sm:flex-row gap-4 justify-center mb-16'>
+              <Button size='lg' className='text-lg px-12 py-4 h-14 bg-primary hover:bg-primary/90 shadow-lg' asChild>
+                <Link href='/login'>
+                  <LogIn className='mr-2 size-5' />
+                  Start Building Now
+                  <ArrowRight className='ml-2 size-5' />
+                </Link>
+              </Button>
+              <Button size='lg' variant='outline' className='text-lg px-12 py-4 h-14 border-2' asChild>
+                <Link href='#demo'>
+                  <Bot className='mr-2 size-5' />
+                  View Demo
+                </Link>
+              </Button>
+            </div>
+
+            {/* Social Proof */}
+            <div className='flex flex-col items-center space-y-4'>
+              <p className='text-sm text-muted-foreground'>Trusted by developers worldwide</p>
+              <div className='flex items-center space-x-8 opacity-60'>
+                <div className='text-sm font-medium'>500+ Projects</div>
+                <div className='w-1 h-1 rounded-full bg-muted-foreground' />
+                <div className='text-sm font-medium'>50+ Countries</div>
+                <div className='w-1 h-1 rounded-full bg-muted-foreground' />
+                <div className='text-sm font-medium'>99.9% Uptime</div>
+              </div>
+            </div>
 
           {/* Hero Stats */}
           <div className='grid grid-cols-2 md:grid-cols-4 gap-8 mt-16'>
@@ -316,23 +348,171 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Pricing Section - BuilderKit Pro Style */}
+      <section id='pricing' className='py-20 bg-muted/30'>
+        <div className='container mx-auto px-4'>
+          <div className='text-center mb-16'>
+            <h2 className='text-3xl md:text-4xl font-bold mb-4'>Simple, Transparent Pricing</h2>
+            <p className='text-xl text-muted-foreground max-w-2xl mx-auto'>
+              Choose the perfect plan for your needs. Start free, upgrade as you grow.
+            </p>
+          </div>
+
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto'>
+            {/* Free Plan */}
+            <Card className='relative border-2 hover:shadow-lg transition-shadow'>
+              <CardHeader className='text-center pb-8'>
+                <CardTitle className='text-2xl'>Starter</CardTitle>
+                <div className='mt-4'>
+                  <span className='text-4xl font-bold'>$0</span>
+                  <span className='text-muted-foreground'>/month</span>
+                </div>
+                <p className='text-muted-foreground mt-2'>Perfect for getting started</p>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                <ul className='space-y-3'>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    5 AI Tools Access
+                  </li>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    1,000 API Calls/month
+                  </li>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    Basic Support
+                  </li>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    Community Access
+                  </li>
+                </ul>
+                <Button className='w-full mt-6' variant='outline' asChild>
+                  <Link href='/login'>Get Started Free</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Pro Plan */}
+            <Card className='relative border-2 border-primary shadow-lg scale-105'>
+              <div className='absolute -top-3 left-1/2 transform -translate-x-1/2'>
+                <Badge className='bg-primary text-primary-foreground px-3 py-1'>Most Popular</Badge>
+              </div>
+              <CardHeader className='text-center pb-8'>
+                <CardTitle className='text-2xl'>Professional</CardTitle>
+                <div className='mt-4'>
+                  <span className='text-4xl font-bold'>$29</span>
+                  <span className='text-muted-foreground'>/month</span>
+                </div>
+                <p className='text-muted-foreground mt-2'>For growing businesses</p>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                <ul className='space-y-3'>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    All 18+ AI Tools
+                  </li>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    25,000 API Calls/month
+                  </li>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    Priority Support
+                  </li>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    Custom AI Agents
+                  </li>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    Advanced Analytics
+                  </li>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    API Access
+                  </li>
+                </ul>
+                <Button className='w-full mt-6' asChild>
+                  <Link href='/login'>Start Pro Trial</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Enterprise Plan */}
+            <Card className='relative border-2 hover:shadow-lg transition-shadow'>
+              <CardHeader className='text-center pb-8'>
+                <CardTitle className='text-2xl'>Enterprise</CardTitle>
+                <div className='mt-4'>
+                  <span className='text-4xl font-bold'>$99</span>
+                  <span className='text-muted-foreground'>/month</span>
+                </div>
+                <p className='text-muted-foreground mt-2'>For large organizations</p>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                <ul className='space-y-3'>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    Unlimited AI Tools
+                  </li>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    Unlimited API Calls
+                  </li>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    24/7 Dedicated Support
+                  </li>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    White-label Solution
+                  </li>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    Custom Integrations
+                  </li>
+                  <li className='flex items-center'>
+                    <Shield className='size-4 text-green-500 mr-3' />
+                    SLA Guarantee
+                  </li>
+                </ul>
+                <Button className='w-full mt-6' variant='outline' asChild>
+                  <Link href='/contact'>Contact Sales</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Pricing FAQ */}
+          <div className='text-center mt-16'>
+            <p className='text-muted-foreground mb-4'>
+              All plans include core features, SSL security, and regular updates.
+            </p>
+            <Button variant='ghost' asChild>
+              <Link href='/pricing-faq'>View Pricing FAQ →</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className='py-20'>
         <div className='container mx-auto px-4 text-center'>
           <div className='max-w-3xl mx-auto'>
-            <h2 className='text-3xl md:text-4xl font-bold mb-6'>Ready to Explore the AI Platform?</h2>
+            <h2 className='text-3xl md:text-4xl font-bold mb-6'>Ready to Transform Your Workflow?</h2>
             <p className='text-xl text-muted-foreground mb-8'>
-              Experience our comprehensive AI platform. Register or sign in to start exploring immediately!
+              Join thousands of developers and businesses already using our AI platform to build amazing products.
             </p>
             <div className='flex flex-col sm:flex-row gap-4 justify-center'>
               <Button size='lg' className='text-lg px-8' asChild>
                 <Link href='/login'>
                   <LogIn className='mr-2 size-5' />
-                  Login <ArrowRight className='ml-2 size-5' />
+                  Start Building Today <ArrowRight className='ml-2 size-5' />
                 </Link>
               </Button>
               <Button size='lg' variant='outline' className='text-lg px-8' asChild>
-                <Link href='/test'>Test Platform</Link>
+                <Link href='/demo'>Schedule Demo</Link>
               </Button>
             </div>
           </div>
