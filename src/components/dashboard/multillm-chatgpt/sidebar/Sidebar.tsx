@@ -39,7 +39,11 @@ const Sidebar = async () => {
             </p>
           )}
 
-          <div>{data?.map((history) => <HistoryItem key={history.id} history={history} />)}</div>
+          <div>
+            {data?.map((history) => (
+              <HistoryItem key={history.id} history={history} />
+            ))}
+          </div>
         </div>
       </div>
 

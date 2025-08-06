@@ -37,7 +37,11 @@ const Sidebar = async () => {
             <p className='text-sm text-accent-foreground/50 text-center mt-40'>No History</p>
           )}
 
-          <div>{data?.map((history) => <HistoryItem key={history.id} history={history} />)}</div>
+          <div>
+            {data?.map((history) => (
+              <HistoryItem key={history.id} history={history} />
+            ))}
+          </div>
         </div>
       </div>
 

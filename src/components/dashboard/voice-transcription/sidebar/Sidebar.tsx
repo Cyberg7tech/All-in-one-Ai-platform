@@ -12,7 +12,9 @@ const Sidebar = () => {
           <Logo />
         </div>
         <div className='space-y-1'>
-          {SidebarRoutes?.map((item) => <SidebarItem key={item.label} route={item} />)}
+          {SidebarRoutes?.map((item) => (
+            <SidebarItem key={item.label} route={item} />
+          ))}
         </div>
       </div>
 
