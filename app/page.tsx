@@ -220,6 +220,7 @@ export default function HomePage() {
                 <div className='text-sm font-medium'>99.9% Uptime</div>
               </div>
             </div>
+          </div>
 
           {/* Hero Stats */}
           <div className='grid grid-cols-2 md:grid-cols-4 gap-8 mt-16'>
