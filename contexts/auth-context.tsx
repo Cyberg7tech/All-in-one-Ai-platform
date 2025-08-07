@@ -1,7 +1,7 @@
 'use client';
-import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useSupabaseClient } from '@/components/providers/supabase-provider';
-import { Session, User } from '@supabase/supabase-js';
+import { Session } from '@supabase/supabase-js';
 
 interface AuthUser {
   id: string;
@@ -20,6 +20,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   signup: (email: string, password: string, name: string, plan: string) => Promise<void>;
   refreshUser: () => Promise<void>;
+  updateDisplayName: (name: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -79,6 +80,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   };
 
+  const fetchUserData = async (userId: string): Promise<AuthUser | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('name, role, subscription_plan, created_at')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user data:', error);
+        return null;
+      }
+
+      return {
+        id: userId,
+        email: '', // Will be filled from session
+        name: data?.name || '',
+        role: data?.role || 'user',
+        subscription_plan: data?.subscription_plan || 'free',
+        created_at: data?.created_at || '',
+      };
+    } catch (error) {
+      console.error('Error in fetchUserData:', error);
+      return null;
+    }
+  };
+
   const refreshUser = async () => {
     if (!mounted) return;
     try {
@@ -96,7 +124,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else if (!session?.user) {
         setUser(null);
       } else {
-        setUser(getUserFromSession(session));
+        // Fetch complete user data from database
+        const userData = await fetchUserData(session.user.id);
+        if (userData) {
+          setUser({
+            ...userData,
+            email: session.user.email ?? '',
+          });
+        } else {
+          setUser(getUserFromSession(session));
+        }
       }
     } catch (error) {
       console.error('Error in refreshUser:', error);
@@ -106,7 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     if (!mounted) throw new Error('Component not mounted');
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw new Error(error.message);
     // Session will be handled by the useSession hook
   };
@@ -119,21 +156,80 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signup = async (email: string, password: string, name: string, plan: string) => {
     if (!mounted) throw new Error('Component not mounted');
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error || !data.user) throw new Error(error?.message || 'Signup failed');
-    await supabase.from('users').insert({
-      id: data.user.id,
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name: name,
+        },
+      },
+    });
+    if (error) throw new Error(error?.message || 'Signup failed');
+
+    // Get the user from the session
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('User creation failed');
+
+    // Insert user data into users table
+    const { error: insertError } = await supabase.from('users').insert({
+      id: user.id,
       email,
       name,
       role: 'user',
       subscription_plan: plan,
     });
+
+    if (insertError) {
+      console.error('Error inserting user data:', insertError);
+    }
+
     // Session will be handled by the useSession hook
+  };
+
+  const updateDisplayName = async (name: string) => {
+    if (!mounted || !user) throw new Error('User not authenticated');
+
+    try {
+      // Update user metadata
+      const { error: metadataError } = await supabase.auth.updateUser({
+        data: { name: name },
+      });
+
+      if (metadataError) {
+        console.error('Error updating user metadata:', metadataError);
+      }
+
+      // Update users table
+      const { error: dbError } = await supabase.from('users').update({ name: name }).eq('id', user.id);
+
+      if (dbError) {
+        console.error('Error updating user in database:', dbError);
+        throw new Error('Failed to update display name');
+      }
+
+      // Update local state
+      setUser((prev) => (prev ? { ...prev, name } : null));
+    } catch (error) {
+      console.error('Error in updateDisplayName:', error);
+      throw error;
+    }
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, isLoading, login, logout, signup, refreshUser }}>
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        login,
+        logout,
+        signup,
+        refreshUser,
+        updateDisplayName,
+      }}>
       {children}
     </AuthContext.Provider>
   );

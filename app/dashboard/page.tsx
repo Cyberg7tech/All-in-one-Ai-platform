@@ -5,10 +5,9 @@ import { ArrowRight, Bot, Brain, TrendingUp, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth-context';
-
+import { DisplayNameModal } from '@/components/dashboard/display-name-modal';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { dbHelpers } from '@/lib/supabase/client';
-import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import { formatDate } from '@/lib/utils';
 
@@ -46,10 +45,8 @@ const quickActions = [
 ];
 
 export default function DashboardPage() {
-  const { user, refreshUser } = useAuth();
+  const { user } = useAuth();
   const [showNameModal, setShowNameModal] = useState(false);
-  const [displayName, setDisplayName] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
@@ -133,62 +130,32 @@ export default function DashboardPage() {
     }
   }, [user]);
 
-  const handleSaveName = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!displayName.trim() || !user?.id) return;
-
-    setIsSaving(true);
-    try {
-      const supabase = getSupabaseClient();
-      const { error } = await supabase.from('users').update({ name: displayName.trim() }).eq('id', user.id);
-
-      if (error) {
-        console.error('Error updating user name:', error);
-        toast.error('Failed to update name. Please try again.');
-        return;
-      }
-
-      await refreshUser(); // Refresh user data from context
-      setShowNameModal(false);
-      toast.success('Name updated successfully!');
-    } catch (error) {
-      console.error('Error updating user name:', error);
-      toast.error('Failed to update name. Please try again.');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   return (
     <div className='min-h-screen bg-background'>
       {/* Display Name Modal */}
-      {showNameModal && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
-          <div className='bg-background p-8 rounded-lg shadow-lg w-full max-w-sm'>
-            <h2 className='text-xl font-bold mb-4'>Set Your Display Name</h2>
-            <form onSubmit={handleSaveName} className='space-y-4'>
-              <input
-                type='text'
-                className='w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent'
-                placeholder='Enter your name'
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                required
-              />
-              <Button type='submit' className='w-full' disabled={isSaving}>
-                {isSaving ? 'Saving...' : 'Save Name'}
-              </Button>
-            </form>
-          </div>
-        </div>
-      )}
+      <DisplayNameModal
+        isOpen={showNameModal}
+        onClose={() => setShowNameModal(false)}
+        currentName={user?.name || ''}
+      />
       {/* Main Content */}
       <main className='container mx-auto px-4 py-8'>
         {/* Welcome Section */}
         <div className='mb-8'>
           <div className='flex items-center justify-between'>
             <div>
-              <h1 className='text-3xl font-bold mb-2'>Welcome back, {user?.name || user?.email || ''}! 👋</h1>
+              <div className='flex items-center gap-2 mb-2'>
+                <h1 className='text-3xl font-bold'>Welcome back, {user?.name || user?.email || ''}! 👋</h1>
+                {user?.name && (
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    onClick={() => setShowNameModal(true)}
+                    className='text-muted-foreground hover:text-foreground'>
+                    Edit
+                  </Button>
+                )}
+              </div>
               <p className='text-muted-foreground'>
                 Ready to build something amazing with AI? Here's what you can do today.
               </p>

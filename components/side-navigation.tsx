@@ -2,47 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Home,
-  MessageSquare,
-  Bot,
-  Wrench,
-  Image,
-  Video,
-  UserCheck,
-  Mic,
-  Volume2,
-  FileAudio,
-  Music,
-  PaintBucket,
-  Camera,
-  Sparkles,
-  Zap,
-  History,
-  LogOut,
-  BarChart3,
-} from 'lucide-react';
+import { Home, MessageSquare, Bot, Wrench, History, LogOut, BarChart3, Grid3X3 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 const navigationItems = [
   { name: 'Home', href: '/dashboard', icon: Home },
+  { name: 'AI Apps', href: '/dashboard/ai-apps', icon: Grid3X3 },
   { name: 'Chat', href: '/dashboard/chat', icon: MessageSquare },
   { name: 'Agents', href: '/dashboard/agents', icon: Bot },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
   { name: 'Tools', href: '/dashboard/explore', icon: Wrench },
-  { name: 'AI Images', href: '/dashboard/tools/image-generator', icon: Image },
-  { name: 'AI Videos', href: '/dashboard/tools/video-generator', icon: Video, badge: 'New' },
-  { name: 'AI Talking Videos', href: '/dashboard/tools/talking-videos', icon: UserCheck, badge: 'New' },
-  { name: 'AI Text to Speech', href: '/dashboard/tools/text-to-speech', icon: Volume2 },
-  { name: 'AI Speech to Text', href: '/dashboard/tools/speech-to-text', icon: Mic },
-  { name: 'Record & Transcribe', href: '/dashboard/tools/record-transcribe', icon: FileAudio },
-  { name: 'AI Music Generator', href: '/dashboard/tools/music-generator', icon: Music, badge: 'New' },
-  { name: 'AI Interior Designer', href: '/dashboard/tools/interior-design', icon: PaintBucket },
-  { name: 'AI Photo Studio', href: '/dashboard/tools/photo-studio', icon: Camera },
-  { name: 'Headshots', href: '/dashboard/tools/headshots', icon: Sparkles, badge: 'New' },
-  { name: 'Brand Voice', href: '/dashboard/tools/brand-voice', icon: Zap },
   { name: 'History', href: '/dashboard/history', icon: History },
 ];
 
@@ -70,11 +40,6 @@ export function SideNavigation() {
                   <item.icon className='size-5' />
                   <span>{item.name}</span>
                 </div>
-                {item.badge && (
-                  <Badge variant='secondary' className='text-xs'>
-                    {item.badge}
-                  </Badge>
-                )}
               </Link>
             );
           })}

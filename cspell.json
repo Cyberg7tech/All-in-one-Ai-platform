@@ -142,7 +142,10 @@
     "clsx",
     "Linecap",
     "rgba",
-    "Builderkit"
+    "Builderkit",
+    "multillm",
+    "llamagpt",
+    "ghibli"
   ],
   "flagWords": [],
   "overrides": [

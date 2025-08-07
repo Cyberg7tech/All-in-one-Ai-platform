@@ -46,7 +46,10 @@ export default function LoginForm() {
       } else {
         await login(email, password);
       }
-      router.push('/dashboard');
+
+      // Check for redirect URL
+      const redirectTo = searchParams.get('redirectTo') || '/dashboard';
+      router.push(redirectTo);
     } catch (err: any) {
       setError(err.message || 'An error occurred. Please try again.');
     }
@@ -187,6 +190,7 @@ export default function LoginForm() {
                       required={isSignUp}
                       className='pl-10 h-11'
                       disabled={isLoading}
+                      autoComplete='name'
                     />
                   </div>
                 </div>
@@ -205,6 +209,7 @@ export default function LoginForm() {
                     required
                     className='pl-10 h-11'
                     disabled={isLoading}
+                    autoComplete='email'
                   />
                 </div>
               </div>
@@ -222,6 +227,7 @@ export default function LoginForm() {
                     required
                     className='px-10 h-11'
                     disabled={isLoading}
+                    autoComplete={isSignUp ? 'new-password' : 'current-password'}
                   />
                   <Button
                     type='button'
