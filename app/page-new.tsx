@@ -200,15 +200,31 @@ export default function HomePage() {
             <div>
               <h3 className='font-semibold mb-4'>Product</h3>
               <ul className='space-y-2 text-muted-foreground'>
-                <li><Link href='/pricing' className='hover:text-foreground transition-colors'>Pricing</Link></li>
-                <li><Link href='/docs' className='hover:text-foreground transition-colors'>Docs</Link></li>
+                <li>
+                  <Link href='/pricing' className='hover:text-foreground transition-colors'>
+                    Pricing
+                  </Link>
+                </li>
+                <li>
+                  <Link href='/docs' className='hover:text-foreground transition-colors'>
+                    Docs
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
               <h3 className='font-semibold mb-4'>Company</h3>
               <ul className='space-y-2 text-muted-foreground'>
-                <li><Link href='/about' className='hover:text-foreground transition-colors'>About</Link></li>
-                <li><Link href='/privacy' className='hover:text-foreground transition-colors'>Privacy</Link></li>
+                <li>
+                  <Link href='/about' className='hover:text-foreground transition-colors'>
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link href='/privacy' className='hover:text-foreground transition-colors'>
+                    Privacy
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
