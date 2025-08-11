@@ -24,7 +24,12 @@ export async function POST(request: NextRequest) {
     });
 
     const body = await request.json();
-    const { messages, model = 'gpt-4o-mini', maxTokens = 1000, temperature = 0.7 } = body;
+    const {
+      messages,
+      model = 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+      maxTokens = 1000,
+      temperature = 0.7,
+    } = body;
 
     console.log('Chat API: Request details', {
       model,
@@ -51,6 +56,17 @@ export async function POST(request: NextRequest) {
 
     // Try primary model first
     try {
+      // ensure model exists in DB to avoid downstream FK issues
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/models/ensure`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: usedModel }),
+          cache: 'no-store',
+        });
+      } catch (e) {
+        // best-effort; ignore
+      }
       console.log(`Attempting ${usedProvider} with model ${usedModel}`);
 
       response = await apiService.chat(messages, usedModel, {

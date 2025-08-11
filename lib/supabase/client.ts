@@ -30,32 +30,17 @@ export const getSupabaseClient = () => {
   return _client;
 };
 
-// Admin client for backend operations
-let _adminClient: SupabaseClient | null = null;
-
-export function getSupabaseAdmin(): SupabaseClient {
-  if (!_adminClient) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ttnkomdxbkmfmkaycjao.supabase.co';
-    const supabaseServiceKey =
-      process.env.SUPABASE_SERVICE_ROLE_KEY ||
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtvbWR4YmttZm1rYXljamFvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzE1NzAxOCwiZXhwIjoyMDY4NzMzMDE4fQ.UOE8fFmFYqnCHKiA-MlfHEfxDxViasspD64trjmsMLI';
-
-    _adminClient = createBrowserClient(supabaseUrl, supabaseServiceKey);
-
-    // Store reference for debugging
-    if (typeof window !== 'undefined') {
-      (window as any).__supabaseAdminInstance = _adminClient;
-    }
-  }
-
-  return _adminClient;
-}
+// Admin operations must be performed via server routes; no service role client in browser
 
 // Enhanced database helpers for the One AI platform
 export const dbHelpers = {
   // User Management
   async createUser(userData: { email: string; name: string; role?: string; subscription_plan?: string }) {
-    const { data, error } = await getSupabaseAdmin().from('users').insert(userData).select().single();
+    const res = await fetch('/api/models/ensure', { method: 'HEAD' }).catch(() => null);
+    if (!res) {
+      console.warn('Admin operations are not available on client; create user via server API');
+    }
+    const { data, error } = await getSupabaseClient().from('users').insert(userData).select().single();
 
     if (error) {
       console.error('Error creating user:', error);
@@ -117,13 +102,17 @@ export const dbHelpers = {
 
       if (insertError) {
         // Fallback to admin client when available (project already exposes admin client)
-        const { data, error } = await getSupabaseAdmin()
-          .from('ai_models')
-          .insert({ id: modelId, name: modelId, provider: inferredProvider })
-          .select()
-          .single();
-        if (error) throw error;
-        return data;
+        // Fallback to server endpoint to ensure model (uses service role on server)
+        const ensureRes = await fetch('/api/models/ensure', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: modelId }),
+        }).catch(() => null);
+        if (ensureRes && ensureRes.ok) {
+          const json = await ensureRes.json();
+          return json.model || null;
+        }
+        throw insertError;
       }
 
       return inserted;
@@ -141,6 +130,16 @@ export const dbHelpers = {
     agent_id?: string;
   }) {
     // Make sure referenced model exists to satisfy FK constraint
+    // First try server ensure endpoint (avoids RLS issues on client)
+    try {
+      await fetch('/api/models/ensure', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: sessionData.model_id }),
+      });
+    } catch {
+      // No-op if offline
+    }
     await dbHelpers.ensureModelExists(sessionData.model_id);
 
     const { data, error } = await getSupabaseClient()

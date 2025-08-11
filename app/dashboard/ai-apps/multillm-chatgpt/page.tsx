@@ -693,7 +693,7 @@ export default function MultiLLMChatPage() {
       <div className='w-80 border-r bg-muted/20 flex flex-col'>
         {/* Header */}
         <div className='p-4 border-b'>
-          <Button onClick={createNewSession} className='w-full'>
+          <Button onClick={createNewSession} className='w-full' disabled={isCreating}>
             <Plus className='size-4 mr-2' />
             New Chat
           </Button>
