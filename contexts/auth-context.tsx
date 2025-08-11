@@ -170,7 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // User data will be automatically inserted by the auth trigger
     // No need to manually insert into users table
-    
+
     // Session will be handled by the useSession hook
   };
 
