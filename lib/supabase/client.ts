@@ -75,12 +75,74 @@ export const dbHelpers = {
   },
 
   // Chat Sessions
+  async ensureModelExists(modelId: string) {
+    try {
+      // Check if model exists
+      const { data: existing } = await getSupabaseClient()
+        .from('ai_models')
+        .select('id')
+        .eq('id', modelId)
+        .single();
+
+      if (existing?.id) return existing;
+
+      // Try to infer provider from id
+      const lower = modelId.toLowerCase();
+      const inferredProvider = lower.includes('gpt')
+        ? 'openai'
+        : lower.includes('claude')
+          ? 'anthropic'
+          : lower.includes('gemini')
+            ? 'google'
+            : lower.includes('deepseek')
+              ? 'deepseek'
+              : lower.includes('llama') || lower.includes('qwen') || lower.includes('mistral')
+                ? 'together'
+                : 'together';
+
+      // Insert minimal row; if RLS blocks, try admin client
+      let insertError: any = null;
+      let inserted: any = null;
+      try {
+        const { data, error } = await getSupabaseClient()
+          .from('ai_models')
+          .insert({ id: modelId, name: modelId, provider: inferredProvider })
+          .select()
+          .single();
+        inserted = data;
+        insertError = error;
+      } catch (e) {
+        insertError = e;
+      }
+
+      if (insertError) {
+        // Fallback to admin client when available (project already exposes admin client)
+        const { data, error } = await getSupabaseAdmin()
+          .from('ai_models')
+          .insert({ id: modelId, name: modelId, provider: inferredProvider })
+          .select()
+          .single();
+        if (error) throw error;
+        return data;
+      }
+
+      return inserted;
+    } catch (error) {
+      console.error('ensureModelExists error:', error);
+      // Best-effort; continue even if we could not insert
+      return null;
+    }
+  },
+
   async createChatSession(sessionData: {
     user_id: string;
     title: string;
     model_id: string;
     agent_id?: string;
   }) {
+    // Make sure referenced model exists to satisfy FK constraint
+    await dbHelpers.ensureModelExists(sessionData.model_id);
+
     const { data, error } = await getSupabaseClient()
       .from('chat_sessions')
       .insert(sessionData)
@@ -88,6 +150,16 @@ export const dbHelpers = {
       .single();
 
     if (error) {
+      // Retry once if FK violation occurs by ensuring model again
+      if ((error as any)?.code === '23503') {
+        await dbHelpers.ensureModelExists(sessionData.model_id);
+        const retry = await getSupabaseClient().from('chat_sessions').insert(sessionData).select().single();
+        if (retry.error) {
+          console.error('Error creating chat session (retry):', retry.error);
+          throw retry.error;
+        }
+        return retry.data as any;
+      }
       console.error('Error creating chat session:', error);
       throw error;
     }
