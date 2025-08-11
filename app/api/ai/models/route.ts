@@ -5,8 +5,36 @@ const apiService = AIAPIService.getInstance();
 
 export async function GET() {
   try {
-    // Get all available models from the AI API service
-    const availableModels = apiService.getAvailableModels();
+    // Prefer dynamic fetch from Together.ai if configured
+    let availableModels: any[] = [];
+
+    if (process.env.TOGETHER_API_KEY) {
+      try {
+        const res = await fetch('https://api.together.xyz/v1/models', {
+          headers: {
+            Authorization: `Bearer ${process.env.TOGETHER_API_KEY}`,
+          },
+          cache: 'no-store',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          availableModels = (data?.data || []).map((m: any) => ({
+            id: m.id,
+            name: m.display_name || m.id,
+            provider: 'together',
+            category: 'chat',
+          }));
+        }
+      } catch (e) {
+        // fall back to static list below
+        console.warn('Falling back to static model list for Together.ai');
+      }
+    }
+
+    if (availableModels.length === 0) {
+      // Fallback to curated list from the API service (Together/OpenAI depending on keys)
+      availableModels = apiService.getAvailableModels();
+    }
 
     // Add additional metadata and categorization
     const enhancedModels = availableModels.map((model) => ({
@@ -38,9 +66,9 @@ export async function GET() {
       speed:
         model.provider === 'together'
           ? 'fast'
-          : model.id.includes('mini') || model.id.includes('flash')
+          : model.id?.includes?.('mini') || model.id?.includes?.('flash')
             ? 'fast'
-            : model.id.includes('o1') || model.id.includes('opus')
+            : model.id?.includes?.('o1') || model.id?.includes?.('opus')
               ? 'slow'
               : 'medium',
     }));

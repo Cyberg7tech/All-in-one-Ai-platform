@@ -93,7 +93,7 @@ export default function LoginForm() {
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
+    <div className='min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-950 dark:via-slate-950 dark:to-black flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
       <div className='sm:mx-auto sm:w-full sm:max-w-md'>
         {/* Back to Home Button */}
         <div className='flex justify-start mb-6'>
@@ -110,13 +110,13 @@ export default function LoginForm() {
           <div className='mx-auto size-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center shadow-lg'>
             <AIIcon size={32} className='text-primary-foreground' />
           </div>
-          <h2 className='mt-6 text-3xl font-bold tracking-tight text-gray-900'>Welcome Back</h2>
-          <p className='mt-2 text-sm text-gray-600'>Sign in to your One Ai account</p>
+          <h2 className='mt-6 text-3xl font-bold tracking-tight text-foreground'>Welcome Back</h2>
+          <p className='mt-2 text-sm text-muted-foreground'>Sign in to your One Ai account</p>
         </div>
       </div>
 
       <div className='mt-8 sm:mx-auto sm:w-full sm:max-w-md'>
-        <Card className='shadow-xl border-0 bg-white/80 backdrop-blur-sm'>
+        <Card className='shadow-xl bg-card border border-border'>
           <CardHeader className='space-y-1 pb-4'>
             <div className='flex items-center justify-center space-x-2'>
               <Button
@@ -143,7 +143,7 @@ export default function LoginForm() {
               variant='outline'
               onClick={handleGoogleOAuth}
               disabled={isLoading}
-              className='w-full h-11 bg-white hover:bg-gray-50 border-gray-200'>
+              className='w-full h-11 bg-background hover:bg-muted/80 border-border'>
               <svg className='mr-2 size-4' viewBox='0 0 24 24'>
                 <path
                   fill='currentColor'
@@ -170,7 +170,7 @@ export default function LoginForm() {
                 <span className='w-full border-t' />
               </div>
               <div className='relative flex justify-center text-xs uppercase'>
-                <span className='bg-white px-2 text-muted-foreground'>Or continue with</span>
+                <span className='bg-background px-2 text-muted-foreground'>Or continue with</span>
               </div>
             </div>
 
@@ -209,6 +209,7 @@ export default function LoginForm() {
                     required
                     className='pl-10 h-11'
                     disabled={isLoading}
+                    autoFocus
                     autoComplete='email'
                   />
                 </div>
@@ -234,6 +235,8 @@ export default function LoginForm() {
                     variant='ghost'
                     size='sm'
                     className='absolute right-0 top-0 h-11 px-3 hover:bg-transparent'
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    tabIndex={-1}
                     onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? (
                       <EyeOff className='size-4 text-muted-foreground' />

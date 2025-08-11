@@ -72,6 +72,7 @@ const CHAT_TEMPLATES = [
   },
 ];
 
+// Fallback list; replaced at runtime by models from the API when available
 const MULTI_LLM_MODELS = [
   {
     id: 'gpt-4o-mini',
@@ -135,6 +136,7 @@ export default function MultiLLMChatPage() {
   const [selectedModel, setSelectedModel] = useState('gpt-4o-mini');
   const [modelSearch, setModelSearch] = useState('');
   const [showModelPicker, setShowModelPicker] = useState(false);
+  const [availableModels, setAvailableModels] = useState<typeof MULTI_LLM_MODELS>(MULTI_LLM_MODELS);
 
   // Voice recording states
   const [isRecording, setIsRecording] = useState(false);
@@ -151,13 +153,13 @@ export default function MultiLLMChatPage() {
   // Filter and group models
   const filteredModels = useMemo(
     () =>
-      MULTI_LLM_MODELS.filter(
+      availableModels.filter(
         (model) =>
           model.name.toLowerCase().includes(modelSearch.toLowerCase()) ||
           model.provider.toLowerCase().includes(modelSearch.toLowerCase()) ||
           model.capabilities.some((cap) => cap.toLowerCase().includes(modelSearch.toLowerCase()))
       ),
-    [modelSearch]
+    [modelSearch, availableModels]
   );
 
   const groupedModels = useMemo(
@@ -180,12 +182,41 @@ export default function MultiLLMChatPage() {
     [sessions, currentSessionId]
   );
   const selectedModelInfo = useMemo(
-    () => MULTI_LLM_MODELS.find((m) => m.id === selectedModel),
-    [selectedModel]
+    () => availableModels.find((m) => m.id === selectedModel),
+    [availableModels, selectedModel]
   );
 
   // Refs for preventing infinite loops
   const hasFetchedSessions = useRef(false);
+
+  // Load available models from API once
+  useEffect(() => {
+    const loadModels = async () => {
+      try {
+        const res = await fetch('/api/ai/models');
+        if (!res.ok) return;
+        const data = await res.json();
+        const models = (data?.models?.all || []).map((m: any) => ({
+          id: m.id,
+          name: m.name,
+          provider: m.provider,
+          category: m.category,
+          tier: m.tier,
+          capabilities: m.capabilities || ['chat'],
+          contextWindow: m.contextWindow || 32768,
+          speed: m.speed || 'fast',
+        }));
+        if (models.length > 0) {
+          setAvailableModels(models);
+          const preferred = models.find((m: any) => m.provider === 'together') || models[0];
+          if (preferred) setSelectedModel(preferred.id);
+        }
+      } catch (e) {
+        console.warn('Failed to load models; using fallback list');
+      }
+    };
+    loadModels();
+  }, []);
 
   // Load chat sessions from DB only once when user.id is available
   useEffect(() => {
@@ -280,8 +311,11 @@ export default function MultiLLMChatPage() {
   }, []);
 
   // Create new session in DB
+  const [isCreating, setIsCreating] = useState(false);
   const createNewSession = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user?.id || isCreating) return;
+    setIsCreating(true);
+    setShowModelPicker(false);
     const session = await dbHelpers.createChatSession({
       user_id: user.id,
       title: 'New Chat',
@@ -298,7 +332,8 @@ export default function MultiLLMChatPage() {
       ...prev,
     ]);
     setCurrentSessionId(String(session.id));
-  }, [user?.id, selectedModel]);
+    setIsCreating(false);
+  }, [user?.id, selectedModel, isCreating]);
 
   // Generate smart chat title based on message content
   const generateChatTitle = useCallback((messageContent: string): string => {
@@ -653,7 +688,7 @@ export default function MultiLLMChatPage() {
   );
 
   return (
-    <div className='flex h-screen bg-background'>
+    <div className='flex h-[calc(100vh-64px)] bg-background'>
       {/* Sidebar */}
       <div className='w-80 border-r bg-muted/20 flex flex-col'>
         {/* Header */}
