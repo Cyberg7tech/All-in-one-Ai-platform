@@ -1,7 +1,7 @@
 'use client';
-import { createContext, useContext, useState } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
+import { createContext, useContext } from 'react';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/lib/supabase/client';
 
 const SupabaseContext = createContext<SupabaseClient | null>(null);
 
@@ -14,9 +14,8 @@ export function useSupabaseClient() {
 }
 
 export default function SupabaseProvider({ children }: { children: React.ReactNode }) {
-  const [supabaseClient] = useState(() =>
-    createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
-  );
+  // Use singleton client instead of creating a new one
+  const supabaseClient = getSupabaseClient();
 
   return <SupabaseContext.Provider value={supabaseClient}>{children}</SupabaseContext.Provider>;
 }

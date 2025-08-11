@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { id, name, provider, category } = await req.json();
+    const { id, name, provider, model_type, category } = await req.json();
     if (!id || typeof id !== 'string') {
       return NextResponse.json({ error: 'Missing model id' }, { status: 400 });
     }
@@ -27,7 +27,9 @@ export async function POST(req: NextRequest) {
       id,
       name: name || id,
       provider: provider || inferProvider(id),
-      category: category || 'chat',
+      model_type: model_type || category || 'chat',
+      description: `${name || id} model`,
+      is_active: true,
     } as any;
 
     const { data, error } = await supabase
