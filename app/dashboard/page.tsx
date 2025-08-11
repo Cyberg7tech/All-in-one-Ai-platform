@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Bot, Brain, TrendingUp, Shield } from 'lucide-react';
+import { ArrowRight, Brain, TrendingUp, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth-context';
@@ -15,31 +15,24 @@ import { formatDate } from '@/lib/utils';
 
 const quickActions = [
   {
-    icon: Bot,
-    title: 'Create AI Agent',
-    description: 'Build a custom AI agent with specialized tools',
-    href: '/dashboard/agents/new',
-    color: 'text-blue-500',
-  },
-  {
     icon: Brain,
     title: 'Chat with AI',
     description: 'Start a conversation with our AI models',
-    href: '/dashboard/chat',
+    href: '/dashboard/ai-apps/multillm-chatgpt',
     color: 'text-purple-500',
   },
   {
     icon: TrendingUp,
     title: 'Create Forecast',
     description: 'Generate predictions from your data',
-    href: '/dashboard/forecasting',
+    href: '/dashboard/ai-apps/quiz-generator',
     color: 'text-green-500',
   },
   {
     icon: Shield,
-    title: 'Monitor Anomalies',
-    description: 'Set up anomaly detection alerts',
-    href: '/dashboard/anomalies',
+    title: 'Explore AI Apps',
+    description: 'Discover all available AI modules',
+    href: '/dashboard/ai-apps',
     color: 'text-red-500',
   },
 ];
@@ -222,10 +215,10 @@ export default function DashboardPage() {
               <CardContent className='p-6'>
                 <div className='flex items-center justify-between'>
                   <div>
-                    <p className='text-sm text-muted-foreground uppercase tracking-wide'>AI Agents</p>
+                    <p className='text-sm text-muted-foreground uppercase tracking-wide'>AI Apps</p>
                     <p className='text-2xl font-bold text-primary'>{stats?.aiAgents || 0}</p>
                   </div>
-                  <Bot className='size-8 text-muted-foreground' />
+                  <Brain className='size-8 text-muted-foreground' />
                 </div>
               </CardContent>
             </Card>
@@ -315,7 +308,7 @@ export default function DashboardPage() {
                     Start using One AI tools to see your activity here
                   </p>
                   <Button variant='outline' size='sm' asChild>
-                    <Link href='/dashboard/tools/image-generator'>Generate Your First Image</Link>
+                    <Link href='/dashboard/ai-apps/image-generator'>Generate Your First Image</Link>
                   </Button>
                 </div>
               )}

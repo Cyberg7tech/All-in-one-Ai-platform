@@ -2,15 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, MessageSquare, Bot, Wrench, History, LogOut, BarChart3, Grid3X3 } from 'lucide-react';
+import { Home, Wrench, History, LogOut, BarChart3, Grid3X3 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 
 const navigationItems = [
   { name: 'Home', href: '/dashboard', icon: Home },
   { name: 'AI Apps', href: '/dashboard/ai-apps', icon: Grid3X3 },
-  { name: 'Chat', href: '/dashboard/chat', icon: MessageSquare },
-  { name: 'Agents', href: '/dashboard/agents', icon: Bot },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
   { name: 'Tools', href: '/dashboard/explore', icon: Wrench },
   { name: 'History', href: '/dashboard/history', icon: History },
