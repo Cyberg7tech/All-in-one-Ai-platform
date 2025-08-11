@@ -162,30 +162,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       options: {
         data: {
           name: name,
+          subscription_plan: plan,
         },
       },
     });
     if (error) throw new Error(error?.message || 'Signup failed');
 
-    // Get the user from the session
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error('User creation failed');
-
-    // Insert user data into users table
-    const { error: insertError } = await supabase.from('users').insert({
-      id: user.id,
-      email,
-      name,
-      role: 'user',
-      subscription_plan: plan,
-    });
-
-    if (insertError) {
-      console.error('Error inserting user data:', insertError);
-    }
-
+    // User data will be automatically inserted by the auth trigger
+    // No need to manually insert into users table
+    
     // Session will be handled by the useSession hook
   };
 
