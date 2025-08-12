@@ -31,61 +31,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const supabase = useSupabaseClient();
 
   const updateUserFromSession = useCallback(
-    async (sessionUser: User) => {
-      try {
-        console.log('Updating user from session:', sessionUser.email);
+    (sessionUser: User) => {
+      console.log('Updating user from session:', sessionUser.email);
 
-        // Skip database calls during SSR
-        if (!supabase) {
-          const userData = {
+      // Always set immediate basic user data so UI can render without blocking
+      const basicUserData = {
+        id: sessionUser.id,
+        email: sessionUser.email ?? '',
+        name: sessionUser.user_metadata?.name || '',
+        role: 'user',
+        subscription_plan: 'free',
+        created_at: sessionUser.created_at,
+      };
+      setUser(basicUserData);
+
+      // If no client (SSR), stop here
+      if (!supabase) {
+        console.log('Set user data (basic, SSR/client not ready):', basicUserData);
+        return;
+      }
+
+      // Fetch enriched profile in background and update state when ready
+      supabase
+        .from('users')
+        .select('name, role, subscription_plan, created_at')
+        .eq('id', sessionUser.id)
+        .single()
+        .then(({ data: userData, error }) => {
+          if (error && error.code !== 'PGRST116') {
+            console.error('Error fetching user data:', error);
+          }
+
+          const finalUserData = {
             id: sessionUser.id,
             email: sessionUser.email ?? '',
-            name: sessionUser.user_metadata?.name || '',
-            role: 'user',
-            subscription_plan: 'free',
-            created_at: sessionUser.created_at,
+            name: userData?.name || sessionUser.user_metadata?.name || '',
+            role: userData?.role || 'user',
+            subscription_plan: userData?.subscription_plan || 'free',
+            created_at: userData?.created_at || sessionUser.created_at,
           };
-          setUser(userData);
-          console.log('Set user data (SSR):', userData);
-          return;
-        }
-
-        // First try to get user data from database
-        const { data: userData, error } = await supabase
-          .from('users')
-          .select('name, role, subscription_plan, created_at')
-          .eq('id', sessionUser.id)
-          .single();
-
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error fetching user data:', error);
-        }
-
-        const finalUserData = {
-          id: sessionUser.id,
-          email: sessionUser.email ?? '',
-          name: userData?.name || sessionUser.user_metadata?.name || '',
-          role: userData?.role || 'user',
-          subscription_plan: userData?.subscription_plan || 'free',
-          created_at: userData?.created_at || sessionUser.created_at,
-        };
-
-        setUser(finalUserData);
-        console.log('Set user data (with DB):', finalUserData);
-      } catch (error) {
-        console.error('Error updating user from session:', error);
-        // Fallback to basic user data
-        const fallbackData = {
-          id: sessionUser.id,
-          email: sessionUser.email ?? '',
-          name: sessionUser.user_metadata?.name || '',
-          role: 'user',
-          subscription_plan: 'free',
-          created_at: sessionUser.created_at,
-        };
-        setUser(fallbackData);
-        console.log('Set user data (fallback):', fallbackData);
-      }
+          setUser(finalUserData);
+          console.log('Set user data (with DB):', finalUserData);
+        })
+        .catch((err) => {
+          console.error('Error updating user from session (background):', err);
+        });
     },
     [supabase]
   );
@@ -108,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('Initial session:', session?.user?.email || 'No session');
 
         if (session?.user) {
-          await updateUserFromSession(session.user);
+          updateUserFromSession(session.user);
         } else {
           setUser(null);
         }
@@ -132,11 +122,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       try {
         if (event === 'SIGNED_IN' && session?.user) {
-          await updateUserFromSession(session.user);
+          updateUserFromSession(session.user);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
         } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-          await updateUserFromSession(session.user);
+          updateUserFromSession(session.user);
         }
       } catch (error) {
         console.error('Error handling auth state change:', error);
