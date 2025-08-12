@@ -5,5 +5,11 @@
   "css.validate": true,
   "css.lint.unknownAtRules": "ignore",
   "scss.lint.unknownAtRules": "ignore",
-  "less.lint.unknownAtRules": "ignore"
+  "less.lint.unknownAtRules": "ignore",
+  "cSpell.words": [
+    "plpgsql",
+    "SQLERRM",
+    "schemaname",
+    "viewname"
+  ]
 }

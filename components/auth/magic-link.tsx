@@ -33,6 +33,10 @@ export function MagicLink({
     setError('');
 
     try {
+      if (!supabase) {
+        setError('Auth is not ready yet. Please try again in a moment.');
+        return;
+      }
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {

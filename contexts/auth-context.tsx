@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || !supabase) return;
 
     // Get initial session
     const initializeAuth = async () => {
@@ -81,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const fetchUserData = async (userId: string): Promise<AuthUser | null> => {
+    if (!supabase) return null;
     try {
       const { data, error } = await supabase
         .from('users')
@@ -110,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshUser = async () => {
     if (!mounted) return;
     try {
+      if (!supabase) return;
       const {
         data: { session },
         error,
@@ -143,6 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     if (!mounted) throw new Error('Component not mounted');
+    if (!supabase) throw new Error('Auth is not ready yet. Please try again.');
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw new Error(error.message);
     // Session will be handled by the useSession hook
@@ -150,12 +153,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     if (!mounted) return;
+    if (!supabase) return;
     await supabase.auth.signOut();
     // Session will be handled by the useSession hook
   };
 
   const signup = async (email: string, password: string, name: string, plan: string) => {
     if (!mounted) throw new Error('Component not mounted');
+    if (!supabase) throw new Error('Auth is not ready yet. Please try again.');
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -179,6 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       // Update user metadata
+      if (!supabase) throw new Error('Auth is not ready yet. Please try again.');
       const { error: metadataError } = await supabase.auth.updateUser({
         data: { name: name },
       });

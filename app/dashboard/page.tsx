@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth-context';
 import { DisplayNameModal } from '@/components/dashboard/display-name-modal';
-import { getSupabaseClient } from '@/lib/supabase/client';
+import { useSupabaseClient } from '@/components/providers/supabase-provider';
 import { dbHelpers } from '@/lib/supabase/client';
 import { useState, useEffect } from 'react';
 import { formatDate } from '@/lib/utils';
@@ -39,6 +39,7 @@ const quickActions = [
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const supabase = useSupabaseClient();
   const [showNameModal, setShowNameModal] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
@@ -52,9 +53,8 @@ export default function DashboardPage() {
   }, [user]);
 
   useEffect(() => {
-    if (user) {
+    if (user && supabase) {
       const fetchStats = async () => {
-        const supabase = getSupabaseClient();
         const { data: userStats, error } = await supabase
           .from('users')
           .select('*')
@@ -121,7 +121,7 @@ export default function DashboardPage() {
       fetchStats();
       fetchRecentActivity();
     }
-  }, [user]);
+  }, [user, supabase]);
 
   return (
     <div className='min-h-screen bg-background'>

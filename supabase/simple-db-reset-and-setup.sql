@@ -202,9 +202,11 @@ CREATE TABLE chat_sessions (
 CREATE TABLE chat_messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     session_id UUID NOT NULL REFERENCES chat_sessions(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
     content TEXT NOT NULL,
     tokens_used INTEGER DEFAULT 0,
+    model_used TEXT,
     cost DECIMAL(10, 6) DEFAULT 0,
     metadata JSONB DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -494,6 +496,7 @@ CREATE INDEX idx_users_subscription_plan ON users(subscription_plan);
 CREATE INDEX idx_chat_sessions_user_id ON chat_sessions(user_id);
 CREATE INDEX idx_chat_sessions_app_type ON chat_sessions(app_type);
 CREATE INDEX idx_chat_messages_session_id ON chat_messages(session_id);
+CREATE INDEX idx_chat_messages_user_id ON chat_messages(user_id);
 CREATE INDEX idx_documents_user_id ON documents(user_id);
 CREATE INDEX idx_document_chunks_document_id ON document_chunks(document_id);
 CREATE INDEX idx_generated_content_user_id ON generated_content(user_id);
@@ -608,8 +611,24 @@ CREATE POLICY "Authenticated users can update ai_models" ON ai_models FOR UPDATE
 
 -- Chat sessions and messages
 CREATE POLICY "Users can manage own chat_sessions" ON chat_sessions USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage chat_messages from own sessions" ON chat_messages
-    USING (EXISTS (SELECT 1 FROM chat_sessions WHERE chat_sessions.id = chat_messages.session_id AND chat_sessions.user_id = auth.uid()));
+CREATE POLICY "Users can read/update/delete chat_messages from own sessions" ON chat_messages
+    USING (
+        EXISTS (
+            SELECT 1 FROM chat_sessions
+            WHERE chat_sessions.id = chat_messages.session_id
+              AND chat_sessions.user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Users can insert chat_messages for own sessions" ON chat_messages
+    FOR INSERT
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM chat_sessions
+            WHERE chat_sessions.id = chat_messages.session_id
+              AND chat_sessions.user_id = auth.uid()
+        )
+    );
 
 -- Documents
 CREATE POLICY "Users can manage own documents" ON documents USING (auth.uid() = user_id);
