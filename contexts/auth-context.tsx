@@ -33,6 +33,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateUserFromSession = async (sessionUser: User) => {
     try {
+      // Skip database calls during SSR
+      if (!supabase) {
+        setUser({
+          id: sessionUser.id,
+          email: sessionUser.email ?? '',
+          name: sessionUser.user_metadata?.name || '',
+          role: 'user',
+          subscription_plan: 'free',
+          created_at: sessionUser.created_at,
+        });
+        return;
+      }
+
       // First try to get user data from database
       const { data: userData, error } = await supabase
         .from('users')

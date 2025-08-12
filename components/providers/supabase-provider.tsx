@@ -8,6 +8,10 @@ const SupabaseContext = createContext<SupabaseClient | null>(null);
 export function useSupabaseClient() {
   const context = useContext(SupabaseContext);
   if (!context) {
+    // During SSR/prerendering, return null instead of throwing
+    if (typeof window === 'undefined') {
+      return null;
+    }
     throw new Error('useSupabaseClient must be used within SupabaseProvider');
   }
   return context;
@@ -22,7 +26,16 @@ export default function SupabaseProvider({ children }: SupabaseProviderProps) {
     if (typeof window !== 'undefined') {
       return createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookieOptions: {
+            name: 'sb-one-ai-auth',
+            lifetime: 60 * 60 * 24 * 7, // 7 days
+            domain: undefined,
+            path: '/',
+            sameSite: 'lax',
+          },
+        }
       );
     }
     return null;
