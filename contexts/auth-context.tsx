@@ -28,22 +28,25 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(false);
   const supabase = useSupabaseClient();
 
   const updateUserFromSession = useCallback(
     async (sessionUser: User) => {
       try {
+        console.log('Updating user from session:', sessionUser.email);
+        
         // Skip database calls during SSR
         if (!supabase) {
-          setUser({
+          const userData = {
             id: sessionUser.id,
             email: sessionUser.email ?? '',
             name: sessionUser.user_metadata?.name || '',
             role: 'user',
             subscription_plan: 'free',
             created_at: sessionUser.created_at,
-          });
+          };
+          setUser(userData);
+          console.log('Set user data (SSR):', userData);
           return;
         }
 
@@ -58,38 +61,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.error('Error fetching user data:', error);
         }
 
-        setUser({
+        const finalUserData = {
           id: sessionUser.id,
           email: sessionUser.email ?? '',
           name: userData?.name || sessionUser.user_metadata?.name || '',
           role: userData?.role || 'user',
           subscription_plan: userData?.subscription_plan || 'free',
           created_at: userData?.created_at || sessionUser.created_at,
-        });
+        };
+        
+        setUser(finalUserData);
+        console.log('Set user data (with DB):', finalUserData);
       } catch (error) {
         console.error('Error updating user from session:', error);
         // Fallback to basic user data
-        setUser({
+        const fallbackData = {
           id: sessionUser.id,
           email: sessionUser.email ?? '',
           name: sessionUser.user_metadata?.name || '',
           role: 'user',
           subscription_plan: 'free',
           created_at: sessionUser.created_at,
-        });
+        };
+        setUser(fallbackData);
+        console.log('Set user data (fallback):', fallbackData);
       }
     },
     [supabase]
   );
 
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase) {
+      setIsLoading(false);
+      return;
+    }
+
+    console.log('Setting up auth listener...');
 
     const initializeAuth = async () => {
       try {
+        console.log('Initializing auth...');
         const {
           data: { session },
         } = await supabase.auth.getSession();
+
+        console.log('Initial session:', session?.user?.email || 'No session');
 
         if (session?.user) {
           await updateUserFromSession(session.user);
@@ -101,36 +117,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
       } finally {
         setIsLoading(false);
-        setIsInitialized(true);
+        console.log('Auth initialization complete');
       }
     };
 
-    if (!isInitialized) {
-      initializeAuth();
-    }
+    // Initialize auth state
+    initializeAuth();
 
+    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event);
+      console.log('Auth state change:', event, session?.user?.email || 'No user');
 
-      if (event === 'SIGNED_IN' && session?.user) {
-        await updateUserFromSession(session.user);
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-      } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-        await updateUserFromSession(session.user);
-      }
-
-      if (isInitialized) {
+      try {
+        if (event === 'SIGNED_IN' && session?.user) {
+          await updateUserFromSession(session.user);
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+        } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+          await updateUserFromSession(session.user);
+        }
+      } catch (error) {
+        console.error('Error handling auth state change:', error);
+      } finally {
         setIsLoading(false);
+        console.log('Auth state change complete, isLoading set to false');
       }
     });
 
     return () => {
+      console.log('Cleaning up auth subscription');
       subscription.unsubscribe();
     };
-  }, [supabase, isInitialized, updateUserFromSession]);
+  }, [supabase, updateUserFromSession]);
 
   const refreshUser = async () => {
     if (!supabase) return;
@@ -206,6 +226,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw error;
     } catch (error) {
       setIsLoading(false);
+      throw error;
+    }
+  };
+
+  const refreshUser = async () => {
+    if (!supabase) throw new Error('Supabase client not available');
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        await updateUserFromSession(session.user);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('Error refreshing user:', error);
       throw error;
     }
   };
