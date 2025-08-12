@@ -13,9 +13,7 @@
       "statusCode": 307,
       "responseTime": "584ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard"]
     },
     {
       "name": "Explore Page",
@@ -25,9 +23,7 @@
       "statusCode": 307,
       "responseTime": "9ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard%2Fexplore"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard%2Fexplore"]
     },
     {
       "name": "Analytics",
@@ -37,9 +33,7 @@
       "statusCode": 307,
       "responseTime": "5ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard%2Fanalytics"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard%2Fanalytics"]
     },
     {
       "name": "History",
@@ -49,9 +43,7 @@
       "statusCode": 307,
       "responseTime": "10ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard%2Fhistory"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard%2Fhistory"]
     },
     {
       "name": "Billing",
@@ -61,9 +53,7 @@
       "statusCode": 307,
       "responseTime": "5ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard%2Fbilling"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard%2Fbilling"]
     },
     {
       "name": "Activity",
@@ -73,9 +63,7 @@
       "statusCode": 307,
       "responseTime": "5ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard%2Factivity"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard%2Factivity"]
     },
     {
       "name": "AI Apps List",
@@ -85,9 +73,7 @@
       "statusCode": 307,
       "responseTime": "4ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps"]
     },
     {
       "name": "Multi-LLM Chat",
@@ -97,9 +83,7 @@
       "statusCode": 307,
       "responseTime": "5ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps%2Fmultillm-chatgpt"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps%2Fmultillm-chatgpt"]
     },
     {
       "name": "Image Generator",
@@ -109,9 +93,7 @@
       "statusCode": 307,
       "responseTime": "8ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps%2Fimage-generator"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps%2Fimage-generator"]
     },
     {
       "name": "Chat with PDF",
@@ -121,9 +103,7 @@
       "statusCode": 307,
       "responseTime": "5ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps%2Fchat-with-pdf"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps%2Fchat-with-pdf"]
     },
     {
       "name": "Interior Design",
@@ -133,9 +113,7 @@
       "statusCode": 307,
       "responseTime": "3ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps%2Finterior-design"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps%2Finterior-design"]
     },
     {
       "name": "Text to Speech",
@@ -145,9 +123,7 @@
       "statusCode": 307,
       "responseTime": "4ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps%2Ftext-to-speech"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps%2Ftext-to-speech"]
     },
     {
       "name": "YouTube Content",
@@ -157,9 +133,7 @@
       "statusCode": 307,
       "responseTime": "3ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps%2Fyoutube-content"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps%2Fyoutube-content"]
     },
     {
       "name": "Chat with YouTube",
@@ -169,9 +143,7 @@
       "statusCode": 307,
       "responseTime": "3ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps%2Fchat-with-youtube"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard%2Fai-apps%2Fchat-with-youtube"]
     },
     {
       "name": "Forecasting",
@@ -181,9 +153,7 @@
       "statusCode": 307,
       "responseTime": "4ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard%2Fforecasting"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard%2Fforecasting"]
     },
     {
       "name": "Anomalies",
@@ -193,9 +163,7 @@
       "statusCode": 307,
       "responseTime": "3ms",
       "error": null,
-      "notes": [
-        "Redirect to: /login?redirectTo=%2Fdashboard%2Fanomalies"
-      ]
+      "notes": ["Redirect to: /login?redirectTo=%2Fdashboard%2Fanomalies"]
     },
     {
       "name": "Models Ensure API",
@@ -205,9 +173,7 @@
       "statusCode": 405,
       "responseTime": "454ms",
       "error": null,
-      "notes": [
-        "HTTP 405: Method Not Allowed"
-      ]
+      "notes": ["HTTP 405: Method Not Allowed"]
     },
     {
       "name": "Chat API",
@@ -217,9 +183,7 @@
       "statusCode": null,
       "responseTime": null,
       "error": null,
-      "notes": [
-        "Requires authentication - skipped in automated test"
-      ]
+      "notes": ["Requires authentication - skipped in automated test"]
     },
     {
       "name": "Image Generation API",
@@ -229,9 +193,7 @@
       "statusCode": null,
       "responseTime": null,
       "error": null,
-      "notes": [
-        "Requires authentication - skipped in automated test"
-      ]
+      "notes": ["Requires authentication - skipped in automated test"]
     },
     {
       "name": "Text to Speech API",
@@ -241,9 +203,7 @@
       "statusCode": null,
       "responseTime": null,
       "error": null,
-      "notes": [
-        "Requires authentication - skipped in automated test"
-      ]
+      "notes": ["Requires authentication - skipped in automated test"]
     },
     {
       "name": "YouTube Summary API",
@@ -253,9 +213,7 @@
       "statusCode": null,
       "responseTime": null,
       "error": null,
-      "notes": [
-        "Requires authentication - skipped in automated test"
-      ]
+      "notes": ["Requires authentication - skipped in automated test"]
     },
     {
       "name": "PDF Process API",
@@ -265,9 +223,7 @@
       "statusCode": null,
       "responseTime": null,
       "error": null,
-      "notes": [
-        "Requires authentication - skipped in automated test"
-      ]
+      "notes": ["Requires authentication - skipped in automated test"]
     }
   ],
   "aiAppsStatus": [
