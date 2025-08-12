@@ -16,6 +16,13 @@ export const getSupabaseClient = () => {
     return _client;
   }
 
+  // Reuse a previously created instance stored on window to avoid multiple GoTrueClient warnings
+  const existing = (window as any).__supabaseInstance as SupabaseClient | undefined;
+  if (existing) {
+    _client = existing;
+    return _client;
+  }
+
   // Create new client only if one doesn't exist
   _client = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
