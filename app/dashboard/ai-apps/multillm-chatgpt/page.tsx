@@ -509,7 +509,13 @@ export default function MultiLLMChatPage() {
         //   model_used: selectedModel,
         //   cost: data.cost || 0,
         // });
-        assistantMsg = { id: Date.now().toString() }; // Temporary mock
+        assistantMsg = {
+          id: Date.now().toString(),
+          content: String(data.content || ''),
+          created_at: new Date().toISOString(),
+          model_used: selectedModel,
+          tokens_used: data?.usage?.total_tokens || 0,
+        };
         // TODO: Replace with direct Supabase calls
         // await dbHelpers.addChatMessage({
         //   session_id: sessionId,
@@ -534,8 +540,10 @@ export default function MultiLLMChatPage() {
                     {
                       id: String(assistantMsg.id),
                       role: 'assistant' as const,
-                      content: String(assistantMsg.content),
-                      timestamp: new Date(String(assistantMsg.created_at)),
+                      content: String(assistantMsg.content || ''),
+                      timestamp: new Date(String(assistantMsg.created_at || new Date().toISOString())),
+                      model: String(assistantMsg.model_used || selectedModel),
+                      tokens: Number(assistantMsg.tokens_used || data?.usage?.total_tokens || 0),
                       user_name: user.name ? String(user.name) : user.email,
                       user_email: user.email ? String(user.email) : undefined,
                     },
