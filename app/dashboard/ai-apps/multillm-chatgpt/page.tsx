@@ -324,12 +324,12 @@ export default function MultiLLMChatPage() {
     //   title: 'New Chat',
     //   model_id: selectedModel,
     // });
-            const session = { 
-          id: Date.now().toString(),
-          title: 'New Chat',
-          model_id: selectedModel,
-          updated_at: new Date().toISOString()
-        }; // Temporary mock
+    const session = {
+      id: Date.now().toString(),
+      title: 'New Chat',
+      model_id: selectedModel,
+      updated_at: new Date().toISOString(),
+    }; // Temporary mock
     setSessions((prev) => [
       {
         id: String(session.id),
@@ -414,11 +414,11 @@ export default function MultiLLMChatPage() {
         //   title: 'New Chat',
         //   model_id: selectedModel,
         // });
-        const session = { 
+        const session = {
           id: Date.now().toString(),
           title: 'New Chat',
           model_id: selectedModel,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         }; // Temporary mock
         sessionId = String(session.id);
         setSessions((prev) => [
@@ -445,10 +445,10 @@ export default function MultiLLMChatPage() {
       //   model_used: selectedModel,
       //   cost: 0,
       // });
-      const userMsg = { 
+      const userMsg = {
         id: Date.now().toString(),
         content: messageContent,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       }; // Temporary mock
 
       // Immediately add user message to UI state so it shows up right away
