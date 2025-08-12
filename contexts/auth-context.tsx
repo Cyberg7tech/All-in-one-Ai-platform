@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (sessionUser: User) => {
       try {
         console.log('Updating user from session:', sessionUser.email);
-        
+
         // Skip database calls during SSR
         if (!supabase) {
           const userData = {
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           subscription_plan: userData?.subscription_plan || 'free',
           created_at: userData?.created_at || sessionUser.created_at,
         };
-        
+
         setUser(finalUserData);
         console.log('Set user data (with DB):', finalUserData);
       } catch (error) {
@@ -230,24 +230,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const refreshUser = async () => {
-    if (!supabase) throw new Error('Supabase client not available');
 
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (session?.user) {
-        await updateUserFromSession(session.user);
-      } else {
-        setUser(null);
-      }
-    } catch (error) {
-      console.error('Error refreshing user:', error);
-      throw error;
-    }
-  };
 
   const updateDisplayName = async (name: string) => {
     if (!supabase || !user) throw new Error('User not authenticated');
