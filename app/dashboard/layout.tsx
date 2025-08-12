@@ -6,17 +6,20 @@ import { TopNavigation } from '@/components/top-navigation';
 import { SideNavigation } from '@/components/side-navigation';
 import { Loader2 } from 'lucide-react';
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const { user, isLoading } = useAuth();
+interface DashboardLayoutProps {
+  children: ReactNode;
+}
+
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/login');
+    if (!isLoading && !isAuthenticated) {
+      router.push('/login?redirectTo=/dashboard');
     }
-  }, [user, isLoading, router]);
+  }, [isAuthenticated, isLoading, router]);
 
-  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div className='flex items-center justify-center min-h-screen bg-background'>
@@ -28,8 +31,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  // Don't render anything if user is not authenticated (will redirect)
-  if (!user) {
+  if (!isAuthenticated || !user) {
     return null;
   }
 

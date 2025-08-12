@@ -2,13 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 
 import './globals.css';
-import { ThemeProvider } from '@/components/providers/theme-provider';
-import { QueryProvider } from '@/components/providers/query-provider';
-import { AuthProvider } from '@/contexts/auth-context';
 import { ErrorBoundary } from '@/components/providers/error-boundary';
-
-import { Toaster } from 'sonner';
-import SupabaseProvider from '@/components/providers/supabase-provider';
+import ClientLayout from '@/components/providers/client-layout';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -43,16 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <ErrorBoundary>
-          <ThemeProvider attribute='class' defaultTheme='system' enableSystem disableTransitionOnChange>
-            <SupabaseProvider>
-              <AuthProvider>
-                <QueryProvider>
-                  {children}
-                  <Toaster />
-                </QueryProvider>
-              </AuthProvider>
-            </SupabaseProvider>
-          </ThemeProvider>
+          <ClientLayout>{children}</ClientLayout>
         </ErrorBoundary>
       </body>
     </html>

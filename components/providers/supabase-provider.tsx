@@ -1,45 +1,32 @@
 'use client';
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { getSupabaseClient } from '@/lib/supabase/client';
+import { createBrowserClient } from '@supabase/ssr';
 
 const SupabaseContext = createContext<SupabaseClient | null>(null);
 
-export function useSupabaseClient(): SupabaseClient | null {
-  // Return null on the server or before the provider initializes on the client
-  // Callers should guard against null and only use the client after mount
+export function useSupabaseClient() {
   const context = useContext(SupabaseContext);
+  if (!context) {
+    throw new Error('useSupabaseClient must be used within SupabaseProvider');
+  }
   return context;
 }
 
-export default function SupabaseProvider({ children }: { children: React.ReactNode }) {
-  const [supabaseClient, setSupabaseClient] = useState<SupabaseClient | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
+interface SupabaseProviderProps {
+  children: React.ReactNode;
+}
 
-  useEffect(() => {
-    // Only initialize client on the client side
+export default function SupabaseProvider({ children }: SupabaseProviderProps) {
+  const [supabaseClient] = useState(() => {
     if (typeof window !== 'undefined') {
-      try {
-        const client = getSupabaseClient();
-        console.log('Supabase client initialized successfully');
-        setSupabaseClient(client);
-        setIsInitialized(true);
-      } catch (error) {
-        console.error('Failed to initialize Supabase client:', error);
-        setIsInitialized(true); // Set to true even on error to prevent infinite loading
-      }
+      return createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
     }
-  }, []);
-
-  // During SSR, we provide null
-  if (typeof window === 'undefined') {
-    return <SupabaseContext.Provider value={null}>{children}</SupabaseContext.Provider>;
-  }
-
-  // On the client, wait for initialization
-  if (!isInitialized) {
-    return <div>Initializing...</div>;
-  }
+    return null;
+  });
 
   return <SupabaseContext.Provider value={supabaseClient}>{children}</SupabaseContext.Provider>;
 }

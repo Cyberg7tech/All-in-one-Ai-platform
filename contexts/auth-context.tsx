@@ -1,7 +1,7 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useSupabaseClient } from '@/components/providers/supabase-provider';
-import { Session } from '@supabase/supabase-js';
+import { User } from '@supabase/supabase-js';
 
 interface AuthUser {
   id: string;
@@ -18,7 +18,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  signup: (email: string, password: string, name: string, plan: string) => Promise<void>;
+  signup: (email: string, password: string, name: string, plan?: string) => Promise<void>;
   refreshUser: () => Promise<void>;
   updateDisplayName: (name: string) => Promise<void>;
 }
@@ -28,161 +28,113 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const supabase = useSupabaseClient();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const updateUserFromSession = async (sessionUser: User) => {
+    try {
+      // First try to get user data from database
+      const { data: userData, error } = await supabase
+        .from('users')
+        .select('name, role, subscription_plan, created_at')
+        .eq('id', sessionUser.id)
+        .single();
 
-  useEffect(() => {
-    if (!mounted || !supabase) return;
-
-    const fetchUserData = async (userId: string): Promise<AuthUser | null> => {
-      try {
-        const { data, error } = await supabase
-          .from('users')
-          .select('name, role, subscription_plan, created_at')
-          .eq('id', userId)
-          .single();
-
-        if (error) {
-          console.error('Error fetching user data:', error);
-          return null;
-        }
-
-        return {
-          id: userId,
-          email: '', // Will be filled from session
-          name: data?.name || '',
-          role: data?.role || 'user',
-          subscription_plan: data?.subscription_plan || 'free',
-          created_at: data?.created_at || '',
-        };
-      } catch (error) {
-        console.error('Error in fetchUserData:', error);
-        return null;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching user data:', error);
       }
-    };
 
-    // Get initial session
+      setUser({
+        id: sessionUser.id,
+        email: sessionUser.email ?? '',
+        name: userData?.name || sessionUser.user_metadata?.name || '',
+        role: userData?.role || 'user',
+        subscription_plan: userData?.subscription_plan || 'free',
+        created_at: userData?.created_at || sessionUser.created_at,
+      });
+    } catch (error) {
+      console.error('Error updating user from session:', error);
+      // Fallback to basic user data
+      setUser({
+        id: sessionUser.id,
+        email: sessionUser.email ?? '',
+        name: sessionUser.user_metadata?.name || '',
+        role: 'user',
+        subscription_plan: 'free',
+        created_at: sessionUser.created_at,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!supabase) return;
+
     const initializeAuth = async () => {
       try {
         const {
           data: { session },
         } = await supabase.auth.getSession();
-        console.log('Initial session check:', session?.user?.email || 'No session');
 
         if (session?.user) {
-          // Fetch complete user data from database
-          const userData = await fetchUserData(session.user.id);
-          if (userData) {
-            setUser({
-              ...userData,
-              email: session.user.email ?? '',
-            });
-          } else {
-            setUser(getUserFromSession(session));
-          }
+          await updateUserFromSession(session.user);
         } else {
           setUser(null);
         }
-        setIsLoading(false);
       } catch (error) {
-        console.error('Error getting session:', error);
+        console.error('Error initializing auth:', error);
         setUser(null);
+      } finally {
         setIsLoading(false);
+        setIsInitialized(true);
       }
     };
 
-    initializeAuth();
+    if (!isInitialized) {
+      initializeAuth();
+    }
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session?.user?.email || 'No session');
+      console.log('Auth state change:', event);
 
-      if (event === 'TOKEN_REFRESHED') {
-        console.log('Token refreshed successfully');
+      if (event === 'SIGNED_IN' && session?.user) {
+        await updateUserFromSession(session.user);
       } else if (event === 'SIGNED_OUT') {
-        console.log('User signed out');
         setUser(null);
-        return;
-      } else if (event === 'SIGNED_IN' && session?.user) {
-        // Fetch complete user data after sign in
-        const userData = await fetchUserData(session.user.id);
-        if (userData) {
-          setUser({
-            ...userData,
-            email: session.user.email ?? '',
-          });
-        } else {
-          setUser(getUserFromSession(session));
-        }
-        return;
+      } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+        await updateUserFromSession(session.user);
       }
 
-      // For other events, use basic session data
-      setUser(getUserFromSession(session));
+      if (isInitialized) {
+        setIsLoading(false);
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [mounted, supabase]);
-
-  const getUserFromSession = (session: Session | null): AuthUser | null => {
-    if (!session?.user) return null;
-    return {
-      id: session.user.id,
-      email: session.user.email ?? '',
-      name: session.user.user_metadata?.name ?? '',
-    };
-  };
+  }, [supabase, isInitialized, updateUserFromSession]);
 
   const refreshUser = async () => {
-    if (!mounted || !supabase) return;
+    if (!supabase) return;
+
     try {
       const {
         data: { session },
         error,
       } = await supabase.auth.getSession();
+
       if (error) {
         console.error('Error refreshing session:', error);
-        // If there's an auth error, clear the user and try to refresh
-        if (error.message.includes('Invalid Refresh Token')) {
-          await supabase.auth.signOut();
-        }
         setUser(null);
-      } else if (!session?.user) {
-        setUser(null);
-      } else {
-        // Fetch complete user data from database
-        try {
-          const { data, error: userError } = await supabase
-            .from('users')
-            .select('name, role, subscription_plan, created_at')
-            .eq('id', session.user.id)
-            .single();
+        return;
+      }
 
-          if (userError) {
-            console.error('Error fetching user data:', userError);
-            setUser(getUserFromSession(session));
-          } else {
-            setUser({
-              id: session.user.id,
-              email: session.user.email ?? '',
-              name: data?.name || '',
-              role: data?.role || 'user',
-              subscription_plan: data?.subscription_plan || 'free',
-              created_at: data?.created_at || '',
-            });
-          }
-        } catch (userFetchError) {
-          console.error('Error in user data fetch:', userFetchError);
-          setUser(getUserFromSession(session));
-        }
+      if (session?.user) {
+        await updateUserFromSession(session.user);
+      } else {
+        setUser(null);
       }
     } catch (error) {
       console.error('Error in refreshUser:', error);
@@ -191,49 +143,64 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
-    if (!mounted) throw new Error('Component not mounted');
-    if (!supabase) throw new Error('Auth is not ready yet. Please try again.');
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw new Error(error.message);
-    // Session will be handled by the useSession hook
+    if (!supabase) throw new Error('Supabase client not available');
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+    } catch (error) {
+      setIsLoading(false);
+      throw error;
+    }
   };
 
   const logout = async () => {
-    if (!mounted) return;
     if (!supabase) return;
-    await supabase.auth.signOut();
-    // Session will be handled by the useSession hook
+
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      setUser(null);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
-  const signup = async (email: string, password: string, name: string, plan: string) => {
-    if (!mounted) throw new Error('Component not mounted');
-    if (!supabase) throw new Error('Auth is not ready yet. Please try again.');
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name: name,
-          subscription_plan: plan,
+  const signup = async (email: string, password: string, name: string, plan: string = 'free') => {
+    if (!supabase) throw new Error('Supabase client not available');
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            subscription_plan: plan,
+          },
         },
-      },
-    });
-    if (error) throw new Error(error?.message || 'Signup failed');
+      });
 
-    // User data will be automatically inserted by the auth trigger
-    // No need to manually insert into users table
-
-    // Session will be handled by the useSession hook
+      if (error) throw error;
+    } catch (error) {
+      setIsLoading(false);
+      throw error;
+    }
   };
 
   const updateDisplayName = async (name: string) => {
-    if (!mounted || !user) throw new Error('User not authenticated');
+    if (!supabase || !user) throw new Error('User not authenticated');
 
     try {
       // Update user metadata
-      if (!supabase) throw new Error('Auth is not ready yet. Please try again.');
       const { error: metadataError } = await supabase.auth.updateUser({
-        data: { name: name },
+        data: { name },
       });
 
       if (metadataError) {
@@ -241,7 +208,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Update users table
-      const { error: dbError } = await supabase.from('users').update({ name: name }).eq('id', user.id);
+      const { error: dbError } = await supabase.from('users').update({ name }).eq('id', user.id);
 
       if (dbError) {
         console.error('Error updating user in database:', dbError);
@@ -275,6 +242,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within an AuthProvider');
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   return context;
 }

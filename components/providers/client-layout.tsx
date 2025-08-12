@@ -1,16 +1,26 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { ReactNode } from 'react';
+import { ThemeProvider } from '@/components/providers/theme-provider';
+import { QueryProvider } from '@/components/providers/query-provider';
+import { AuthProvider } from '@/contexts/auth-context';
+import SupabaseProvider from '@/components/providers/supabase-provider';
+import { Toaster } from 'sonner';
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false);
+interface ClientLayoutProps {
+  children: ReactNode;
+}
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null; // Prevent hydration mismatch
-  }
-
-  return <>{children}</>;
+export default function ClientLayout({ children }: ClientLayoutProps) {
+  return (
+    <ThemeProvider attribute='class' defaultTheme='system' enableSystem disableTransitionOnChange>
+      <SupabaseProvider>
+        <AuthProvider>
+          <QueryProvider>
+            {children}
+            <Toaster />
+          </QueryProvider>
+        </AuthProvider>
+      </SupabaseProvider>
+    </ThemeProvider>
+  );
 }
