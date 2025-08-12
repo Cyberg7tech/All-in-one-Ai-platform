@@ -58,9 +58,21 @@ export default function ContentWriterPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: `Write a ${contentType} about "${prompt}" in a ${tone} tone. The content should be ${length} length.`,
-          model: 'gpt-4',
-          stream: false,
+          messages: [
+            {
+              role: 'system',
+              content:
+                'You are a professional content writer. Produce clear, well-structured, original content and avoid markdown unless asked.',
+            },
+            {
+              role: 'user',
+              content: `Write a ${contentType} about "${prompt}" in a ${tone} tone. The content should be ${length} length.`,
+            },
+          ],
+          // Prefer Together model if available; chat route will route automatically
+          model: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+          maxTokens: 900,
+          temperature: 0.7,
         }),
       });
 
@@ -69,7 +81,7 @@ export default function ContentWriterPage() {
       }
 
       const data = await response.json();
-      setGeneratedContent(data.message);
+      setGeneratedContent(String(data.content || ''));
 
       toast({
         title: 'Content generated successfully!',

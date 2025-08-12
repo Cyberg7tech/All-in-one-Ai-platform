@@ -8,16 +8,32 @@ export async function GET() {
     // Prefer dynamic fetch from Together.ai if configured
     let availableModels: any[] = [];
 
-    if (process.env.TOGETHER_API_KEY) {
-      try {
-        const res = await fetch('https://api.together.xyz/v1/models', {
-          headers: {
-            Authorization: `Bearer ${process.env.TOGETHER_API_KEY}`,
-          },
+    // Always try fetching the public Together models list first (works without auth).
+    try {
+      const res = await fetch('https://api.together.xyz/v1/models', { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        availableModels = (data?.data || []).map((m: any) => ({
+          id: m.id,
+          name: m.display_name || m.id,
+          provider: 'together',
+          // Heuristic categorization to help UI grouping
+          category: m.id?.toLowerCase().includes('vision')
+            ? 'multimodal'
+            : m.id?.toLowerCase().includes('search')
+              ? 'search'
+              : m.id?.toLowerCase().includes('reason') || m.id?.toLowerCase().includes('r1')
+                ? 'reasoning'
+                : 'chat',
+        }));
+      } else if (process.env.TOGETHER_API_KEY) {
+        // Some environments may require auth; retry with API key if provided
+        const resAuthed = await fetch('https://api.together.xyz/v1/models', {
+          headers: { Authorization: `Bearer ${process.env.TOGETHER_API_KEY}` },
           cache: 'no-store',
         });
-        if (res.ok) {
-          const data = await res.json();
+        if (resAuthed.ok) {
+          const data = await resAuthed.json();
           availableModels = (data?.data || []).map((m: any) => ({
             id: m.id,
             name: m.display_name || m.id,
@@ -25,10 +41,10 @@ export async function GET() {
             category: 'chat',
           }));
         }
-      } catch (e) {
-        // fall back to static list below
-        console.warn('Falling back to static model list for Together.ai');
       }
+    } catch (e) {
+      // fall back to static list below
+      console.warn('Falling back to static model list for Together.ai');
     }
 
     if (availableModels.length === 0) {
@@ -62,7 +78,7 @@ export async function GET() {
               ? 131072
               : 32768,
 
-      // Add speed rating
+      // Add speed rating (rough heuristic)
       speed:
         model.provider === 'together'
           ? 'fast'
