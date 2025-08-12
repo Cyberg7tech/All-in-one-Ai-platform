@@ -9,6 +9,7 @@ import { ErrorBoundary } from '@/components/providers/error-boundary';
 
 import { Toaster } from 'sonner';
 import SupabaseProvider from '@/components/providers/supabase-provider';
+import { SupabaseProvider as AppSupabaseProvider } from '@/app/providers/SupabaseProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -44,14 +45,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={inter.className} suppressHydrationWarning>
         <ErrorBoundary>
           <ThemeProvider attribute='class' defaultTheme='system' enableSystem disableTransitionOnChange>
-            <SupabaseProvider>
+            <AppSupabaseProvider>
               <AuthProvider>
                 <QueryProvider>
                   {children}
                   <Toaster />
                 </QueryProvider>
               </AuthProvider>
-            </SupabaseProvider>
+            </AppSupabaseProvider>
           </ThemeProvider>
         </ErrorBoundary>
       </body>

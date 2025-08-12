@@ -3,10 +3,15 @@
 import { createBrowserClient } from '@supabase/ssr';
 import { type SupabaseClient } from '@supabase/supabase-js';
 
-// Singleton client instance to prevent multiple GoTrueClient instances
+// Singleton browser client instance to prevent multiple GoTrueClient instances
 let _client: SupabaseClient | null = null;
 
-export const getSupabaseClient = () => {
+/**
+ * Returns a singleton Supabase browser client. This function MUST NOT be
+ * called on the server. Use the server client from `lib/supabase/server` for
+ * any server-side usage.
+ */
+export const getSupabaseClient = (): SupabaseClient => {
   if (typeof window === 'undefined') {
     throw new Error('Supabase client called on server');
   }
@@ -16,7 +21,8 @@ export const getSupabaseClient = () => {
     return _client;
   }
 
-  // Reuse a previously created instance stored on window to avoid multiple GoTrueClient warnings
+  // Reuse a previously created instance stored on window to avoid
+  // "Multiple GoTrueClient instances detected" warnings
   const existing = (window as any).__supabaseInstance as SupabaseClient | undefined;
   if (existing) {
     _client = existing;
@@ -26,13 +32,20 @@ export const getSupabaseClient = () => {
   // Create new client only if one doesn't exist
   _client = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        // Use a unique storage key for this app so we never compete with any
+        // other client that might be present in the same origin
+        storageKey: 'sb-one-ai-auth',
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    }
   );
 
-  // Store reference for debugging
-  if (typeof window !== 'undefined') {
-    (window as any).__supabaseInstance = _client;
-  }
+  // Store reference so any subsequent imports/modules share the same instance
+  (window as any).__supabaseInstance = _client;
 
   return _client;
 };
