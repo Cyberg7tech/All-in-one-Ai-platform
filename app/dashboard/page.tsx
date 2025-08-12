@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/contexts/auth-context';
 import { DisplayNameModal } from '@/components/dashboard/display-name-modal';
 import { useSupabaseClient } from '@/components/providers/supabase-provider';
-import { dbHelpers } from '@/lib/supabase/client';
+// import { dbHelpers } from '@/lib/supabase/client'; // Removed in BuilderKit restructure
 import { useState, useEffect } from 'react';
 import { formatDate } from '@/lib/utils';
 
@@ -70,7 +70,13 @@ export default function DashboardPage() {
 
       const fetchRecentActivity = async () => {
         try {
-          const userActivities = await dbHelpers.getUserActivities(user.id, 10);
+          const userActivities = await supabase
+          .from('activities')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('timestamp', { ascending: false })
+          .limit(10)
+          .then(({ data }) => data || []);
           setRecentActivity(userActivities || []);
         } catch (error) {
           console.error('Error fetching recent activities:', error);
@@ -82,17 +88,35 @@ export default function DashboardPage() {
       const createSampleActivities = async () => {
         try {
           // Add some sample activities for new users
-          await dbHelpers.addActivity(
-            user.id,
-            'Registration',
-            'Account Created',
-            'Welcome to One AI platform!',
-            '👤'
-          );
-          await dbHelpers.addActivity(user.id, 'Login', 'Dashboard Access', 'Accessed the dashboard', '🏠');
+          await supabase
+            .from('activities')
+            .insert({
+              user_id: user.id,
+              type: 'Registration',
+              name: 'Account Created',
+              description: 'Welcome to One AI platform!',
+              icon: '👤',
+              metadata: {},
+            });
+          await supabase
+            .from('activities')
+            .insert({
+              user_id: user.id,
+              type: 'Login',
+              name: 'Dashboard Access',
+              description: 'Accessed the dashboard',
+              icon: '🏠',
+              metadata: {},
+            });
 
           // Refresh activities
-          const userActivities = await dbHelpers.getUserActivities(user.id, 10);
+          const userActivities = await supabase
+          .from('activities')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('timestamp', { ascending: false })
+          .limit(10)
+          .then(({ data }) => data || []);
           setRecentActivity(userActivities || []);
         } catch (error) {
           console.error('Error creating sample activities:', error);
