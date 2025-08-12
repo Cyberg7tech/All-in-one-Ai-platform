@@ -1,6 +1,6 @@
+'use client';
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
-'use client';
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 import { useEffect, ReactNode } from 'react';

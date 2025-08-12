@@ -38,16 +38,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!mounted || !supabase) return;
 
+    const fetchUserData = async (userId: string): Promise<AuthUser | null> => {
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('name, role, subscription_plan, created_at')
+          .eq('id', userId)
+          .single();
+
+        if (error) {
+          console.error('Error fetching user data:', error);
+          return null;
+        }
+
+        return {
+          id: userId,
+          email: '', // Will be filled from session
+          name: data?.name || '',
+          role: data?.role || 'user',
+          subscription_plan: data?.subscription_plan || 'free',
+          created_at: data?.created_at || '',
+        };
+      } catch (error) {
+        console.error('Error in fetchUserData:', error);
+        return null;
+      }
+    };
+
     // Get initial session
     const initializeAuth = async () => {
       try {
         const {
           data: { session },
         } = await supabase.auth.getSession();
-        setUser(getUserFromSession(session));
+        console.log('Initial session check:', session?.user?.email || 'No session');
+
+        if (session?.user) {
+          // Fetch complete user data from database
+          const userData = await fetchUserData(session.user.id);
+          if (userData) {
+            setUser({
+              ...userData,
+              email: session.user.email ?? '',
+            });
+          } else {
+            setUser(getUserFromSession(session));
+          }
+        } else {
+          setUser(null);
+        }
         setIsLoading(false);
       } catch (error) {
         console.error('Error getting session:', error);
+        setUser(null);
         setIsLoading(false);
       }
     };
@@ -57,12 +100,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, session?.user?.email || 'No session');
+
       if (event === 'TOKEN_REFRESHED') {
         console.log('Token refreshed successfully');
       } else if (event === 'SIGNED_OUT') {
         console.log('User signed out');
+        setUser(null);
+        return;
+      } else if (event === 'SIGNED_IN' && session?.user) {
+        // Fetch complete user data after sign in
+        const userData = await fetchUserData(session.user.id);
+        if (userData) {
+          setUser({
+            ...userData,
+            email: session.user.email ?? '',
+          });
+        } else {
+          setUser(getUserFromSession(session));
+        }
+        return;
       }
+
+      // For other events, use basic session data
       setUser(getUserFromSession(session));
     });
 
@@ -80,38 +141,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   };
 
-  const fetchUserData = async (userId: string): Promise<AuthUser | null> => {
-    if (!supabase) return null;
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('name, role, subscription_plan, created_at')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching user data:', error);
-        return null;
-      }
-
-      return {
-        id: userId,
-        email: '', // Will be filled from session
-        name: data?.name || '',
-        role: data?.role || 'user',
-        subscription_plan: data?.subscription_plan || 'free',
-        created_at: data?.created_at || '',
-      };
-    } catch (error) {
-      console.error('Error in fetchUserData:', error);
-      return null;
-    }
-  };
-
   const refreshUser = async () => {
-    if (!mounted) return;
+    if (!mounted || !supabase) return;
     try {
-      if (!supabase) return;
       const {
         data: { session },
         error,
@@ -127,13 +159,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
       } else {
         // Fetch complete user data from database
-        const userData = await fetchUserData(session.user.id);
-        if (userData) {
-          setUser({
-            ...userData,
-            email: session.user.email ?? '',
-          });
-        } else {
+        try {
+          const { data, error: userError } = await supabase
+            .from('users')
+            .select('name, role, subscription_plan, created_at')
+            .eq('id', session.user.id)
+            .single();
+
+          if (userError) {
+            console.error('Error fetching user data:', userError);
+            setUser(getUserFromSession(session));
+          } else {
+            setUser({
+              id: session.user.id,
+              email: session.user.email ?? '',
+              name: data?.name || '',
+              role: data?.role || 'user',
+              subscription_plan: data?.subscription_plan || 'free',
+              created_at: data?.created_at || '',
+            });
+          }
+        } catch (userFetchError) {
+          console.error('Error in user data fetch:', userFetchError);
           setUser(getUserFromSession(session));
         }
       }
