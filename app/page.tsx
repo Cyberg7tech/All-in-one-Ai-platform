@@ -1,6 +1,4 @@
 import Link from 'next/link';
-export const revalidate = 0;
-export const dynamic = 'force-dynamic';
 import {
   ArrowRight,
   Bot,
