@@ -230,8 +230,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-
-
   const updateDisplayName = async (name: string) => {
     if (!supabase || !user) throw new Error('User not authenticated');
 

@@ -47,13 +47,13 @@ export default function LoginForm() {
         await login(email, password);
       }
 
-      // Check for redirect URL
-      const redirectTo = searchParams.get('redirectTo') || '/dashboard';
-      router.push(redirectTo);
+      // Don't redirect here - let the auth context handle it
+      // The login page useEffect will handle the redirect when user state updates
+      console.log('Login successful, waiting for auth context to handle redirect...');
     } catch (err: any) {
       setError(err.message || 'An error occurred. Please try again.');
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleGoogleOAuth = async () => {

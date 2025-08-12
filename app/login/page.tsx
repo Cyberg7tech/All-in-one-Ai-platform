@@ -9,7 +9,7 @@ export default function LoginPage() {
   // and ensure fresh render to read client-side session state
   // during navigation.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
@@ -18,10 +18,12 @@ export default function LoginPage() {
   }, []);
 
   useEffect(() => {
-    if (mounted && !isLoading && user) {
+    console.log('Login page effect:', { mounted, isLoading, isAuthenticated, user: !!user });
+    if (mounted && !isLoading && isAuthenticated) {
+      console.log('Redirecting to dashboard...');
       router.push('/dashboard');
     }
-  }, [user, isLoading, router, mounted]);
+  }, [isAuthenticated, isLoading, router, mounted]);
 
   if (!mounted || isLoading) return null;
 
