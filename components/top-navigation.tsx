@@ -108,7 +108,7 @@ export function TopNavigation() {
           </Button>
 
           {showNotifications && (
-            <Card className='absolute top-12 right-0 w-80 z-50 shadow-lg'>
+            <Card className='absolute top-12 right-0 w-80 z-[9999] shadow-lg'>
               <CardHeader className='pb-3'>
                 <div className='flex items-center justify-between'>
                   <CardTitle className='text-lg'>Notifications</CardTitle>
@@ -144,7 +144,7 @@ export function TopNavigation() {
           </Button>
 
           {showSettings && (
-            <Card className='absolute top-12 right-0 w-64 z-50 shadow-lg'>
+            <Card className='absolute top-12 right-0 w-64 z-[9999] shadow-lg'>
               <CardHeader className='pb-3'>
                 <div className='flex items-center justify-between'>
                   <CardTitle className='text-lg'>Settings</CardTitle>
@@ -195,7 +195,7 @@ export function TopNavigation() {
           </div>
 
           {showUserProfile && (
-            <Card className='absolute top-12 right-0 w-72 z-50 shadow-lg'>
+            <Card className='absolute top-12 right-0 w-72 z-[9999] shadow-lg'>
               <CardHeader className='pb-3'>
                 <div className='flex items-center justify-between'>
                   <CardTitle className='text-lg'>User Profile</CardTitle>
