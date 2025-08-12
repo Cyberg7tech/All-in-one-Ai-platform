@@ -52,12 +52,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Fetch enriched profile in background and update state when ready
-      supabase
-        .from('users')
-        .select('name, role, subscription_plan, created_at')
-        .eq('id', sessionUser.id)
-        .single()
-        .then(({ data: userData, error }) => {
+      (async () => {
+        try {
+          const { data: userData, error } = await supabase
+            .from('users')
+            .select('name, role, subscription_plan, created_at')
+            .eq('id', sessionUser.id)
+            .single();
+
           if (error && error.code !== 'PGRST116') {
             console.error('Error fetching user data:', error);
           }
@@ -72,10 +74,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           };
           setUser(finalUserData);
           console.log('Set user data (with DB):', finalUserData);
-        })
-        .catch((err) => {
+        } catch (err) {
           console.error('Error updating user from session (background):', err);
-        });
+        }
+      })();
     },
     [supabase]
   );
