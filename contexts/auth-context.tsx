@@ -1,5 +1,5 @@
 'use client';
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { useSupabaseClient } from '@/components/providers/supabase-provider';
 import { User } from '@supabase/supabase-js';
 
@@ -31,10 +31,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
   const supabase = useSupabaseClient();
 
-  const updateUserFromSession = async (sessionUser: User) => {
-    try {
-      // Skip database calls during SSR
-      if (!supabase) {
+  const updateUserFromSession = useCallback(
+    async (sessionUser: User) => {
+      try {
+        // Skip database calls during SSR
+        if (!supabase) {
+          setUser({
+            id: sessionUser.id,
+            email: sessionUser.email ?? '',
+            name: sessionUser.user_metadata?.name || '',
+            role: 'user',
+            subscription_plan: 'free',
+            created_at: sessionUser.created_at,
+          });
+          return;
+        }
+
+        // First try to get user data from database
+        const { data: userData, error } = await supabase
+          .from('users')
+          .select('name, role, subscription_plan, created_at')
+          .eq('id', sessionUser.id)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching user data:', error);
+        }
+
+        setUser({
+          id: sessionUser.id,
+          email: sessionUser.email ?? '',
+          name: userData?.name || sessionUser.user_metadata?.name || '',
+          role: userData?.role || 'user',
+          subscription_plan: userData?.subscription_plan || 'free',
+          created_at: userData?.created_at || sessionUser.created_at,
+        });
+      } catch (error) {
+        console.error('Error updating user from session:', error);
+        // Fallback to basic user data
         setUser({
           id: sessionUser.id,
           email: sessionUser.email ?? '',
@@ -43,41 +77,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           subscription_plan: 'free',
           created_at: sessionUser.created_at,
         });
-        return;
       }
-
-      // First try to get user data from database
-      const { data: userData, error } = await supabase
-        .from('users')
-        .select('name, role, subscription_plan, created_at')
-        .eq('id', sessionUser.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching user data:', error);
-      }
-
-      setUser({
-        id: sessionUser.id,
-        email: sessionUser.email ?? '',
-        name: userData?.name || sessionUser.user_metadata?.name || '',
-        role: userData?.role || 'user',
-        subscription_plan: userData?.subscription_plan || 'free',
-        created_at: userData?.created_at || sessionUser.created_at,
-      });
-    } catch (error) {
-      console.error('Error updating user from session:', error);
-      // Fallback to basic user data
-      setUser({
-        id: sessionUser.id,
-        email: sessionUser.email ?? '',
-        name: sessionUser.user_metadata?.name || '',
-        role: 'user',
-        subscription_plan: 'free',
-        created_at: sessionUser.created_at,
-      });
-    }
-  };
+    },
+    [supabase]
+  );
 
   useEffect(() => {
     if (!supabase) return;

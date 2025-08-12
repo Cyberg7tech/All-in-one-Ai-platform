@@ -286,31 +286,7 @@ export default function MultiLLMChatPage() {
     };
   }, []);
 
-  // Strip markdown formatting from text
-  const stripMarkdown = useCallback((text: string): string => {
-    return (
-      text
-        // Remove headers (### text -> text)
-        .replace(/^#{1,6}\s+/gm, '')
-        // Remove bold (**text** -> text)
-        .replace(/\*\*(.*?)\*\*/g, '$1')
-        // Remove italic (*text* -> text)
-        .replace(/\*(.*?)\*/g, '$1')
-        // Remove code blocks (```text``` -> text)
-        .replace(/```[\s\S]*?```/g, '')
-        // Remove inline code (`text` -> text)
-        .replace(/`(.*?)`/g, '$1')
-        // Remove links ([text](url) -> text)
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-        // Remove bullet points (- text -> text)
-        .replace(/^[\s]*[-*+]\s+/gm, '')
-        // Remove numbered lists (1. text -> text)
-        .replace(/^\d+\.\s+/gm, '')
-        // Clean up extra whitespace
-        .replace(/\n{3,}/g, '\n\n')
-        .trim()
-    );
-  }, []);
+  // TODO: Add stripMarkdown utility function when implementing actual database calls
 
   // Create new session in DB
   const [isCreating, setIsCreating] = useState(false);
@@ -523,9 +499,16 @@ export default function MultiLLMChatPage() {
       // Store assistant message
       let assistantMsg: any = null;
       if (data.success) {
-        const cleanContent = stripMarkdown(data.content);
         // TODO: Replace with direct Supabase calls
-        // assistantMsg = await dbHelpers.addChatMessage(...);
+        // assistantMsg = await dbHelpers.addChatMessage({
+        //   session_id: sessionId,
+        //   user_id: user.id,
+        //   role: 'assistant' as const,
+        //   content: data.content, // TODO: Add stripMarkdown utility
+        //   tokens_used: data.usage?.total_tokens || 0,
+        //   model_used: selectedModel,
+        //   cost: data.cost || 0,
+        // });
         assistantMsg = { id: Date.now().toString() }; // Temporary mock
         // TODO: Replace with direct Supabase calls
         // await dbHelpers.addChatMessage({
@@ -594,7 +577,6 @@ export default function MultiLLMChatPage() {
     selectedModel,
     sessions,
     updateChatTitle,
-    stripMarkdown,
     user?.name,
     user?.email,
   ]);
