@@ -19,11 +19,12 @@ export default function LoginPage() {
 
   useEffect(() => {
     console.log('Login page effect:', { mounted, isLoading, isAuthenticated, user: !!user });
-    if (mounted && !isLoading && isAuthenticated) {
+    if (mounted && !isLoading && isAuthenticated && user) {
       console.log('Redirecting to dashboard...');
-      router.push('/dashboard');
+      // Try immediate redirect
+      window.location.href = '/dashboard';
     }
-  }, [isAuthenticated, isLoading, router, mounted]);
+  }, [isAuthenticated, isLoading, router, mounted, user]);
 
   if (!mounted || isLoading) return null;
 

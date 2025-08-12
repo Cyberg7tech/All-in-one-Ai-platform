@@ -52,6 +52,8 @@ export default function LoginForm() {
       console.log('Login successful, waiting for auth context to handle redirect...');
     } catch (err: any) {
       setError(err.message || 'An error occurred. Please try again.');
+    } finally {
+      // Always reset form loading state, but let auth context manage its own loading
       setIsLoading(false);
     }
   };
