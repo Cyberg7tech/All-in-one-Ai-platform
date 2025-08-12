@@ -30,7 +30,6 @@ export default function SupabaseProvider({ children }: SupabaseProviderProps) {
         {
           cookieOptions: {
             name: 'sb-one-ai-auth',
-            lifetime: 60 * 60 * 24 * 7, // 7 days
             domain: undefined,
             path: '/',
             sameSite: 'lax',
