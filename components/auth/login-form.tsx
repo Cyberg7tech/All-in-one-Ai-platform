@@ -62,16 +62,16 @@ export default function LoginForm() {
       setError('Auth is not ready yet. Please try again in a moment.');
       return;
     }
-    const redirectTo =
-      process.env.NODE_ENV === 'production'
-        ? 'https://one-ai.sgbizsolution.com/auth/callback'
-        : `${window.location.origin}/auth/callback`;
+    const redirectTo = `${window.location.origin}/auth/callback`;
 
     try {
       await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo,
+          queryParams: {
+            prompt: 'select_account',
+          },
         },
       });
     } catch (err: any) {

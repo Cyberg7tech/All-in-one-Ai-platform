@@ -24,6 +24,12 @@ export async function GET(request: Request) {
             cookieStore.set({ name, value: '', ...options });
           },
         },
+        cookieOptions: {
+          name: 'sb-one-ai-auth',
+          domain: undefined,
+          path: '/',
+          sameSite: 'lax',
+        },
       }
     );
 
