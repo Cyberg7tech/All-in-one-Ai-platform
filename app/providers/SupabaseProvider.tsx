@@ -16,5 +16,3 @@ export function useSupabase(): SupabaseClient {
   if (!client) throw new Error('SupabaseProvider missing');
   return client;
 }
-
-
