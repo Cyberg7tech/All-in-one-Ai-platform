@@ -180,16 +180,16 @@ export class AIModelManager {
   // Get available models for a specific capability
   getModelsForCapability(capability: string): any[] {
     const allModels = this.apiService.getAvailableModels();
-    
+
     switch (capability) {
       case 'chat':
-        return allModels.filter(m => m.category === 'chat');
+        return allModels.filter((m) => m.category === 'chat');
       case 'coding':
-        return allModels.filter(m => m.category === 'coding' || m.name.toLowerCase().includes('code'));
+        return allModels.filter((m) => m.category === 'coding' || m.name.toLowerCase().includes('code'));
       case 'reasoning':
-        return allModels.filter(m => m.category === 'reasoning');
+        return allModels.filter((m) => m.category === 'reasoning');
       case 'multimodal':
-        return allModels.filter(m => m.category === 'multimodal');
+        return allModels.filter((m) => m.category === 'multimodal');
       default:
         return allModels;
     }
@@ -199,15 +199,14 @@ export class AIModelManager {
   getRecommendedModels(): Record<string, any[]> {
     return {
       'general-chat': this.getModelsForCapability('chat').slice(0, 3),
-      'coding': this.getModelsForCapability('coding').slice(0, 3),
-      'reasoning': this.getModelsForCapability('reasoning').slice(0, 3),
-      'creative': this.getModelsForCapability('chat').filter(m => 
-        m.name.toLowerCase().includes('claude') || 
-        m.name.toLowerCase().includes('gpt-4')
-      ).slice(0, 2),
-      'fast-cheap': this.getModelsForCapability('chat').filter(m => 
-        m.tier === 'free' || m.cost === 'Free'
-      ).slice(0, 3),
+      coding: this.getModelsForCapability('coding').slice(0, 3),
+      reasoning: this.getModelsForCapability('reasoning').slice(0, 3),
+      creative: this.getModelsForCapability('chat')
+        .filter((m) => m.name.toLowerCase().includes('claude') || m.name.toLowerCase().includes('gpt-4'))
+        .slice(0, 2),
+      'fast-cheap': this.getModelsForCapability('chat')
+        .filter((m) => m.tier === 'free' || m.cost === 'Free')
+        .slice(0, 3),
     };
   }
 
@@ -232,8 +231,8 @@ export class AIModelManager {
 
     // Check if at least one provider is configured for optional providers
     if (moduleRequirements.optionalProviders.length > 0) {
-      const hasOptionalProvider = moduleRequirements.optionalProviders.some(
-        providerId => this.isProviderConfigured(providerId)
+      const hasOptionalProvider = moduleRequirements.optionalProviders.some((providerId) =>
+        this.isProviderConfigured(providerId)
       );
       if (!hasOptionalProvider) {
         missingRequirements.push(`At least one of: ${moduleRequirements.optionalProviders.join(', ')}`);
@@ -252,7 +251,7 @@ export class AIModelManager {
     requiredProviders: string[];
     optionalProviders: string[];
   } {
-    const requirements: Record<string, { requiredProviders: string[], optionalProviders: string[] }> = {
+    const requirements: Record<string, { requiredProviders: string[]; optionalProviders: string[] }> = {
       'multillm-chatgpt': {
         requiredProviders: [],
         optionalProviders: ['openai', 'together', 'aimlapi'],
@@ -297,16 +296,18 @@ export class AIModelManager {
         requiredProviders: [],
         optionalProviders: ['aimlapi', 'google'],
       },
-      'llamagpt': {
+      llamagpt: {
         requiredProviders: ['together'],
         optionalProviders: [],
       },
     };
 
-    return requirements[moduleId] || {
-      requiredProviders: [],
-      optionalProviders: ['openai', 'together', 'aimlapi'],
-    };
+    return (
+      requirements[moduleId] || {
+        requiredProviders: [],
+        optionalProviders: ['openai', 'together', 'aimlapi'],
+      }
+    );
   }
 
   // Get setup instructions for a module
@@ -318,9 +319,9 @@ export class AIModelManager {
   } {
     const validation = this.validateModuleConfiguration(moduleId);
     const moduleRequirements = this.getModuleRequirements(moduleId);
-    
+
     return {
-      title: `Setup ${moduleId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`,
+      title: `Setup ${moduleId.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}`,
       description: `Configure the required AI providers for ${moduleId}`,
       requirements: validation.missingRequirements,
       setupSteps: [

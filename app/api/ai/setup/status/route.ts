@@ -4,11 +4,11 @@ import { AIModelManager } from '@/lib/ai/model-manager';
 export async function GET() {
   try {
     const modelManager = AIModelManager.getInstance();
-    
+
     // Get all providers and their configuration status
     const providers = modelManager.getProviders();
     const capabilities = modelManager.getCapabilities();
-    
+
     // Check each AI module's configuration
     const modules = [
       'multillm-chatgpt',
@@ -31,13 +31,13 @@ export async function GET() {
       'youtube-content',
     ];
 
-    const moduleStatus = modules.map(moduleId => {
+    const moduleStatus = modules.map((moduleId) => {
       const validation = modelManager.validateModuleConfiguration(moduleId);
       const setupInstructions = modelManager.getModuleSetupInstructions(moduleId);
-      
+
       return {
         id: moduleId,
-        name: moduleId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        name: moduleId.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
         isConfigured: validation.isValid,
         missingRequirements: validation.missingRequirements,
         configuredProviders: validation.configuredProviders,
@@ -46,7 +46,7 @@ export async function GET() {
     });
 
     // Calculate overall setup progress
-    const configuredModules = moduleStatus.filter(m => m.isConfigured).length;
+    const configuredModules = moduleStatus.filter((m) => m.isConfigured).length;
     const totalModules = moduleStatus.length;
     const setupProgress = Math.round((configuredModules / totalModules) * 100);
 
@@ -58,17 +58,17 @@ export async function GET() {
       setupProgress,
       configuredModules,
       totalModules,
-      providers: providers.map(p => ({
+      providers: providers.map((p) => ({
         id: p.id,
         name: p.name,
         isConfigured: p.isConfigured,
         capabilities: p.supportedCapabilities,
       })),
-      capabilities: capabilities.map(c => ({
+      capabilities: capabilities.map((c) => ({
         id: c.id,
         name: c.name,
         description: c.description,
-        isAvailable: c.requiredKeys.some(key => !!process.env[key]),
+        isAvailable: c.requiredKeys.some((key) => !!process.env[key]),
       })),
       modules: moduleStatus,
       nextSteps,
@@ -93,10 +93,10 @@ export async function GET() {
 
 function getRecommendedNextSteps(providers: any[], moduleStatus: any[]): string[] {
   const steps: string[] = [];
-  
+
   // Check if any provider is configured
-  const hasAnyProvider = providers.some(p => p.isConfigured);
-  
+  const hasAnyProvider = providers.some((p) => p.isConfigured);
+
   if (!hasAnyProvider) {
     steps.push('🔑 Add at least one AI provider API key (OpenAI, Together AI, or AI/ML API)');
     steps.push('📚 Follow the setup guide: AI_MODULES_SETUP_GUIDE.md');
@@ -104,10 +104,10 @@ function getRecommendedNextSteps(providers: any[], moduleStatus: any[]): string[
   }
 
   // Check for specific missing capabilities
-  const hasOpenAI = providers.find(p => p.id === 'openai')?.isConfigured;
-  const hasTogetherAI = providers.find(p => p.id === 'together')?.isConfigured;
-  const hasElevenLabs = providers.find(p => p.id === 'elevenlabs')?.isConfigured;
-  const hasReplicate = providers.find(p => p.id === 'replicate')?.isConfigured;
+  const hasOpenAI = providers.find((p) => p.id === 'openai')?.isConfigured;
+  const hasTogetherAI = providers.find((p) => p.id === 'together')?.isConfigured;
+  const hasElevenLabs = providers.find((p) => p.id === 'elevenlabs')?.isConfigured;
+  const hasReplicate = providers.find((p) => p.id === 'replicate')?.isConfigured;
 
   if (!hasOpenAI && !hasTogetherAI) {
     steps.push('💬 Add a chat provider (OpenAI or Together AI) for better chat experience');
@@ -126,11 +126,11 @@ function getRecommendedNextSteps(providers: any[], moduleStatus: any[]): string[
   }
 
   const unconfiguredCriticalModules = moduleStatus.filter(
-    m => !m.isConfigured && ['multillm-chatgpt', 'content-writer', 'image-generator'].includes(m.id)
+    (m) => !m.isConfigured && ['multillm-chatgpt', 'content-writer', 'image-generator'].includes(m.id)
   );
 
   if (unconfiguredCriticalModules.length > 0) {
-    steps.push(`⚙️ Configure core modules: ${unconfiguredCriticalModules.map(m => m.name).join(', ')}`);
+    steps.push(`⚙️ Configure core modules: ${unconfiguredCriticalModules.map((m) => m.name).join(', ')}`);
   }
 
   if (steps.length === 0) {
@@ -181,10 +181,10 @@ function getFullFeatureRecommendations(providers: any[]): {
     description: 'Complete AI platform with all capabilities',
     requiredKeys: [
       'OPENAI_API_KEY',
-      'TOGETHER_API_KEY', 
+      'TOGETHER_API_KEY',
       'AIML_API_KEY',
       'REPLICATE_API_TOKEN',
-      'ELEVENLABS_API_KEY'
+      'ELEVENLABS_API_KEY',
     ],
     estimatedCost: '$1.00-$10.00 per 1000 messages (varies by features used)',
   };
