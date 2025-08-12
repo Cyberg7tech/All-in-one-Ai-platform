@@ -17,6 +17,13 @@ export function getServerSupabase(): SupabaseClient {
         set: () => {},
         remove: () => {},
       },
+      // IMPORTANT: match the browser client cookie name
+      cookieOptions: {
+        name: 'sb-one-ai-auth',
+        domain: undefined,
+        path: '/',
+        sameSite: 'lax',
+      },
     }
   );
 }
