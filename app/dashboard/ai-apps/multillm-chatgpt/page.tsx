@@ -226,8 +226,8 @@ export default function MultiLLMChatPage() {
       console.log('🔄 Fetching chat sessions for user:', user.id);
       setIsLoadingSessions(true);
       try {
-        // const dbSessions = await // dbHelpers. // TODO: Replace with direct Supabase calls
-    if (false) console.log('dbHelpers disabled');getChatSessions(user.id); // TODO: Replace with direct Supabase calls
+        // TODO: Replace with direct Supabase calls
+        // const dbSessions = await dbHelpers.getChatSessions(user.id);
         const dbSessions: any[] = [];
 
         if (dbSessions && dbSessions.length > 0) {
@@ -318,12 +318,13 @@ export default function MultiLLMChatPage() {
     if (!user?.id || isCreating) return;
     setIsCreating(true);
     setShowModelPicker(false);
-    const session = await // dbHelpers. // TODO: Replace with direct Supabase calls
-    if (false) console.log('dbHelpers disabled');createChatSession({
-      user_id: user.id,
-      title: 'New Chat',
-      model_id: selectedModel,
-    });
+    // TODO: Replace with direct Supabase calls
+    // const session = await dbHelpers.createChatSession({
+    //   user_id: user.id,
+    //   title: 'New Chat',
+    //   model_id: selectedModel,
+    // });
+    const session = { id: Date.now().toString() }; // Temporary mock
     setSessions((prev) => [
       {
         id: String(session.id),
@@ -367,8 +368,8 @@ export default function MultiLLMChatPage() {
         const smartTitle = generateChatTitle(firstMessage);
 
         // Update in database
-        await // dbHelpers. // TODO: Replace with direct Supabase calls
-    if (false) console.log('dbHelpers disabled');updateChatSession(sessionId, { title: smartTitle });
+        // TODO: Replace with direct Supabase calls
+        // await dbHelpers.updateChatSession(sessionId, { title: smartTitle });
 
         // Update in UI state
         setSessions((prev) =>
@@ -402,12 +403,13 @@ export default function MultiLLMChatPage() {
 
       // If no session, create one
       if (!sessionId) {
-        const session = await // dbHelpers. // TODO: Replace with direct Supabase calls
-    if (false) console.log('dbHelpers disabled');createChatSession({
-          user_id: user.id,
-          title: 'New Chat',
-          model_id: selectedModel,
-        });
+        // TODO: Replace with direct Supabase calls
+        // const session = await dbHelpers.createChatSession({
+        //   user_id: user.id,
+        //   title: 'New Chat',
+        //   model_id: selectedModel,
+        // });
+        const session = { id: Date.now().toString() }; // Temporary mock
         sessionId = String(session.id);
         setSessions((prev) => [
           {
@@ -423,16 +425,17 @@ export default function MultiLLMChatPage() {
       }
 
       // Store user message
-      const userMsg = await // dbHelpers. // TODO: Replace with direct Supabase calls
-    if (false) console.log('dbHelpers disabled');addChatMessage({
-        session_id: sessionId,
-        user_id: user.id,
-        role: 'user' as const,
-        content: messageContent,
-        tokens_used: 0, // User messages don't consume tokens
-        model_used: selectedModel,
-        cost: 0,
-      });
+      // TODO: Replace with direct Supabase calls
+      // const userMsg = await dbHelpers.addChatMessage({
+      //   session_id: sessionId,
+      //   user_id: user.id,
+      //   role: 'user' as const,
+      //   content: messageContent,
+      //   tokens_used: 0, // User messages don't consume tokens
+      //   model_used: selectedModel,
+      //   cost: 0,
+      // });
+      const userMsg = { id: Date.now().toString() }; // Temporary mock
 
       // Immediately add user message to UI state so it shows up right away
       setSessions((prev) =>
@@ -507,16 +510,19 @@ export default function MultiLLMChatPage() {
       let assistantMsg: any = null;
       if (data.success) {
         const cleanContent = stripMarkdown(data.content);
-        assistantMsg = await // dbHelpers. // TODO: Replace with direct Supabase calls
-    if (false) console.log('dbHelpers disabled');addChatMessage({
-          session_id: sessionId,
-          user_id: user.id,
-          role: 'assistant' as const,
-          content: cleanContent,
-          tokens_used: data.usage?.total_tokens || 0,
-          model_used: selectedModel,
-          cost: data.cost || 0,
-        });
+        // TODO: Replace with direct Supabase calls
+        // assistantMsg = await dbHelpers.addChatMessage(...);
+        assistantMsg = { id: Date.now().toString() }; // Temporary mock
+        // TODO: Replace with direct Supabase calls
+        // await dbHelpers.addChatMessage({
+        //   session_id: sessionId,
+        //   user_id: user.id,
+        //   role: 'assistant' as const,
+        //   content: cleanContent,
+        //   tokens_used: data.usage?.total_tokens || 0,
+        //   model_used: selectedModel,
+        //   cost: data.cost || 0,
+        // });
       }
 
       // Update session state with assistant message only (user message already added)
@@ -675,8 +681,10 @@ export default function MultiLLMChatPage() {
   const deleteSession = useCallback(
     async (sessionId: string) => {
       try {
-        await // dbHelpers. // TODO: Replace with direct Supabase calls
-    if (false) console.log('dbHelpers disabled');deleteChatSession(sessionId);
+        // TODO: Replace with direct Supabase calls
+        // await dbHelpers.deleteChatSession(sessionId);
+        // TODO: Replace with direct Supabase calls
+        // await dbHelpers.deleteChatSession(sessionId);
         setSessions((prev) => prev.filter((s) => s.id !== sessionId));
         if (currentSessionId === sessionId) {
           const remainingSessions = sessions.filter((s) => s.id !== sessionId);

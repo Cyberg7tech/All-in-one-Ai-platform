@@ -71,12 +71,12 @@ export default function DashboardPage() {
       const fetchRecentActivity = async () => {
         try {
           const userActivities = await supabase
-          .from('activities')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('timestamp', { ascending: false })
-          .limit(10)
-          .then(({ data }) => data || []);
+            .from('activities')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('timestamp', { ascending: false })
+            .limit(10)
+            .then(({ data }) => data || []);
           setRecentActivity(userActivities || []);
         } catch (error) {
           console.error('Error fetching recent activities:', error);
@@ -88,35 +88,31 @@ export default function DashboardPage() {
       const createSampleActivities = async () => {
         try {
           // Add some sample activities for new users
-          await supabase
-            .from('activities')
-            .insert({
-              user_id: user.id,
-              type: 'Registration',
-              name: 'Account Created',
-              description: 'Welcome to One AI platform!',
-              icon: '👤',
-              metadata: {},
-            });
-          await supabase
-            .from('activities')
-            .insert({
-              user_id: user.id,
-              type: 'Login',
-              name: 'Dashboard Access',
-              description: 'Accessed the dashboard',
-              icon: '🏠',
-              metadata: {},
-            });
+          await supabase.from('activities').insert({
+            user_id: user.id,
+            type: 'Registration',
+            name: 'Account Created',
+            description: 'Welcome to One AI platform!',
+            icon: '👤',
+            metadata: {},
+          });
+          await supabase.from('activities').insert({
+            user_id: user.id,
+            type: 'Login',
+            name: 'Dashboard Access',
+            description: 'Accessed the dashboard',
+            icon: '🏠',
+            metadata: {},
+          });
 
           // Refresh activities
           const userActivities = await supabase
-          .from('activities')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('timestamp', { ascending: false })
-          .limit(10)
-          .then(({ data }) => data || []);
+            .from('activities')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('timestamp', { ascending: false })
+            .limit(10)
+            .then(({ data }) => data || []);
           setRecentActivity(userActivities || []);
         } catch (error) {
           console.error('Error creating sample activities:', error);
