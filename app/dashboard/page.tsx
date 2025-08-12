@@ -1,4 +1,7 @@
 'use client';
+// Ensure page is not statically cached to avoid stale auth/UI
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import { ArrowRight, Brain, TrendingUp, Shield } from 'lucide-react';

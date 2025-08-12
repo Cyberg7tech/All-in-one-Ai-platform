@@ -5,6 +5,10 @@ import { useAuth } from '@/contexts/auth-context';
 import LoginForm from '@/components/auth/login-form';
 
 export default function LoginPage() {
+  // Avoid any static caching for auth routes
+  // and ensure fresh render to read client-side session state
+  // during navigation.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
