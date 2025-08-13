@@ -120,15 +120,19 @@ export async function POST(req: NextRequest) {
       rawText = json.text || '';
     }
 
+    // NOTE: If text extraction failed, still create the document so the user can proceed,
+    // and return success with 0 chunks. This avoids blocking with 400 errors on some hosts.
+    // The document can be reprocessed later or used for metadata-only workflows.
     if (!rawText) {
-      return NextResponse.json(
-        {
-          error:
-            'No text to ingest. Provide text field or install PDF parser. File was uploaded to storage if provided.',
-          storagePath,
-        },
-        { status: 400 }
-      );
+      const { data: doc, error: docErr } = await supabase
+        .from('documents')
+        .insert({ user_id: userId, title, file_path: storagePath || null })
+        .select()
+        .single();
+      if (docErr) {
+        return NextResponse.json({ error: docErr.message }, { status: 500 });
+      }
+      return NextResponse.json({ success: true, documentId: doc.id, chunks: 0, storagePath });
     }
 
     const chunks = chunkText(rawText);

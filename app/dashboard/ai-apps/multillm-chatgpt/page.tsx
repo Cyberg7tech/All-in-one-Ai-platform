@@ -153,12 +153,15 @@ export default function MultiLLMChatPage() {
   // Filter and group models
   const filteredModels = useMemo(
     () =>
-      availableModels.filter(
-        (model) =>
-          model.name.toLowerCase().includes(modelSearch.toLowerCase()) ||
-          model.provider.toLowerCase().includes(modelSearch.toLowerCase()) ||
-          model.capabilities.some((cap) => cap.toLowerCase().includes(modelSearch.toLowerCase()))
-      ),
+      availableModels.filter((model) => {
+        const q = modelSearch.toLowerCase();
+        return (
+          model.name.toLowerCase().includes(q) ||
+          String(model.provider).toLowerCase().includes(q) ||
+          String(model.id).toLowerCase().includes(q) ||
+          (model.capabilities || []).some((cap) => String(cap).toLowerCase().includes(q))
+        );
+      }),
     [modelSearch, availableModels]
   );
 
@@ -193,12 +196,13 @@ export default function MultiLLMChatPage() {
   useEffect(() => {
     const loadModels = async () => {
       try {
-        const res = await fetch('/api/ai/models');
+        const res = await fetch('/api/ai/models', { cache: 'no-store' });
         if (!res.ok) return;
         const data = await res.json();
+        // Ensure Together models are present and labeled correctly
         const models = (data?.models?.all || []).map((m: any) => ({
           id: m.id,
-          name: m.name,
+          name: m.name || m.id,
           provider: m.provider,
           category: m.category,
           tier: m.tier,
@@ -208,7 +212,11 @@ export default function MultiLLMChatPage() {
         }));
         if (models.length > 0) {
           setAvailableModels(models);
-          const preferred = models.find((m: any) => m.provider === 'together') || models[0];
+          // Prefer a premium Together model if available, otherwise first Together model
+          const preferred =
+            models.find((m: any) => m.provider === 'together' && m.tier === 'premium') ||
+            models.find((m: any) => m.provider === 'together') ||
+            models[0];
           if (preferred) setSelectedModel(preferred.id);
         }
       } catch (e) {
@@ -739,7 +747,7 @@ export default function MultiLLMChatPage() {
                           <div className='flex items-center justify-between'>
                             <div className='flex-1'>
                               <div className='flex items-center space-x-2'>
-                                <span className='font-medium text-sm'>{model.name}</span>
+                                <span className='font-medium text-sm'>{model.name || model.id}</span>
                                 {model.tier === 'premium' && (
                                   <Badge variant='secondary' className='text-xs'>
                                     Premium
@@ -747,7 +755,7 @@ export default function MultiLLMChatPage() {
                                 )}
                               </div>
                               <p className='text-xs text-muted-foreground mt-1'>
-                                {model.provider} • {model.capabilities.join(', ')} • {model.speed}
+                                {model.provider} • {(model.capabilities || []).join(', ')} • {model.speed}
                               </p>
                             </div>
                             <div className='ml-2'>
@@ -758,7 +766,9 @@ export default function MultiLLMChatPage() {
                                   ? 'Premium'
                                   : model.tier === 'standard'
                                     ? 'Standard'
-                                    : 'Open Source'}
+                                    : model.tier === 'free'
+                                      ? 'Free'
+                                      : 'Open Source'}
                               </Badge>
                             </div>
                           </div>
