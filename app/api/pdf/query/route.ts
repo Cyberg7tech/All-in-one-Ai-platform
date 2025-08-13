@@ -1,20 +1,14 @@
+// cspell:ignore intfloat
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import { togetherEmbeddings, TOGETHER_BASE } from '@/lib/ai/providers/together';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 async function embedQuery(text: string): Promise<number[]> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error('OPENAI_API_KEY is not configured');
-  const res = await fetch('https://api.openai.com/v1/embeddings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({ model: 'text-embedding-3-small', input: text }),
-  });
-  if (!res.ok) throw new Error(`OpenAI embedding failed: ${res.status} ${await res.text()}`);
-  const json = await res.json();
+  const json = await togetherEmbeddings(text, 'intfloat/multilingual-e5-large-instruct');
   return json.data[0].embedding as number[];
 }
 
@@ -22,7 +16,7 @@ async function callLLM(system: string, user: string): Promise<string> {
   // Prefer Together (chat) if available; else OpenAI
   const together = process.env.TOGETHER_API_KEY;
   if (together) {
-    const res = await fetch('https://api.together.xyz/v1/chat/completions', {
+    const res = await fetch(`${TOGETHER_BASE}/chat/completions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${together}` },
       body: JSON.stringify({
@@ -39,23 +33,7 @@ async function callLLM(system: string, user: string): Promise<string> {
     return json?.choices?.[0]?.message?.content || 'No response';
   }
 
-  const openai = process.env.OPENAI_API_KEY;
-  if (!openai) throw new Error('No LLM provider configured');
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${openai}` },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: system },
-        { role: 'user', content: user },
-      ],
-      temperature: 0.2,
-      max_tokens: 800,
-    }),
-  });
-  const json = await res.json().catch(() => ({}));
-  return json?.choices?.[0]?.message?.content || 'No response';
+  throw new Error('TOGETHER_API_KEY is not configured');
 }
 
 export async function POST(req: NextRequest) {

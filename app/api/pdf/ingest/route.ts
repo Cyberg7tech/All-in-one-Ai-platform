@@ -1,3 +1,4 @@
+// cspell:ignore intfloat
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
@@ -5,24 +6,11 @@ import { createServerClient } from '@supabase/ssr';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-type EmbeddingProvider = 'openai';
+import { togetherEmbeddings } from '@/lib/ai/providers/together';
 
-async function embedTexts(texts: string[], provider: EmbeddingProvider = 'openai'): Promise<number[][]> {
-  if (provider === 'openai') {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) throw new Error('OPENAI_API_KEY is not configured');
-    const res = await fetch('https://api.openai.com/v1/embeddings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model: 'text-embedding-3-small', input: texts }),
-    });
-    if (!res.ok) {
-      throw new Error(`OpenAI embedding failed: ${res.status} ${await res.text()}`);
-    }
-    const json = await res.json();
-    return json.data.map((d: any) => d.embedding as number[]);
-  }
-  throw new Error('Unsupported embedding provider');
+async function embedTexts(texts: string[]): Promise<number[][]> {
+  const res = await togetherEmbeddings(texts, 'intfloat/multilingual-e5-large-instruct');
+  return res.data.map((d: any) => d.embedding as number[]);
 }
 
 function chunkText(text: string, target = 1200, overlap = 100): string[] {
@@ -78,6 +66,7 @@ export async function POST(req: NextRequest) {
     let title = 'Untitled Document';
     let rawText = '';
     let storagePath: string | null = null;
+    let uploadedFileMeta: { name?: string; size?: number; type?: string } | null = null;
 
     const contentType = req.headers.get('content-type') || '';
     if (contentType.includes('multipart/form-data')) {
@@ -99,6 +88,7 @@ export async function POST(req: NextRequest) {
           upsert: false,
         });
         if (!uploadError) storagePath = key;
+        uploadedFileMeta = { name: file.name, size: file.size, type: file.type };
 
         // Try parsing PDF text if possible
         if (!rawText && file.type === 'application/pdf') {
@@ -126,7 +116,14 @@ export async function POST(req: NextRequest) {
     if (!rawText) {
       const { data: doc, error: docErr } = await supabase
         .from('documents')
-        .insert({ user_id: userId, title, file_path: storagePath || null })
+        .insert({
+          user_id: userId,
+          filename: storagePath || null,
+          original_name: uploadedFileMeta?.name || title,
+          file_size: uploadedFileMeta?.size || null,
+          file_type: uploadedFileMeta?.type || 'application/pdf',
+          content: '',
+        })
         .select()
         .single();
       if (docErr) {
@@ -143,7 +140,14 @@ export async function POST(req: NextRequest) {
     // Create document row
     const { data: doc, error: docErr } = await supabase
       .from('documents')
-      .insert({ user_id: userId, title, file_path: storagePath || null })
+      .insert({
+        user_id: userId,
+        filename: storagePath || null,
+        original_name: uploadedFileMeta?.name || title,
+        file_size: uploadedFileMeta?.size || null,
+        file_type: uploadedFileMeta?.type || 'application/pdf',
+        content: chunks.join('\n\n'),
+      })
       .select()
       .single();
     if (docErr) {
@@ -155,11 +159,11 @@ export async function POST(req: NextRequest) {
 
     // Build rows for chunks
     const rows = chunks.map((content, i) => ({
-      doc_id: doc.id,
-      user_id: userId,
+      document_id: doc.id,
       chunk_index: i,
       content,
-      embedding: embeddings[i],
+      embedding_data: embeddings[i],
+      metadata: null,
     }));
     // Insert in pages of 100
     const pageSize = 100;

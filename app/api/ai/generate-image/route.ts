@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AIAPIService } from '@/lib/ai/api-integration';
-
-const apiService = AIAPIService.getInstance();
+// Together-only implementation; legacy OpenAI path removed
 
 // Handle CORS preflight requests
 export async function OPTIONS() {
@@ -66,57 +64,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let result;
+    // Together-only implementation; no OpenAI result variable
 
-    if (model === 'dall-e-3' || model === 'dall-e-2') {
-      console.log('Image Generation API: Using DALL-E', { model, prompt: prompt.substring(0, 100) });
-
-      // Use OpenAI DALL-E for image generation
-      const dalleStyle = model === 'dall-e-3' && ['vivid', 'natural'].includes(style) ? style : undefined;
-
-      result = await apiService.generateImageWithDALLE(prompt, {
-        model,
-        size,
-        style: dalleStyle,
-        quality: model === 'dall-e-3' ? quality : undefined,
-      });
-
-      console.log('Image Generation API: DALL-E result', {
-        success: !result.error,
-        hasImageUrl: !!result.image_url,
-        error: result.error,
-      });
-
-      // Handle the API response format
-      if (result.error) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: result.content,
-            images: [],
-            metadata: {
-              model,
-              prompt,
-              provider: 'openai',
-              timestamp: new Date().toISOString(),
-            },
-          },
-          { status: 500 }
-        );
-      }
-
-      // Return successful response
-      return NextResponse.json({
-        success: true,
-        images: [result.image_url],
-        metadata: {
-          model: result.model,
-          prompt: result.prompt,
-          provider: result.provider,
-          timestamp: new Date().toISOString(),
-        },
-      });
-    } else {
+    if (model !== 'dall-e-3' && model !== 'dall-e-2') {
       // Try Together images endpoint
       if (!process.env.TOGETHER_API_KEY) {
         return NextResponse.json(
@@ -161,6 +111,17 @@ export async function POST(request: NextRequest) {
         metadata: { model, provider: 'together' },
       });
     }
+
+    // If user explicitly chose DALL·E, but we are Together-only, return a helpful message
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          'DALL·E models are disabled in Together-only mode. Please choose a Together image model (e.g., black-forest-labs/FLUX.1-dev).',
+        images: [],
+      },
+      { status: 400 }
+    );
   } catch (error) {
     console.error('Image Generation API: Unexpected error', error);
     return NextResponse.json(

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { TOGETHER_BASE } from '@/lib/ai/providers/together';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,46 +28,34 @@ export async function POST(request: NextRequest) {
     const randomTranscription = mockTranscriptions[Math.floor(Math.random() * mockTranscriptions.length)];
 
     try {
-      const apiKey = process.env.OPENAI_API_KEY;
-
-      if (!apiKey) {
+      const key = process.env.TOGETHER_API_KEY;
+      if (!key) {
         return NextResponse.json(
-          { error: 'OPENAI_API_KEY is not configured', provider: 'openai-whisper' },
+          { error: 'TOGETHER_API_KEY is not configured', provider: 'together' },
           { status: 500 }
         );
       }
 
-      // Call Whisper v1 transcriptions
       const form = new FormData();
       form.append('file', audioFile, audioFile.name);
-      form.append('model', 'whisper-1');
+      form.append('model', 'openai/whisper-large-v3');
       form.append('language', language);
 
-      const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      const res = await fetch(`${TOGETHER_BASE}/audio/transcriptions`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${apiKey}` },
+        headers: { Authorization: `Bearer ${key}` },
         body: form,
       });
 
-      if (!whisperRes.ok) {
-        const errText = await whisperRes.text();
-        return NextResponse.json(
-          { error: `Whisper failed: ${whisperRes.status} ${errText}` },
-          { status: 500 }
-        );
+      if (!res.ok) {
+        const errText = await res.text();
+        return NextResponse.json({ error: `Together STT failed: ${res.status} ${errText}` }, { status: 500 });
       }
 
-      const whisperJson = (await whisperRes.json()) as any;
-      const text = whisperJson.text || whisperJson?.results?.[0]?.alternatives?.[0]?.transcript || '';
+      const json = (await res.json()) as any;
+      const text = json.text || json?.results?.[0]?.alternatives?.[0]?.transcript || '';
 
-      return NextResponse.json({
-        success: true,
-        transcription: text,
-        language,
-        confidence: 0.95,
-        note: 'Transcribed with OpenAI Whisper',
-        provider: 'openai-whisper',
-      });
+      return NextResponse.json({ success: true, transcription: text, language, provider: 'together' });
     } catch (error) {
       console.error('Speech-to-text error:', error);
 
