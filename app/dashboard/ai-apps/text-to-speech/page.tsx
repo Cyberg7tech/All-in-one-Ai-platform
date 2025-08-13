@@ -87,12 +87,23 @@ export default function TextToSpeechPage() {
     setAudioGenerations((prev) => [generation, ...prev]);
 
     try {
-      // Simulate audio generation
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const res = await fetch('/api/ai/text-to-speech', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: generation.text,
+          voice: generation.voice,
+          speed: generation.speed,
+          pitch: generation.pitch,
+        }),
+      });
 
-      // Create a mock audio URL (in real implementation, this would be from the TTS API)
-      const mockAudioUrl =
-        'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+f3xm8iBkPE2N+AOxAPU6zg5bNmGgU+ltryuWMdBD2a4vC2YxsEPZPY88p9KgUme8j13IQ7DhBYpuXp';
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || 'Failed to generate audio');
+      }
+
+      const data = await res.json();
 
       setAudioGenerations((prev) =>
         prev.map((gen) =>
@@ -100,8 +111,8 @@ export default function TextToSpeechPage() {
             ? {
                 ...gen,
                 status: 'completed',
-                audioUrl: mockAudioUrl,
-                duration: Math.floor(text.length / 10), // Rough estimate
+                audioUrl: String(data.audioUrl || ''),
+                duration: Number(data.duration || Math.floor(text.length / 10)),
               }
             : gen
         )
