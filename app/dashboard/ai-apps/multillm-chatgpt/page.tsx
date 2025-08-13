@@ -218,55 +218,33 @@ export default function MultiLLMChatPage() {
     loadModels();
   }, []);
 
-  // Load chat sessions from DB only once when user.id is available
+  // Load chat sessions for logged-in user
   useEffect(() => {
     if (!user?.id || hasFetchedSessions.current) return;
-
     const fetchSessions = async () => {
-      console.log('🔄 Fetching chat sessions for user:', user.id);
       setIsLoadingSessions(true);
       try {
-        // TODO: Replace with direct Supabase calls
-        // const dbSessions = await dbHelpers.getChatSessions(user.id);
-        const dbSessions: any[] = [];
-
-        if (dbSessions && dbSessions.length > 0) {
-          const mappedSessions = dbSessions.map((s: any) => ({
-            id: String(s.id),
-            title: String(s.title || 'New Chat'),
-            model: String(s.model_id || 'gpt-4o-mini'),
-            lastActivity: new Date(String(s.updated_at || s.created_at)),
-            messages: (s.chat_messages || []).map((m: any) => ({
-              id: String(m.id),
-              role: m.role as 'user' | 'assistant',
-              content: String(m.content),
-              timestamp: new Date(String(m.created_at)),
-              user_name: m.user_name ? String(m.user_name) : undefined,
-              user_email: m.user_email ? String(m.user_email) : undefined,
-            })),
-          }));
-          setSessions(mappedSessions);
-          if (mappedSessions.length > 0) {
-            setCurrentSessionId(mappedSessions[0].id);
-          }
-          console.log('✅ Loaded', mappedSessions.length, 'chat sessions');
-        } else {
-          setSessions([]);
-          setCurrentSessionId(null);
-          console.log('ℹ️ No existing chat sessions found');
-        }
-      } catch (error) {
-        console.error('❌ Error fetching sessions:', error);
-        setSessions([]);
-        setCurrentSessionId(null);
+        const res = await fetch('/api/chat/sessions', { cache: 'no-store' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || 'Failed to load sessions');
+        const mapped = (data.sessions || []).map((s: any) => ({
+          id: String(s.id),
+          title: String(s.title || 'New Chat'),
+          model: String(s.model_id || selectedModel),
+          lastActivity: new Date(String(s.updated_at || s.created_at)),
+          messages: [],
+        }));
+        setSessions(mapped);
+        if (mapped.length > 0) setCurrentSessionId(mapped[0].id);
+      } catch (e) {
+        console.error('load sessions failed', e);
       } finally {
         setIsLoadingSessions(false);
         hasFetchedSessions.current = true;
       }
     };
-
     fetchSessions();
-  }, [user?.id]);
+  }, [user?.id, selectedModel]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -294,18 +272,21 @@ export default function MultiLLMChatPage() {
     if (!user?.id || isCreating) return;
     setIsCreating(true);
     setShowModelPicker(false);
-    // TODO: Replace with direct Supabase calls
-    // const session = await dbHelpers.createChatSession({
-    //   user_id: user.id,
-    //   title: 'New Chat',
-    //   model_id: selectedModel,
-    // });
-    const session = {
-      id: Date.now().toString(),
-      title: 'New Chat',
-      model_id: selectedModel,
-      updated_at: new Date().toISOString(),
-    }; // Temporary mock
+    let session: any;
+    try {
+      const res = await fetch('/api/chat/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'New Chat', model_id: selectedModel }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Failed to create session');
+      session = data.session;
+    } catch (e) {
+      console.error('create session failed', e);
+      setIsCreating(false);
+      return;
+    }
     setSessions((prev) => [
       {
         id: String(session.id),
@@ -411,21 +392,26 @@ export default function MultiLLMChatPage() {
       }
 
       // Store user message
-      // TODO: Replace with direct Supabase calls
-      // const userMsg = await dbHelpers.addChatMessage({
-      //   session_id: sessionId,
-      //   user_id: user.id,
-      //   role: 'user' as const,
-      //   content: messageContent,
-      //   tokens_used: 0, // User messages don't consume tokens
-      //   model_used: selectedModel,
-      //   cost: 0,
-      // });
-      const userMsg = {
-        id: Date.now().toString(),
-        content: messageContent,
-        created_at: new Date().toISOString(),
-      }; // Temporary mock
+      let userMsg: any;
+      try {
+        const res = await fetch('/api/chat/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: sessionId,
+            role: 'user',
+            content: messageContent,
+            model_used: selectedModel,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || 'Failed to save message');
+        userMsg = data.message;
+      } catch (e) {
+        console.error('save message failed', e);
+        setIsLoading(false);
+        return;
+      }
 
       // Immediately add user message to UI state so it shows up right away
       setSessions((prev) =>
@@ -499,33 +485,24 @@ export default function MultiLLMChatPage() {
       // Store assistant message
       let assistantMsg: any = null;
       if (data.success) {
-        // TODO: Replace with direct Supabase calls
-        // assistantMsg = await dbHelpers.addChatMessage({
-        //   session_id: sessionId,
-        //   user_id: user.id,
-        //   role: 'assistant' as const,
-        //   content: data.content, // TODO: Add stripMarkdown utility
-        //   tokens_used: data.usage?.total_tokens || 0,
-        //   model_used: selectedModel,
-        //   cost: data.cost || 0,
-        // });
-        assistantMsg = {
-          id: Date.now().toString(),
-          content: String(data.content || ''),
-          created_at: new Date().toISOString(),
-          model_used: selectedModel,
-          tokens_used: data?.usage?.total_tokens || 0,
-        };
-        // TODO: Replace with direct Supabase calls
-        // await dbHelpers.addChatMessage({
-        //   session_id: sessionId,
-        //   user_id: user.id,
-        //   role: 'assistant' as const,
-        //   content: cleanContent,
-        //   tokens_used: data.usage?.total_tokens || 0,
-        //   model_used: selectedModel,
-        //   cost: data.cost || 0,
-        // });
+        try {
+          const res = await fetch('/api/chat/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              session_id: sessionId,
+              role: 'assistant',
+              content: String(data.content || ''),
+              tokens_used: Number(data?.usage?.total_tokens || 0),
+              model_used: selectedModel,
+            }),
+          });
+          const saved = await res.json();
+          if (!res.ok) throw new Error(saved?.error || 'Failed to save assistant message');
+          assistantMsg = saved.message;
+        } catch (e) {
+          console.error('save assistant failed', e);
+        }
       }
 
       // Update session state with assistant message only (user message already added)

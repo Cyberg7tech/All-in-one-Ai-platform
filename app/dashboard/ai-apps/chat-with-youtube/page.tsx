@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +42,8 @@ interface VideoData {
 }
 
 export default function ChatWithYouTubePage() {
+  const { user } = useAuth();
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [currentVideo, setCurrentVideo] = useState<VideoData | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -63,33 +66,25 @@ export default function ChatWithYouTubePage() {
     setIsLoadingVideo(true);
 
     try {
-      // Simulate video loading and transcript extraction
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Extract ID and fetch transcript from our API
+      const res = await fetch(`/api/youtube/transcript?url=${encodeURIComponent(videoUrl)}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Failed to load transcript');
 
-      // Extract video ID from URL (simplified)
-      const videoId = videoUrl.split('v=')[1]?.split('&')[0] || 'dQw4w9WgXcQ';
+      const videoId = data.videoId as string;
+      const transcript: string = data.transcript as string;
+
+      const infoRes = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(videoUrl)}`);
+      const info = (await infoRes.json().catch(() => ({}))) as any;
 
       const mockVideo: VideoData = {
         id: videoId,
         url: videoUrl,
-        title: 'How to Build Amazing AI Applications - Complete Tutorial',
-        duration: '15:42',
+        title: info?.title || 'YouTube Video',
+        duration: '—',
         thumbnail: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
-        description:
-          'In this comprehensive tutorial, we explore how to build cutting-edge AI applications from scratch. Learn about the latest technologies, frameworks, and best practices.',
-        transcript: `Welcome to this comprehensive tutorial on building AI applications. Today we'll cover everything from the basics to advanced concepts.
-
-First, let's understand what AI applications are and why they're becoming so important in today's technology landscape. Artificial Intelligence has revolutionized how we approach problem-solving in software development.
-
-We'll start with the fundamental concepts. Machine learning, deep learning, and natural language processing are the core pillars of modern AI applications. Each of these areas offers unique capabilities and use cases.
-
-Next, we'll dive into practical implementation. We'll use Python and popular libraries like TensorFlow, PyTorch, and OpenAI's APIs to build real-world applications.
-
-The key to successful AI applications is understanding your data. Data preprocessing, feature engineering, and model selection are crucial steps that determine the success of your project.
-
-We'll also cover deployment strategies, scaling considerations, and best practices for maintaining AI applications in production environments.
-
-Finally, we'll look at emerging trends and future possibilities in AI development. The field is rapidly evolving, and staying updated is essential for any AI developer.`,
+        description: info?.author_name ? `By ${info.author_name}` : 'Loaded transcript',
+        transcript,
         isLoaded: true,
       };
 
@@ -97,10 +92,7 @@ Finally, we'll look at emerging trends and future possibilities in AI developmen
       setMessages([]);
       setVideoUrl('');
 
-      toast({
-        title: 'Video loaded successfully!',
-        description: 'You can now ask questions about the video content.',
-      });
+      toast({ title: 'Video loaded', description: 'Transcript fetched successfully.' });
     } catch (error) {
       toast({
         title: 'Error loading video',
@@ -127,22 +119,64 @@ Finally, we'll look at emerging trends and future possibilities in AI developmen
     setIsLoading(true);
 
     try {
-      // Simulate AI response based on video content
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Ensure chat session exists and persist user message
+      let sid = sessionId;
+      if (!sid) {
+        const resSession = await fetch('/api/chat/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: 'YouTube Chat', model_id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo' }),
+        });
+        const js = await resSession.json();
+        if (!resSession.ok) throw new Error(js?.error || 'Failed to create session');
+        sid = js.session?.id;
+        setSessionId(sid);
+      }
+
+      await fetch('/api/chat/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sid, role: 'user', content: userMessage.content }),
+      });
+
+      // Build Together chat prompt constrained to transcript
+      const system = `You are an assistant that answers strictly and only from the provided YouTube transcript. If the answer is not present in the transcript, say you don't know.`;
+      const content = `Transcript (with timestamps):\n${currentVideo.transcript}\n\nQuestion: ${userMessage.content}\nReturn concise answer and reference timestamps present in square brackets when possible.`;
+      const chatRes = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+          messages: [
+            { role: 'system', content: system },
+            { role: 'user', content },
+          ],
+          maxTokens: 800,
+          temperature: 0.3,
+        }),
+      });
+      const chat = await chatRes.json();
+      if (!chatRes.ok) throw new Error(chat?.error || 'LLM failed');
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: generateResponseBasedOnVideo(userMessage.content, currentVideo),
+        content: String(chat.content || 'No response'),
         timestamp: new Date(),
-        videoTimestamp: generateRandomTimestamp(),
+        videoTimestamp: undefined,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+
+      await fetch('/api/chat/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sid, role: 'assistant', content: assistantMessage.content }),
+      });
     } catch (error) {
       toast({
         title: 'Error sending message',
-        description: 'Please try again later.',
+        description: error instanceof Error ? error.message : 'Please try again later.',
         variant: 'destructive',
       });
     } finally {
@@ -150,35 +184,7 @@ Finally, we'll look at emerging trends and future possibilities in AI developmen
     }
   };
 
-  const generateResponseBasedOnVideo = (question: string, video: VideoData) => {
-    const responses = [
-      `Based on the video "${video.title}", here's what I found about your question: ${question}. 
-
-The video explains that this concept is fundamental to understanding AI applications. According to the tutorial, the key points include practical implementation strategies and real-world examples.
-
-The presenter demonstrates this at around 3:45 in the video, showing step-by-step implementation details.`,
-
-      `Great question about "${question}"! In this video, the instructor covers this topic extensively. 
-
-The video mentions that this is a common challenge when building AI applications. The solution involves understanding the underlying principles and applying best practices as shown in the demonstration.
-
-You can find more details about this at timestamp 7:23 where they provide a detailed walkthrough.`,
-
-      `According to the content in "${video.title}", your question about "${question}" is addressed in the section about advanced concepts.
-
-The video explains that this approach is widely used in modern AI development. The key is to follow the framework outlined in the tutorial and adapt it to your specific use case.
-
-This is particularly well explained around the 10:15 mark in the video.`,
-    ];
-
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
-
-  const generateRandomTimestamp = () => {
-    const minutes = Math.floor(Math.random() * 15);
-    const seconds = Math.floor(Math.random() * 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
+  // Removed mock generators; now using real transcript + LLM
 
   const clearChat = () => {
     setMessages([]);

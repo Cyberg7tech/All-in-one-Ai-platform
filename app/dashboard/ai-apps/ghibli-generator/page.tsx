@@ -69,18 +69,25 @@ export default function GhibliGeneratorPage() {
     setIsGenerating(true);
 
     try {
-      // Simulate image generation
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      // Generate mock Ghibli-style image
-      const mockImageUrl = `https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop&auto=format`;
+      // Use unified image generation API (supports OpenAI DALL-E and Together)
+      const res = await fetch('/api/ai/generate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: `Studio Ghibli style (${selectedStyle}, mood: ${selectedMood}). ${prompt.trim()}`,
+          model: 'black-forest-labs/FLUX.1-dev',
+          size: '1024x1024',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Generation failed');
 
       const newImage: GhibliImage = {
         id: Date.now().toString(),
         prompt: prompt.trim(),
         style: selectedStyle,
         mood: selectedMood,
-        imageUrl: mockImageUrl,
+        imageUrl: String(data.images?.[0] || ''),
         isLiked: false,
         createdAt: new Date(),
       };
@@ -88,14 +95,11 @@ export default function GhibliGeneratorPage() {
       setImages((prev) => [newImage, ...prev]);
       setPrompt('');
 
-      toast({
-        title: 'Ghibli image generated!',
-        description: 'Your Studio Ghibli-style artwork is ready.',
-      });
+      toast({ title: 'Ghibli image generated!', description: 'Your Studio Ghibli-style artwork is ready.' });
     } catch (error) {
       toast({
         title: 'Error generating image',
-        description: 'Please try again later.',
+        description: error instanceof Error ? error.message : 'Please try again later.',
         variant: 'destructive',
       });
     } finally {

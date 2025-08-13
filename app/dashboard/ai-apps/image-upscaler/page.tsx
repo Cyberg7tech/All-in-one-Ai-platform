@@ -97,59 +97,53 @@ export default function ImageUpscalerPage() {
 
   const processUpscale = async (jobId: string) => {
     try {
-      // Simulate upload progress
-      for (let progress = 0; progress <= 100; progress += 10) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
+      // UI: show upload progress
+      for (let progress = 0; progress <= 40; progress += 10) {
+        await new Promise((resolve) => setTimeout(resolve, 80));
         setJobs((prev) => prev.map((job) => (job.id === jobId ? { ...job, progress } : job)));
       }
 
-      // Change to processing
-      setJobs((prev) =>
-        prev.map((job) => (job.id === jobId ? { ...job, status: 'processing', progress: 0 } : job))
-      );
+      setJobs((prev) => prev.map((job) => (job.id === jobId ? { ...job, status: 'processing' } : job)));
 
-      // Simulate processing progress
-      for (let progress = 0; progress <= 100; progress += 15) {
-        await new Promise((resolve) => setTimeout(resolve, 600));
+      // Call Together-backed upscale API
+      const job = jobs.find((j) => j.id === jobId);
+      if (!job) throw new Error('Job not found');
+
+      const blob = await (await fetch(job.originalImage)).blob();
+      const form = new FormData();
+      form.append('file', blob, `upload-${jobId}.png`);
+      form.append('scale', String(job.scale));
+      form.append('enhanceType', job.enhanceType);
+
+      const res = await fetch('/api/ai/image-upscale', { method: 'POST', body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Upscale failed');
+
+      for (let progress = 40; progress <= 100; progress += 15) {
+        await new Promise((resolve) => setTimeout(resolve, 120));
         setJobs((prev) => prev.map((job) => (job.id === jobId ? { ...job, progress } : job)));
       }
 
-      // Complete the job
       setJobs((prev) =>
-        prev.map((job) => {
-          if (job.id === jobId) {
+        prev.map((j) => {
+          if (j.id === jobId) {
             const resultSize = {
-              width: job.originalSize.width * job.scale,
-              height: job.originalSize.height * job.scale,
+              width: j.originalSize.width * j.scale,
+              height: j.originalSize.height * j.scale,
             };
-
-            return {
-              ...job,
-              status: 'completed',
-              progress: 100,
-              resultImage:
-                'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop',
-              resultSize,
-            };
+            return { ...j, status: 'completed', progress: 100, resultImage: data.imageUrl, resultSize };
           }
-          return job;
+          return j;
         })
       );
 
-      toast({
-        title: 'Image upscaled successfully!',
-        description: 'Your enhanced image is ready for download.',
-      });
+      toast({ title: 'Image upscaled successfully!', description: 'Your enhanced image is ready.' });
     } catch (error) {
       setJobs((prev) =>
         prev.map((job) => (job.id === jobId ? { ...job, status: 'error', progress: 0 } : job))
       );
 
-      toast({
-        title: 'Upscaling failed',
-        description: 'Please try again later.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Upscaling failed', description: 'Please try again later.', variant: 'destructive' });
     }
   };
 

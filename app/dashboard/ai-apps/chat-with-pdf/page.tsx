@@ -33,6 +33,7 @@ interface UploadedFile {
   size: number;
   status: 'uploading' | 'processing' | 'ready' | 'error';
   progress: number;
+  documentId?: string;
 }
 
 export default function ChatWithPDFPage() {
@@ -40,6 +41,7 @@ export default function ChatWithPDFPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -67,8 +69,8 @@ export default function ChatWithPDFPage() {
 
       setFiles((prev) => [...prev, newFile]);
 
-      // Simulate file upload and processing
-      simulateFileProcessing(fileId);
+      // Upload and ingest via API
+      void uploadAndIngest(file, fileId);
     });
 
     // Clear the input
@@ -77,33 +79,36 @@ export default function ChatWithPDFPage() {
     }
   };
 
-  const simulateFileProcessing = async (fileId: string) => {
-    // Simulate upload progress
-    for (let progress = 0; progress <= 100; progress += 10) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      setFiles((prev) => prev.map((file) => (file.id === fileId ? { ...file, progress } : file)));
+  const uploadAndIngest = async (file: File, fileId: string) => {
+    try {
+      // Show upload progress UI
+      for (let progress = 10; progress <= 60; progress += 10) {
+        await new Promise((r) => setTimeout(r, 80));
+        setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, progress } : f)));
+      }
+
+      // Send to ingest API
+      const form = new FormData();
+      form.append('file', file);
+      form.append('title', file.name.replace(/\.pdf$/i, ''));
+      const res = await fetch('/api/pdf/ingest', { method: 'POST', body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Failed to ingest PDF');
+
+      // Move to processing/ready
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === fileId ? { ...f, status: 'processing', progress: 80, documentId: data.documentId } : f
+        )
+      );
+
+      await new Promise((r) => setTimeout(r, 150));
+      setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, status: 'ready', progress: 100 } : f)));
+      toast({ title: 'PDF processed', description: 'You can now ask questions about this document.' });
+    } catch (e: any) {
+      setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, status: 'error' as const } : f)));
+      toast({ title: 'Ingest failed', description: e?.message || 'Unknown error', variant: 'destructive' });
     }
-
-    // Change to processing
-    setFiles((prev) =>
-      prev.map((file) => (file.id === fileId ? { ...file, status: 'processing', progress: 0 } : file))
-    );
-
-    // Simulate processing progress
-    for (let progress = 0; progress <= 100; progress += 20) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      setFiles((prev) => prev.map((file) => (file.id === fileId ? { ...file, progress } : file)));
-    }
-
-    // Mark as ready
-    setFiles((prev) =>
-      prev.map((file) => (file.id === fileId ? { ...file, status: 'ready', progress: 100 } : file))
-    );
-
-    toast({
-      title: 'PDF processed successfully',
-      description: 'You can now ask questions about this document.',
-    });
   };
 
   const removeFile = (fileId: string) => {
@@ -138,30 +143,60 @@ export default function ChatWithPDFPage() {
     setIsLoading(true);
 
     try {
-      // Simulate PDF chat API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Ensure a persistent chat session exists
+      let sid = sessionId;
+      if (!sid) {
+        const resSession = await fetch('/api/chat/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: 'PDF Chat', model_id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo' }),
+        });
+        const js = await resSession.json();
+        if (!resSession.ok) throw new Error(js?.error || 'Failed to create chat session');
+        sid = js.session?.id;
+        setSessionId(sid);
+      }
+
+      // Persist user message
+      await fetch('/api/chat/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sid, role: 'user', content: userMessage.content }),
+      });
+
+      // Ask the RAG endpoint
+      const ragRes = await fetch('/api/pdf/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: userMessage.content, k: 5 }),
+      });
+      const rag = await ragRes.json();
+      if (!ragRes.ok) throw new Error(rag?.error || 'Query failed');
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `Based on the uploaded PDF(s), here's what I found regarding "${userMessage.content}": 
-
-This is a simulated response that would typically extract relevant information from the PDF content and provide a comprehensive answer. In a real implementation, this would:
-
-1. Search through the PDF content for relevant sections
-2. Extract key information related to your question
-3. Provide citations or page references
-4. Offer a clear and contextual answer
-
-The actual response would be generated based on the specific content of your PDF document.`,
+        content: String(rag?.answer || 'No response'),
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+
+      // Persist assistant message
+      await fetch('/api/chat/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: sid,
+          role: 'assistant',
+          content: assistantMessage.content,
+          model_used: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+        }),
+      });
     } catch (error) {
       toast({
         title: 'Error sending message',
-        description: 'Please try again later.',
+        description: error instanceof Error ? error.message : 'Please try again later.',
         variant: 'destructive',
       });
     } finally {

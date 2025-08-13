@@ -96,12 +96,19 @@ export default function MusicGeneratorPage() {
     setTracks((prev) => [track, ...prev]);
 
     try {
-      // Simulate music generation
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      // Create mock audio URL
-      const mockAudioUrl =
-        'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+f3xm8iBkPE2N+AOxAPU6zg5bNmGgU+ltryuWMdBD2a4vC2YxsEPZPY88p9KgUme8j13IQ7DhBYpuXp';
+      const res = await fetch('/api/ai/music', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: track.prompt,
+          genre: track.genre,
+          mood: track.mood,
+          duration: track.duration,
+          tempo: track.tempo,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Music generation failed');
 
       setTracks((prev) =>
         prev.map((t) =>
@@ -109,7 +116,7 @@ export default function MusicGeneratorPage() {
             ? {
                 ...t,
                 status: 'completed',
-                audioUrl: mockAudioUrl,
+                audioUrl: data?.track?.url,
               }
             : t
         )
@@ -117,10 +124,7 @@ export default function MusicGeneratorPage() {
 
       setPrompt('');
 
-      toast({
-        title: 'Music generated successfully!',
-        description: 'Your AI-generated track is ready to play.',
-      });
+      toast({ title: 'Music generated successfully!', description: 'Your AI-generated track is ready to play.' });
     } catch (error) {
       setTracks((prev) => prev.map((t) => (t.id === track.id ? { ...t, status: 'error' } : t)));
 

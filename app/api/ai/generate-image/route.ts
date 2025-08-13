@@ -117,22 +117,37 @@ export async function POST(request: NextRequest) {
         },
       });
     } else {
-      // Unsupported model
-      console.error('Image Generation API: Unsupported model', { model });
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Image generation model "${model}" is not supported. Please use "dall-e-3" or "dall-e-2".`,
-          images: [],
-          availableModels: ['dall-e-3', 'dall-e-2'],
-          metadata: {
-            model,
-            prompt,
-            timestamp: new Date().toISOString(),
-          },
+      // Try Together images endpoint
+      if (!process.env.TOGETHER_API_KEY) {
+        return NextResponse.json(
+          { success: false, error: `Unsupported model "${model}" and TOGETHER_API_KEY not configured.`, images: [] },
+          { status: 400 }
+        );
+      }
+
+      const togetherRes = await fetch('https://api.together.xyz/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.TOGETHER_API_KEY}`,
         },
-        { status: 400 }
-      );
+        body: JSON.stringify({ model, prompt, size }),
+      });
+      const tj = await togetherRes.json().catch(() => ({}));
+      if (!togetherRes.ok) {
+        return NextResponse.json(
+          { success: false, error: tj?.error || `Together image generation failed for model ${model}`, images: [] },
+          { status: 500 }
+        );
+      }
+      const imageUrl = tj?.data?.[0]?.url || tj?.image_url || null;
+      if (!imageUrl) {
+        return NextResponse.json(
+          { success: false, error: 'No image returned from Together', images: [] },
+          { status: 500 }
+        );
+      }
+      return NextResponse.json({ success: true, images: [imageUrl], metadata: { model, provider: 'together' } });
     }
   } catch (error) {
     console.error('Image Generation API: Unexpected error', error);

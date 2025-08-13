@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +30,8 @@ interface Message {
 }
 
 export default function GeminiChatPage() {
+  const { user } = useAuth();
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [selectedModel, setSelectedModel] = useState('gemini-pro');
@@ -97,17 +100,58 @@ export default function GeminiChatPage() {
     setIsLoading(true);
 
     try {
-      // Simulate Gemini API call
-      await new Promise((resolve) => setTimeout(resolve, 1800));
+      // Ensure session and save user message
+      let sid = sessionId;
+      if (!sid) {
+        const resSession = await fetch('/api/chat/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: 'Gemini Chat', model_id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo' }),
+        });
+        const js = await resSession.json();
+        if (!resSession.ok) throw new Error(js?.error || 'Failed to create session');
+        sid = js.session?.id;
+        setSessionId(sid);
+      }
+
+      await fetch('/api/chat/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sid, role: 'user', content: userMessage.content }),
+      });
+
+      // Use Together chat per your requirement (replacing Gemini with Together)
+      const res = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+          messages: [
+            { role: 'system', content: 'You are a helpful assistant. Provide structured, insightful answers.' },
+            ...messages.map((m) => ({ role: m.role, content: m.content })),
+            { role: 'user', content: userMessage.content },
+          ],
+          maxTokens: 1000,
+          temperature,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'LLM failed');
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: generateGeminiResponse(userMessage.content),
+        content: String(data.content || ''),
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+
+      await fetch('/api/chat/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sid, role: 'assistant', content: assistantMessage.content, model_used: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo' }),
+      });
     } catch (error) {
       toast({
         title: 'Error sending message',

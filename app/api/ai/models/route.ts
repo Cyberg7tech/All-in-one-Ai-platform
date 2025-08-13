@@ -89,22 +89,47 @@ export async function GET() {
               : 'medium',
     }));
 
-    // Group models by category for better organization
+    // Derive capabilities and tiers
+    const withCaps = enhancedModels.map((m) => {
+      const id = String(m.id).toLowerCase();
+      const caps: string[] = [...(m.capabilities || [])];
+      if (id.includes('vision') || id.includes('vl') || id.includes('gpt-4o') || id.includes('gemini')) {
+        if (!caps.includes('vision')) caps.push('vision');
+      }
+      if (id.includes('flux') || id.includes('stable') || id.includes('sd3') || id.includes('image')) {
+        if (!caps.includes('image')) caps.push('image');
+      }
+      if (id.includes('whisper') || id.includes('audio') || id.includes('sonic')) {
+        if (!caps.includes('audio')) caps.push('audio');
+      }
+      // Tier heuristic: mark popular paid models as premium, others as standard or free
+      const tier = id.includes('free') ? 'free' : m.tier || (id.includes('llama-3.1-70b') || id.includes('gpt')) ? 'premium' : 'standard';
+      return { ...m, capabilities: Array.from(new Set(caps)), tier };
+    });
+
+    // Grouped and sorted per capability
+    const sortByTier = (arr: any[]) =>
+      [...arr].sort((a, b) => {
+        const rank = (t: string) => (t === 'premium' ? 0 : t === 'standard' ? 1 : 2);
+        return rank(a.tier) - rank(b.tier);
+      });
+
     const groupedModels = {
-      reasoning: enhancedModels.filter((m) => m.category === 'reasoning'),
-      chat: enhancedModels.filter((m) => m.category === 'chat'),
-      search: enhancedModels.filter((m) => m.category === 'search'),
-      all: enhancedModels,
-    };
+      chat: sortByTier(withCaps.filter((m) => m.capabilities.includes('chat'))),
+      vision: sortByTier(withCaps.filter((m) => m.capabilities.includes('vision'))),
+      image: sortByTier(withCaps.filter((m) => m.capabilities.includes('image'))),
+      audio: sortByTier(withCaps.filter((m) => m.capabilities.includes('audio'))),
+      all: sortByTier(withCaps),
+    } as const;
 
     return NextResponse.json({
       success: true,
       models: groupedModels,
       total: enhancedModels.length,
       providers: {
-        openai: enhancedModels.filter((m) => m.provider === 'openai').length,
-        aimlapi: enhancedModels.filter((m) => m.provider === 'aimlapi').length,
-        together: enhancedModels.filter((m) => m.provider === 'together').length,
+        openai: withCaps.filter((m) => m.provider === 'openai').length,
+        aimlapi: withCaps.filter((m) => m.provider === 'aimlapi').length,
+        together: withCaps.filter((m) => m.provider === 'together').length,
       },
       configuration: {
         openai_configured: !!process.env.OPENAI_API_KEY?.startsWith('sk-'),

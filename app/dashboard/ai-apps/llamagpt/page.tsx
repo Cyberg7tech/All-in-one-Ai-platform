@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +18,8 @@ interface Message {
 }
 
 export default function LlamaGPTPage() {
+  const { user } = useAuth();
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [selectedModel, setSelectedModel] = useState('llama-3.1-70b');
@@ -76,18 +79,59 @@ export default function LlamaGPTPage() {
     setIsLoading(true);
 
     try {
-      // Simulate Llama API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Ensure persistent chat session and save user message
+      let sid = sessionId;
+      if (!sid) {
+        const resSession = await fetch('/api/chat/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: 'Llama 3.1 Chat', model_id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo' }),
+        });
+        const js = await resSession.json();
+        if (!resSession.ok) throw new Error(js?.error || 'Failed to create session');
+        sid = js.session?.id;
+        setSessionId(sid);
+      }
+
+      await fetch('/api/chat/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sid, role: 'user', content: userMessage.content }),
+      });
+
+      // Together chat call
+      const res = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+          messages: [
+            { role: 'system', content: 'You are Llama 3.1. Be helpful, concise, and accurate.' },
+            ...messages.map((m) => ({ role: m.role, content: m.content })),
+            { role: 'user', content: userMessage.content },
+          ],
+          maxTokens: 1000,
+          temperature,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'LLM failed');
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: generateLlamaResponse(userMessage.content),
-        model: selectedModel,
+        content: String(data.content || ''),
+        model: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+
+      await fetch('/api/chat/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sid, role: 'assistant', content: assistantMessage.content, model_used: assistantMessage.model }),
+      });
     } catch (error) {
       toast({
         title: 'Error sending message',
@@ -99,59 +143,7 @@ export default function LlamaGPTPage() {
     }
   };
 
-  const generateLlamaResponse = (userInput: string) => {
-    const responses = [
-      `As Llama 3.1, I'd be happy to help you with "${userInput}". 
-
-This is an interesting question that requires careful consideration. Based on my training data and reasoning capabilities, here's my analysis:
-
-1. **Key Points**: The topic you've raised involves several important aspects that are worth exploring in detail.
-
-2. **Detailed Analysis**: Let me break this down step by step to provide you with a comprehensive understanding.
-
-3. **Practical Applications**: Here are some ways this knowledge can be applied in real-world scenarios.
-
-4. **Additional Considerations**: There are also some related factors worth considering.
-
-Would you like me to elaborate on any of these points or explore a specific aspect in more depth?`,
-
-      `Thank you for your question about "${userInput}". I'm Llama 3.1, and I'm designed to provide helpful, accurate, and detailed responses.
-
-Here's my analysis:
-
-**Understanding the Context**: Your question touches on important concepts that require a nuanced approach.
-
-**Step-by-Step Breakdown**:
-- First, let's establish the foundational principles
-- Next, we'll explore the practical implications
-- Finally, we'll discuss potential outcomes and recommendations
-
-**Key Insights**:
-- This topic has multiple layers of complexity
-- There are both immediate and long-term considerations
-- The solution often depends on specific circumstances
-
-Is there a particular aspect you'd like me to focus on or expand upon?`,
-
-      `I appreciate you bringing up "${userInput}" - this is exactly the kind of thoughtful question that allows me to demonstrate Llama 3.1's capabilities.
-
-**My Approach**:
-I'll analyze this systematically using my training in reasoning, problem-solving, and knowledge synthesis.
-
-**Core Analysis**:
-The situation you've described involves several interconnected elements that need to be considered holistically.
-
-**Recommendations**:
-Based on my analysis, here are some actionable insights and next steps you might consider.
-
-**Further Exploration**:
-There are several related topics that might be worth investigating as you delve deeper into this subject.
-
-Feel free to ask follow-up questions or request clarification on any part of my response!`,
-    ];
-
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
+  // Mock generator removed; using Together chat
 
   const clearChat = () => {
     setMessages([]);
@@ -183,7 +175,7 @@ Feel free to ask follow-up questions or request clarification on any part of my 
       const newMessages = [...messages];
       newMessages[messageIndex] = {
         ...newMessages[messageIndex],
-        content: generateLlamaResponse(userMessage.content),
+        content: newMessages[messageIndex].content,
         timestamp: new Date(),
       };
 
