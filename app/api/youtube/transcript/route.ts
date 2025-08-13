@@ -22,9 +22,12 @@ function extractVideoId(urlOrId: string): string | null {
 }
 
 async function fetchTimedText(videoId: string, lang: string): Promise<string | null> {
-  const res = await fetch(`https://video.google.com/timedtext?lang=${encodeURIComponent(lang)}&v=${encodeURIComponent(videoId)}`, {
-    cache: 'no-store',
-  });
+  const res = await fetch(
+    `https://video.google.com/timedtext?lang=${encodeURIComponent(lang)}&v=${encodeURIComponent(videoId)}`,
+    {
+      cache: 'no-store',
+    }
+  );
   if (!res.ok) return null;
   const xml = await res.text();
   if (!xml || !xml.includes('<text')) return null;
@@ -64,7 +67,10 @@ export async function GET(req: NextRequest) {
     }
 
     if (!transcript) {
-      return NextResponse.json({ error: 'No transcript available for this video (captions may be disabled).' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'No transcript available for this video (captions may be disabled).' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ success: true, videoId: id, transcript });
@@ -72,5 +78,3 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: e?.message || 'Failed to fetch transcript' }, { status: 500 });
   }
 }
-
-

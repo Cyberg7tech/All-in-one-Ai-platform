@@ -106,7 +106,10 @@ export default function GeminiChatPage() {
         const resSession = await fetch('/api/chat/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: 'Gemini Chat', model_id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo' }),
+          body: JSON.stringify({
+            title: 'Gemini Chat',
+            model_id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+          }),
         });
         const js = await resSession.json();
         if (!resSession.ok) throw new Error(js?.error || 'Failed to create session');
@@ -127,7 +130,10 @@ export default function GeminiChatPage() {
         body: JSON.stringify({
           model: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
           messages: [
-            { role: 'system', content: 'You are a helpful assistant. Provide structured, insightful answers.' },
+            {
+              role: 'system',
+              content: 'You are a helpful assistant. Provide structured, insightful answers.',
+            },
             ...messages.map((m) => ({ role: m.role, content: m.content })),
             { role: 'user', content: userMessage.content },
           ],
@@ -150,7 +156,12 @@ export default function GeminiChatPage() {
       await fetch('/api/chat/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: sid, role: 'assistant', content: assistantMessage.content, model_used: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo' }),
+        body: JSON.stringify({
+          session_id: sid,
+          role: 'assistant',
+          content: assistantMessage.content,
+          model_used: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+        }),
       });
     } catch (error) {
       toast({

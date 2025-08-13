@@ -125,7 +125,10 @@ export default function ChatWithYouTubePage() {
         const resSession = await fetch('/api/chat/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: 'YouTube Chat', model_id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo' }),
+          body: JSON.stringify({
+            title: 'YouTube Chat',
+            model_id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+          }),
         });
         const js = await resSession.json();
         if (!resSession.ok) throw new Error(js?.error || 'Failed to create session');

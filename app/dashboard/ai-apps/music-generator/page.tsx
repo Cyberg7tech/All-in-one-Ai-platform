@@ -124,7 +124,10 @@ export default function MusicGeneratorPage() {
 
       setPrompt('');
 
-      toast({ title: 'Music generated successfully!', description: 'Your AI-generated track is ready to play.' });
+      toast({
+        title: 'Music generated successfully!',
+        description: 'Your AI-generated track is ready to play.',
+      });
     } catch (error) {
       setTracks((prev) => prev.map((t) => (t.id === track.id ? { ...t, status: 'error' } : t)));
 

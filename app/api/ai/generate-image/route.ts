@@ -120,7 +120,11 @@ export async function POST(request: NextRequest) {
       // Try Together images endpoint
       if (!process.env.TOGETHER_API_KEY) {
         return NextResponse.json(
-          { success: false, error: `Unsupported model "${model}" and TOGETHER_API_KEY not configured.`, images: [] },
+          {
+            success: false,
+            error: `Unsupported model "${model}" and TOGETHER_API_KEY not configured.`,
+            images: [],
+          },
           { status: 400 }
         );
       }
@@ -136,7 +140,11 @@ export async function POST(request: NextRequest) {
       const tj = await togetherRes.json().catch(() => ({}));
       if (!togetherRes.ok) {
         return NextResponse.json(
-          { success: false, error: tj?.error || `Together image generation failed for model ${model}`, images: [] },
+          {
+            success: false,
+            error: tj?.error || `Together image generation failed for model ${model}`,
+            images: [],
+          },
           { status: 500 }
         );
       }
@@ -147,7 +155,11 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         );
       }
-      return NextResponse.json({ success: true, images: [imageUrl], metadata: { model, provider: 'together' } });
+      return NextResponse.json({
+        success: true,
+        images: [imageUrl],
+        metadata: { model, provider: 'together' },
+      });
     }
   } catch (error) {
     console.error('Image Generation API: Unexpected error', error);

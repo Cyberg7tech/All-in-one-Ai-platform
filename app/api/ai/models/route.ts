@@ -103,7 +103,11 @@ export async function GET() {
         if (!caps.includes('audio')) caps.push('audio');
       }
       // Tier heuristic: mark popular paid models as premium, others as standard or free
-      const tier = id.includes('free') ? 'free' : m.tier || (id.includes('llama-3.1-70b') || id.includes('gpt')) ? 'premium' : 'standard';
+      const tier = id.includes('free')
+        ? 'free'
+        : m.tier || id.includes('llama-3.1-70b') || id.includes('gpt')
+          ? 'premium'
+          : 'standard';
       return { ...m, capabilities: Array.from(new Set(caps)), tier };
     });
 

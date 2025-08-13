@@ -85,7 +85,10 @@ export default function LlamaGPTPage() {
         const resSession = await fetch('/api/chat/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: 'Llama 3.1 Chat', model_id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo' }),
+          body: JSON.stringify({
+            title: 'Llama 3.1 Chat',
+            model_id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+          }),
         });
         const js = await resSession.json();
         if (!resSession.ok) throw new Error(js?.error || 'Failed to create session');
@@ -130,7 +133,12 @@ export default function LlamaGPTPage() {
       await fetch('/api/chat/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: sid, role: 'assistant', content: assistantMessage.content, model_used: assistantMessage.model }),
+        body: JSON.stringify({
+          session_id: sid,
+          role: 'assistant',
+          content: assistantMessage.content,
+          model_used: assistantMessage.model,
+        }),
       });
     } catch (error) {
       toast({

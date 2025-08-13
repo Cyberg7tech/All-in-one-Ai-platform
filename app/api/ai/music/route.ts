@@ -40,5 +40,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: e?.message || 'Music generation failed' }, { status: 500 });
   }
 }
-
-
