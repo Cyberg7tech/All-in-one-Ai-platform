@@ -43,11 +43,27 @@ function chunkText(text: string, target = 1200, overlap = 100): string[] {
 
 export async function POST(req: NextRequest) {
   try {
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { cookies: { getAll: () => cookieStore.getAll() } }
+      {
+        cookies: {
+          get: (name: string) => cookieStore.get(name)?.value,
+          set: (name: string, value: string, options: any) => {
+            cookieStore.set({ name, value, ...options });
+          },
+          remove: (name: string, options: any) => {
+            cookieStore.set({ name, value: '', ...options });
+          },
+        },
+        cookieOptions: {
+          name: 'sb-one-ai-auth',
+          domain: undefined,
+          path: '/',
+          sameSite: 'lax',
+        },
+      }
     );
 
     const {

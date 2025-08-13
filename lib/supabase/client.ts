@@ -12,7 +12,15 @@ export function getSupabaseClient(): SupabaseClient {
 
   client = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookieOptions: {
+        name: 'sb-one-ai-auth',
+        domain: undefined,
+        path: '/',
+        sameSite: 'lax',
+      },
+    }
   );
 
   return client;
