@@ -229,11 +229,12 @@ export default function MultiLLMChatPage() {
   // Load chat sessions for logged-in user
   useEffect(() => {
     if (!user?.id || hasFetchedSessions.current) return;
+    const controller = new AbortController();
     const fetchSessions = async () => {
       setIsLoadingSessions(true);
       try {
-        const res = await fetch('/api/chat/sessions', { cache: 'no-store' });
-        const data = await res.json();
+        const res = await fetch('/api/chat/sessions', { cache: 'no-store', signal: controller.signal });
+        const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data?.error || 'Failed to load sessions');
         const mapped = (data.sessions || []).map((s: any) => ({
           id: String(s.id),
@@ -243,15 +244,19 @@ export default function MultiLLMChatPage() {
           messages: [],
         }));
         setSessions(mapped);
-        if (mapped.length > 0) setCurrentSessionId(mapped[0].id);
+        if (mapped.length > 0) setCurrentSessionId((prev) => prev || mapped[0].id);
       } catch (e) {
-        console.error('load sessions failed', e);
+        if ((e as any)?.name !== 'AbortError') {
+          console.error('load sessions failed', e);
+        }
       } finally {
         setIsLoadingSessions(false);
         hasFetchedSessions.current = true;
       }
     };
     fetchSessions();
+    // Cleanup to avoid React state updates after route changes
+    return () => controller.abort();
   }, [user?.id, selectedModel]);
 
   const scrollToBottom = useCallback(() => {
@@ -373,30 +378,35 @@ export default function MultiLLMChatPage() {
 
       // If no session, create one
       if (!sessionId) {
-        // TODO: Replace with direct Supabase calls
-        // const session = await dbHelpers.createChatSession({
-        //   user_id: user.id,
-        //   title: 'New Chat',
-        //   model_id: selectedModel,
-        // });
-        const session = {
-          id: Date.now().toString(),
-          title: 'New Chat',
-          model_id: selectedModel,
-          updated_at: new Date().toISOString(),
-        }; // Temporary mock
-        sessionId = String(session.id);
-        setSessions((prev) => [
-          {
-            id: String(session.id),
-            title: String(session.title),
-            model: String(session.model_id),
-            lastActivity: new Date(String(session.updated_at)),
-            messages: [],
-          },
-          ...prev,
-        ]);
-        setCurrentSessionId(String(session.id));
+        // Create a persisted session on the server so it survives reloads/logouts
+        try {
+          const res = await fetch('/api/chat/sessions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: 'New Chat', model_id: selectedModel }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data?.error || 'Failed to create session');
+
+          const session = data.session;
+          sessionId = String(session.id);
+
+          setSessions((prev) => [
+            {
+              id: String(session.id),
+              title: String(session.title || 'New Chat'),
+              model: String(session.model_id || selectedModel),
+              lastActivity: new Date(String(session.updated_at || session.created_at)),
+              messages: [],
+            },
+            ...prev,
+          ]);
+          setCurrentSessionId(String(session.id));
+        } catch (err) {
+          console.error('create session (sendMessage) failed', err);
+          setIsLoading(false);
+          return;
+        }
       }
 
       // Store user message
@@ -446,6 +456,7 @@ export default function MultiLLMChatPage() {
 
       // Call AI API
       const currentSession = sessions.find((s) => s.id === sessionId);
+      // If we just created a session, its messages array might be empty in state; that's fine
       const conversationHistory = currentSession?.messages || [];
 
       // Prepare messages with system context and conversation history
