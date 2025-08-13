@@ -27,30 +27,44 @@ export async function POST(request: NextRequest) {
     const randomTranscription = mockTranscriptions[Math.floor(Math.random() * mockTranscriptions.length)];
 
     try {
-      // In real implementation, use OpenAI Whisper API or similar
       const apiKey = process.env.OPENAI_API_KEY;
 
       if (!apiKey) {
-        console.log('OpenAI API key not configured, returning demo transcription');
-        return NextResponse.json({
-          success: true,
-          transcription: randomTranscription,
-          language,
-          confidence: 0.95,
-          duration: 3.5,
-          note: 'Demo mode - Configure OPENAI_API_KEY for real speech-to-text',
-          provider: 'demo',
-        });
+        return NextResponse.json(
+          { error: 'OPENAI_API_KEY is not configured', provider: 'openai-whisper' },
+          { status: 500 }
+        );
       }
 
-      // TODO: Implement actual Whisper API call when API key is available
+      // Call Whisper v1 transcriptions
+      const form = new FormData();
+      form.append('file', audioFile, audioFile.name);
+      form.append('model', 'whisper-1');
+      form.append('language', language);
+
+      const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${apiKey}` },
+        body: form,
+      });
+
+      if (!whisperRes.ok) {
+        const errText = await whisperRes.text();
+        return NextResponse.json(
+          { error: `Whisper failed: ${whisperRes.status} ${errText}` },
+          { status: 500 }
+        );
+      }
+
+      const whisperJson = (await whisperRes.json()) as any;
+      const text = whisperJson.text || whisperJson?.results?.[0]?.alternatives?.[0]?.transcript || '';
+
       return NextResponse.json({
         success: true,
-        transcription: randomTranscription,
+        transcription: text,
         language,
         confidence: 0.95,
-        duration: 3.5,
-        note: 'Demo transcription - Real implementation would use OpenAI Whisper',
+        note: 'Transcribed with OpenAI Whisper',
         provider: 'openai-whisper',
       });
     } catch (error) {

@@ -732,7 +732,7 @@ export default function MultiLLMChatPage() {
             </Button>
 
             {showModelPicker && (
-              <div className='absolute top-12 left-0 z-50 w-96 bg-background border border-border rounded-lg shadow-lg p-4 max-h-96 overflow-y-auto'>
+              <div className='absolute top-12 left-0 z-[60] w-96 bg-background border border-border rounded-lg shadow-lg p-4 max-h-96 overflow-y-auto overscroll-contain'>
                 <div className='mb-4'>
                   <input
                     type='text'

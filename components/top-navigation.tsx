@@ -89,7 +89,7 @@ export function TopNavigation() {
       </div>
 
       {/* User Actions Section */}
-      <div className='flex items-center space-x-4 relative'>
+      <div className='flex items-center space-x-4 relative overflow-visible'>
         {/* Notifications */}
         <div className='relative' ref={notificationsRef}>
           <Button

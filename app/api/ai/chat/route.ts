@@ -38,11 +38,11 @@ export async function POST(request: NextRequest) {
       temperature,
     });
 
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    if (!messages || !Array.isArray(messages) || messages.length === 0 || !messages[0]?.role) {
       return NextResponse.json(
         {
           success: false,
-          content: 'No messages provided.',
+          content: 'Invalid request. Provide messages as an array of {role, content}.',
           error: 'Invalid request',
         },
         { status: 400 }
