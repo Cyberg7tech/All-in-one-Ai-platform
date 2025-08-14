@@ -8,6 +8,8 @@ export const dynamic = 'force-dynamic';
 
 // No chunk embeddings path anymore; we persist extracted text into documents.content only
 
+const STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET_NAME || 'documents';
+
 async function extractPdfWithPdfjs(buffer: Buffer): Promise<string> {
   try {
     console.log('pdfjs: Starting extraction...');
@@ -18,15 +20,15 @@ async function extractPdfWithPdfjs(buffer: Buffer): Promise<string> {
     const pdfjs = require('pdfjs-dist/legacy/build/pdf.js');
     // Disable workers in server runtime
     pdfjs.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/legacy/build/pdf.worker.js');
-    
+
     console.log('pdfjs: Loading document...');
     const loadingTask = pdfjs.getDocument({ data: buffer, useSystemFonts: true, isEvalSupported: false });
     const doc = await loadingTask.promise;
-    
+
     console.log('pdfjs: Document loaded, pages:', doc.numPages);
     let text = '';
     const numPages = doc.numPages || 0;
-    
+
     for (let i = 1; i <= numPages; i++) {
       console.log(`pdfjs: Processing page ${i}/${numPages}`);
       const page = await doc.getPage(i);
@@ -35,7 +37,7 @@ async function extractPdfWithPdfjs(buffer: Buffer): Promise<string> {
       text += `\n\n${pageText}`;
       console.log(`pdfjs: Page ${i} text length:`, pageText.length);
     }
-    
+
     const result = text.trim();
     console.log('pdfjs: Total extracted text length:', result.length);
     return result;
@@ -117,7 +119,7 @@ export async function POST(req: NextRequest) {
         const fileBytes = new Uint8Array(arrayBuffer);
         const ext = file.name.split('.').pop() || 'bin';
         const key = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-        const { error: uploadError } = await supabase.storage.from('documents').upload(key, fileBytes, {
+        const { error: uploadError } = await supabase.storage.from(STORAGE_BUCKET).upload(key, fileBytes, {
           contentType: file.type || 'application/octet-stream',
           upsert: false,
         });
@@ -128,7 +130,7 @@ export async function POST(req: NextRequest) {
         if (!rawText && file.type === 'application/pdf') {
           console.log('Starting PDF text extraction for file:', file.name, 'Size:', file.size);
           const buffer = Buffer.from(arrayBuffer);
-          
+
           // Method 1: Try pdf-parse
           try {
             console.log('Attempting pdf-parse extraction...');
@@ -157,7 +159,7 @@ export async function POST(req: NextRequest) {
               rawText = '';
             }
           }
-          
+
           console.log('Final extracted text length:', rawText.length);
         }
       }
