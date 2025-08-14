@@ -123,7 +123,12 @@ export async function POST(req: NextRequest) {
           contentType: file.type || 'application/octet-stream',
           upsert: false,
         });
-        if (!uploadError) storagePath = key;
+        if (uploadError) {
+          console.log('Storage upload failed:', uploadError.message);
+        } else {
+          storagePath = key;
+          console.log('Storage upload succeeded. Bucket:', STORAGE_BUCKET, 'Key:', key);
+        }
         uploadedFileMeta = { name: file.name, size: file.size, type: file.type };
 
         // Try parsing PDF text if possible

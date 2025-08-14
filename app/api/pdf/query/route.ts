@@ -193,8 +193,9 @@ export async function POST(req: NextRequest) {
       if (latestDoc?.filename) {
         try {
           // Download the file from storage
+          const bucket = process.env.SUPABASE_STORAGE_BUCKET_NAME || 'documents';
           const { data: fileData, error: dlErr } = await supabase.storage
-            .from('documents')
+            .from(bucket)
             .download(latestDoc.filename);
           if (dlErr) {
             console.error('Error downloading PDF from storage:', dlErr);
