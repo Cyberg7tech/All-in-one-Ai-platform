@@ -61,27 +61,35 @@ export async function GET(req: NextRequest) {
     // Attempt on-the-fly extraction for latest if empty content
     let latestDocContentLength = documents?.[0]?.content?.length || 0;
     let triedOnTheFly = false;
-    if ((latestDocContentLength === 0) && documents?.[0]?.filename) {
+    if (latestDocContentLength === 0 && documents?.[0]?.filename) {
       triedOnTheFly = true;
       try {
         const bucket = process.env.SUPABASE_STORAGE_BUCKET_NAME || 'documents';
-        const { data: fileData, error: dlErr } = await supabase.storage.from(bucket).download(documents[0].filename);
+        const { data: fileData, error: dlErr } = await supabase.storage
+          .from(bucket)
+          .download(documents[0].filename);
         if (!dlErr && fileData) {
           const arrayBuffer = await fileData.arrayBuffer();
           const buffer = Buffer.from(arrayBuffer);
           let extracted = '';
           try {
-            // @ts-expect-error
+            // @ts-expect-error pdf-parse types are not provided in this environment; dynamic import
             const pdfParse = (await import('pdf-parse')).default as any;
             const parsed = await pdfParse(buffer);
             extracted = parsed?.text || '';
-          } catch {}
+          } catch (e) {
+            console.error('test: pdf-parse failed', e);
+          }
           if (!extracted) {
             try {
               // eslint-disable-next-line @typescript-eslint/no-var-requires
               const pdfjs = require('pdfjs-dist/legacy/build/pdf.js');
               pdfjs.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/legacy/build/pdf.worker.js');
-              const loadingTask = pdfjs.getDocument({ data: buffer, useSystemFonts: true, isEvalSupported: false });
+              const loadingTask = pdfjs.getDocument({
+                data: buffer,
+                useSystemFonts: true,
+                isEvalSupported: false,
+              });
               const pdf = await loadingTask.promise;
               let text = '';
               for (let i = 1; i <= (pdf.numPages || 0); i++) {
@@ -91,11 +99,15 @@ export async function GET(req: NextRequest) {
                 text += `\n\n${pageText}`;
               }
               extracted = text.trim();
-            } catch {}
+            } catch (e) {
+              console.error('test: pdfjs extraction failed', e);
+            }
           }
           latestDocContentLength = extracted.length;
         }
-      } catch {}
+      } catch (e) {
+        console.error('test: on-the-fly extraction error', e);
+      }
     }
 
     return NextResponse.json({
