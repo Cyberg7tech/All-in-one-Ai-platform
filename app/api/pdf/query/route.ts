@@ -124,6 +124,9 @@ export async function POST(req: NextRequest) {
       .limit(1)
       .maybeSingle();
 
+    console.log('Retrieved document:', { id: doc?.id, contentLength: doc?.content?.length });
+    console.log('Content preview:', doc?.content?.substring(0, 200));
+
     if (!doc?.content || doc.content.trim().length === 0) {
       return NextResponse.json({
         success: true,

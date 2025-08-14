@@ -121,14 +121,18 @@ export async function POST(req: NextRequest) {
             const buffer = Buffer.from(arrayBuffer);
             const parsed = await pdfParse(buffer);
             rawText = parsed?.text || '';
+            console.log('PDF parse result length:', rawText.length);
             if (!rawText) {
               // Fallback to pdfjs if pdf-parse produced empty text
               rawText = await extractPdfWithPdfjs(buffer);
+              console.log('PDFjs fallback result length:', rawText.length);
             }
-          } catch {
+          } catch (error) {
+            console.log('PDF parse failed, using pdfjs fallback:', error);
             // Fallback to pdfjs if pdf-parse import failed in host
             const buffer = Buffer.from(arrayBuffer);
             rawText = await extractPdfWithPdfjs(buffer);
+            console.log('PDFjs result length:', rawText.length);
           }
         }
       }
@@ -174,7 +178,7 @@ export async function POST(req: NextRequest) {
         original_name: uploadedFileMeta?.name || title,
         file_size: uploadedFileMeta?.size || null,
         file_type: uploadedFileMeta?.type || 'application/pdf',
-        content: chunks.join('\n\n'),
+        content: rawText,
       })
       .select()
       .single();
