@@ -1,5 +1,5 @@
-"use client";
- 
+'use client';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Clock, FileText, MessageSquare, Image as ImageIcon, Video } from 'lucide-react';
