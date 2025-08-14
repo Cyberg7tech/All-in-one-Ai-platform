@@ -13,7 +13,26 @@ async function embedQuery(text: string): Promise<number[]> {
 }
 
 async function callLLM(system: string, user: string): Promise<string> {
-  // Prefer Together (chat) if available; else OpenAI
+  // Prefer OpenAI if available; otherwise use Together
+  const openai = process.env.OPENAI_API_KEY;
+  if (openai) {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${openai}` },
+      body: JSON.stringify({
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: user },
+        ],
+        max_tokens: 800,
+        temperature: 0.2,
+      }),
+    });
+    const json = await res.json().catch(() => ({}));
+    return json?.choices?.[0]?.message?.content || 'No response';
+  }
+
   const together = process.env.TOGETHER_API_KEY;
   if (together) {
     const res = await fetch(`${TOGETHER_BASE}/chat/completions`, {
@@ -33,7 +52,7 @@ async function callLLM(system: string, user: string): Promise<string> {
     return json?.choices?.[0]?.message?.content || 'No response';
   }
 
-  throw new Error('TOGETHER_API_KEY is not configured');
+  throw new Error('Neither OPENAI_API_KEY nor TOGETHER_API_KEY is configured');
 }
 
 export async function POST(req: NextRequest) {
@@ -95,18 +114,18 @@ export async function POST(req: NextRequest) {
       console.warn('match_document_chunks failed; falling back to documents.content', err);
     }
 
-    // Fallback: use latest non-empty documents.content
+    // Fallback: use latest document that has non-null content
     const { data: doc } = await supabase
       .from('documents')
       .select('id, content')
       .eq('user_id', userId)
-      .neq('content', '')
+      .not('content', 'is', null)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (!doc?.content) {
-      return NextResponse.json({ success: true, answer: 'There is no document provided in the context.' });
+    if (!doc?.content || doc.content.trim().length === 0) {
+      return NextResponse.json({ success: true, answer: 'No document content found. Please re-upload your PDF.' });
     }
 
     const MAX_CHARS = 12000;
