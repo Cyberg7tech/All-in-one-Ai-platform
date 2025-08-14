@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 import { togetherEmbeddings, TOGETHER_BASE } from '@/lib/ai/providers/together';
+import Anthropic from '@anthropic-ai/sdk';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,7 +14,30 @@ async function embedQuery(text: string): Promise<number[]> {
 }
 
 async function callLLM(system: string, user: string): Promise<string> {
-  // Prefer OpenAI if available; otherwise use Together
+  // Prefer Anthropic Claude Sonnet if available; then OpenAI; then Together
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  if (anthropicKey) {
+    try {
+      const client = new Anthropic({ apiKey: anthropicKey });
+      const model = process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-20241022';
+      const msg = await client.messages.create({
+        model,
+        max_tokens: 800,
+        temperature: 0.2,
+        system,
+        messages: [{ role: 'user', content: user }],
+      });
+      const content = msg?.content?.[0];
+      if (content && content.type === 'text') return content.text;
+      // Fallback: stringify
+      return JSON.stringify(msg?.content ?? '');
+    } catch (e) {
+      // Fall through to next provider
+      console.warn('Anthropic call failed, falling back to OpenAI/Together', e);
+    }
+  }
+
+  // Prefer OpenAI next if available; otherwise use Together
   const openai = process.env.OPENAI_API_KEY;
   if (openai) {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -135,7 +159,7 @@ export async function POST(req: NextRequest) {
 
     const { data: doc, error: docError } = await supabase
       .from('documents')
-      .select('id, content, original_name, created_at')
+      .select('id, content, original_name, created_at, filename')
       .eq('user_id', userId)
       .not('content', 'is', null)
       .order('created_at', { ascending: false })
@@ -154,7 +178,85 @@ export async function POST(req: NextRequest) {
     });
     console.log('Content preview:', doc?.content?.substring(0, 200));
 
-    if (!doc?.content || doc.content.trim().length === 0) {
+    // If no content, try to fetch latest document by created_at regardless of content and extract on the fly
+    let workingDoc = doc;
+    if (!workingDoc?.content || workingDoc.content.trim().length === 0) {
+      console.log('No inline content found. Attempting on-the-fly extraction from storage...');
+      const { data: latestDoc } = await supabase
+        .from('documents')
+        .select('id, content, original_name, created_at, filename')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (latestDoc?.filename) {
+        try {
+          // Download the file from storage
+          const { data: fileData, error: dlErr } = await supabase.storage
+            .from('documents')
+            .download(latestDoc.filename);
+          if (dlErr) {
+            console.error('Error downloading PDF from storage:', dlErr);
+          } else if (fileData) {
+            const arrayBuffer = await fileData.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+
+            // Two-step extraction similar to ingest
+            let extracted = '';
+            try {
+              // @ts-expect-error: Optional dependency only present when installed
+              const pdfParse = (await import('pdf-parse')).default as any;
+              const parsed = await pdfParse(buffer);
+              extracted = parsed?.text || '';
+              console.log('On-the-fly pdf-parse length:', extracted.length);
+            } catch (e) {
+              console.warn('On-the-fly pdf-parse failed:', e);
+            }
+
+            if (!extracted) {
+              try {
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                const pdfjs = require('pdfjs-dist/legacy/build/pdf.js');
+                pdfjs.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/legacy/build/pdf.worker.js');
+                const loadingTask = pdfjs.getDocument({
+                  data: buffer,
+                  useSystemFonts: true,
+                  isEvalSupported: false,
+                });
+                const pdf = await loadingTask.promise;
+                let text = '';
+                for (let i = 1; i <= (pdf.numPages || 0); i++) {
+                  const page = await pdf.getPage(i);
+                  const content = await page.getTextContent();
+                  const pageText = content.items.map((it: any) => (it.str ?? '') as string).join(' ');
+                  text += `\n\n${pageText}`;
+                }
+                extracted = text.trim();
+                console.log('On-the-fly pdfjs length:', extracted.length);
+              } catch (e) {
+                console.warn('On-the-fly pdfjs failed:', e);
+              }
+            }
+
+            if (extracted && extracted.trim().length > 0) {
+              // Persist extracted text for future queries
+              const { error: updErr } = await supabase
+                .from('documents')
+                .update({ content: extracted })
+                .eq('id', latestDoc.id);
+              if (updErr) console.error('Failed to update document content after extraction:', updErr);
+
+              workingDoc = { ...latestDoc, content: extracted } as typeof latestDoc & { content: string };
+            }
+          }
+        } catch (e) {
+          console.error('On-the-fly extraction overall failure:', e);
+        }
+      }
+    }
+
+    if (!workingDoc?.content || workingDoc.content.trim().length === 0) {
       return NextResponse.json({
         success: true,
         answer: 'No document content found. Please re-upload your PDF.',
@@ -162,7 +264,8 @@ export async function POST(req: NextRequest) {
     }
 
     const MAX_CHARS = 12000;
-    const context = doc.content.length > MAX_CHARS ? doc.content.slice(0, MAX_CHARS) : doc.content;
+    const content = workingDoc.content;
+    const context = content.length > MAX_CHARS ? content.slice(0, MAX_CHARS) : content;
     const systemPrompt = `You are a helpful assistant that answers strictly based on the provided document content. If the answer is not in the content, say you don't know.\nContent:\n${context}`;
     const answer = await callLLM(systemPrompt, question);
     return NextResponse.json({ success: true, answer, matches: [] });
