@@ -88,11 +88,13 @@ export default function ChatWithPDFPage() {
       }
 
       // Send to ingest API
+      console.log('Starting PDF ingest for file:', file.name);
       const form = new FormData();
       form.append('file', file);
       form.append('title', file.name.replace(/\.pdf$/i, ''));
       const res = await fetch('/api/pdf/ingest', { method: 'POST', body: form });
       const data = await res.json();
+      console.log('Ingest response:', { status: res.status, data });
       if (!res.ok) throw new Error(data?.error || 'Failed to ingest PDF');
 
       // Move to processing/ready
@@ -117,6 +119,35 @@ export default function ChatWithPDFPage() {
       title: 'File removed',
       description: 'The PDF has been removed from the chat.',
     });
+  };
+
+  const testDatabase = async () => {
+    try {
+      console.log('Testing database connection...');
+      const res = await fetch('/api/pdf/test');
+      const data = await res.json();
+      console.log('Database test result:', data);
+
+      if (data.success) {
+        toast({
+          title: 'Database Test Results',
+          description: `Total: ${data.totalDocuments}, With Content: ${data.documentsWithContent}`,
+        });
+      } else {
+        toast({
+          title: 'Database Test Failed',
+          description: data.error || 'Unknown error',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Test failed:', error);
+      toast({
+        title: 'Test Failed',
+        description: 'Could not connect to database',
+        variant: 'destructive',
+      });
+    }
   };
 
   const sendMessage = async () => {
@@ -168,12 +199,14 @@ export default function ChatWithPDFPage() {
       });
 
       // Ask the RAG endpoint
+      console.log('Sending query to PDF API:', userMessage.content);
       const ragRes = await fetch('/api/pdf/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: userMessage.content, k: 5 }),
       });
       const rag = await ragRes.json();
+      console.log('Query response:', { status: ragRes.status, rag });
       if (!ragRes.ok) throw new Error(rag?.error || 'Query failed');
 
       const assistantMessage: Message = {
@@ -322,6 +355,16 @@ export default function ChatWithPDFPage() {
                     <p className='text-sm'>No PDFs uploaded yet</p>
                   </div>
                 )}
+
+                {/* Test Database Button */}
+                <div className='pt-4 border-t'>
+                  <Button onClick={testDatabase} variant='outline' size='sm' className='w-full'>
+                    Test Database Connection
+                  </Button>
+                  <p className='text-xs text-muted-foreground mt-1 text-center'>
+                    Debug: Check if documents are stored
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
