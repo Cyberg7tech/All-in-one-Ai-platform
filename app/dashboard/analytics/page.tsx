@@ -57,114 +57,69 @@ export default function AnalyticsPage() {
     }
   }, [timeRange]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const loadAnalyticsData = () => {
-    // Generate analytics based on user data
-    const stats = {
-      aiAgents: 3,
-      apiCalls: 1247,
-      forecasts: 8,
-      alerts: 2,
-      documentsProcessed: 45,
-      totalTokensUsed: 125680,
-      monthlyUsage: 78.5, // percentage
-      storageUsed: 2.3, // GB
-    };
-
-    // Generate metrics based on user role
-    const userMetrics: MetricCard[] = [
-      {
-        title: 'API Calls',
-        value: stats.apiCalls.toLocaleString(),
-        change: user?.role === 'admin' ? 12.5 : 8.3,
-        icon: Brain,
-        trend: 'up',
-        description: 'Total API requests this period',
-      },
-      {
-        title: 'Active Agents',
-        value: stats.aiAgents,
-        change: user?.role === 'admin' ? 25.0 : 15.2,
-        icon: Bot,
-        trend: 'up',
-        description: 'Currently running AI agents',
-      },
-      {
-        title: 'Success Rate',
-        value: user?.role === 'admin' ? '99.2%' : '98.7%',
-        change: 2.1,
-        icon: CheckCircle,
-        trend: 'up',
-        description: 'Successful API responses',
-      },
-      {
-        title: 'Avg Response Time',
-        value: user?.role === 'admin' ? '245ms' : '312ms',
-        change: -5.4,
-        icon: Clock,
-        trend: 'up',
-        description: 'Average API response time',
-      },
-      {
-        title: 'Monthly Cost',
-        value:
-          user?.subscription_plan === 'enterprise'
-            ? '$1,247'
-            : user?.subscription_plan === 'pro'
-              ? '$89'
-              : '$0',
-        change: user?.role === 'admin' ? 15.8 : 12.1,
-        icon: DollarSign,
-        trend: 'up',
-        description: 'Total usage cost this month',
-      },
-      {
-        title: 'Error Rate',
-        value: user?.role === 'admin' ? '0.8%' : '1.3%',
-        change: -12.5,
-        icon: AlertTriangle,
-        trend: 'up',
-        description: 'Failed requests percentage',
-      },
-    ];
-
-    // Usage data over time
-    const usage: ChartData[] = [
-      { name: 'Mon', value: user?.role === 'admin' ? 2400 : 850 },
-      { name: 'Tue', value: user?.role === 'admin' ? 3200 : 1200 },
-      { name: 'Wed', value: user?.role === 'admin' ? 2800 : 980 },
-      { name: 'Thu', value: user?.role === 'admin' ? 3800 : 1400 },
-      { name: 'Fri', value: user?.role === 'admin' ? 4200 : 1600 },
-      { name: 'Sat', value: user?.role === 'admin' ? 2100 : 750 },
-      { name: 'Sun', value: user?.role === 'admin' ? 1800 : 600 },
-    ];
-
-    // Model usage distribution
-    const models: ChartData[] =
-      user?.role === 'admin'
-        ? [
-            { name: 'GPT-4', value: 45, fill: '#8884d8' },
-            { name: 'Claude-3', value: 25, fill: '#82ca9d' },
-            { name: 'GPT-3.5', value: 20, fill: '#ffc658' },
-            { name: 'Llama-2', value: 10, fill: '#ff7300' },
-          ]
-        : [
-            { name: 'GPT-4', value: 60, fill: '#8884d8' },
-            { name: 'Claude-3', value: 30, fill: '#82ca9d' },
-            { name: 'GPT-3.5', value: 10, fill: '#ffc658' },
-          ];
-
-    // Error tracking
-    const errors: ChartData[] = [
-      { name: 'Rate Limit', value: user?.role === 'admin' ? 45 : 25 },
-      { name: 'Timeout', value: user?.role === 'admin' ? 30 : 15 },
-      { name: 'Invalid Request', value: user?.role === 'admin' ? 20 : 8 },
-      { name: 'Auth Error', value: user?.role === 'admin' ? 5 : 2 },
-    ];
-
-    setMetrics(userMetrics);
-    setUsageData(usage);
-    setModelUsage(models);
-    setErrorData(errors);
+  const loadAnalyticsData = async () => {
+    try {
+      const res = await fetch('/api/analytics');
+      const json = await res.json();
+      if (!res.ok || !json?.success) return;
+      const d = json.data;
+      const userMetrics: MetricCard[] = [
+        {
+          title: 'API Calls',
+          value: (d.metrics.apiCalls || 0).toLocaleString(),
+          change: 0,
+          icon: Brain,
+          trend: 'up',
+          description: 'Total API requests this period',
+        },
+        {
+          title: 'Active Agents',
+          value: d.metrics.activeAgents || 0,
+          change: 0,
+          icon: Bot,
+          trend: 'up',
+          description: 'Currently running AI agents',
+        },
+        {
+          title: 'Success Rate',
+          value: `${d.metrics.successRate || 99}%`,
+          change: 0,
+          icon: CheckCircle,
+          trend: 'up',
+          description: 'Successful API responses',
+        },
+        {
+          title: 'Avg Response Time',
+          value: d.metrics.avgResponseMs ? `${d.metrics.avgResponseMs}ms` : '—',
+          change: 0,
+          icon: Clock,
+          trend: 'up',
+          description: 'Average API response time',
+        },
+        {
+          title: 'Monthly Cost',
+          value: '$0',
+          change: 0,
+          icon: DollarSign,
+          trend: 'up',
+          description: 'Total usage cost this month',
+        },
+        {
+          title: 'Error Rate',
+          value: `${d.metrics.errorRate || 0}%`,
+          change: 0,
+          icon: AlertTriangle,
+          trend: 'up',
+          description: 'Failed requests percentage',
+        },
+      ];
+      setMetrics(userMetrics);
+      setUsageData(d.usage || []);
+      setModelUsage((d.modelUsage || []).map((m: any, i: number) => ({ ...m, fill: ['#8884d8','#82ca9d','#ffc658','#ff7300','#00bcd4'][i % 5] })));
+      setErrorData(d.errorBreakdown || []);
+    } catch {
+      // Keep defaults if API fails
+    }
   };
 
   const timeRanges = [
