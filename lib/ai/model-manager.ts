@@ -2,7 +2,7 @@
 // Centralized model management following BuilderKit.ai documentation
 
 import { AIAPIService } from './api-integration';
-import { AI_MODELS, getModelById, getProviderFromModelId } from './models';
+// import { AI_MODELS } from './models';
 
 export interface ModelCapability {
   id: string;
@@ -318,7 +318,6 @@ export class AIModelManager {
     setupSteps: string[];
   } {
     const validation = this.validateModuleConfiguration(moduleId);
-    const moduleRequirements = this.getModuleRequirements(moduleId);
 
     return {
       title: `Setup ${moduleId.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}`,

@@ -317,15 +317,18 @@ export default function TestPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: customTestPrompt,
-          model: 'gpt-3.5-turbo',
+          messages: [
+            { role: 'system', content: 'You are a helpful assistant.' },
+            { role: 'user', content: customTestPrompt },
+          ],
+          model: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
           stream: false,
         }),
       });
 
       if (response.ok) {
         const result = await response.json();
-        setCustomTestResult(result.message || 'Test completed successfully');
+        setCustomTestResult(result.content || 'Test completed successfully');
       } else {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }

@@ -191,7 +191,6 @@ export function EnhancedSelect({
   placeholder = 'Select an option',
   options,
   searchable = false,
-  multiple = false,
   className = '',
 }: EnhancedSelectProps) {
   const [searchTerm, setSearchTerm] = useState('');
