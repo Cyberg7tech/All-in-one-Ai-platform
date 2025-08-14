@@ -341,6 +341,7 @@ export default function ImageUpscalerPage() {
                         {/* Job Header */}
                         <div className='flex items-center justify-between mb-4'>
                           <div className='flex items-center space-x-3'>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={job.originalImage}
                               alt='Original'
@@ -393,6 +394,7 @@ export default function ImageUpscalerPage() {
                             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                               <div>
                                 <h5 className='text-sm font-medium mb-2'>Original</h5>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                   src={job.originalImage}
                                   alt='Original'
@@ -404,6 +406,7 @@ export default function ImageUpscalerPage() {
                               </div>
                               <div>
                                 <h5 className='text-sm font-medium mb-2'>Enhanced ({job.scale}x)</h5>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                   src={job.resultImage}
                                   alt='Enhanced'

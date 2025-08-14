@@ -338,6 +338,7 @@ export default function GhibliGeneratorPage() {
                       <div key={image.id} className='group relative'>
                         <Card className='overflow-hidden'>
                           <div className='relative'>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={image.imageUrl}
                               alt={image.prompt}

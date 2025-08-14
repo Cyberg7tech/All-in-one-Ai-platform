@@ -337,6 +337,7 @@ export default function ImageGeneratorPage() {
                         <Card>
                           <CardContent className='p-0'>
                             <div className='relative'>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={image.imageUrl}
                                 alt={image.prompt}

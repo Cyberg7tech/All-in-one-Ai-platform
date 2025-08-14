@@ -341,6 +341,7 @@ export default function InteriorDesignPage() {
                         {/* Project Header */}
                         <div className='flex items-center justify-between mb-4'>
                           <div className='flex items-center space-x-3'>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={project.originalImage}
                               alt='Original room'
@@ -396,6 +397,7 @@ export default function InteriorDesignPage() {
                             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                               {project.results.map((result, index) => (
                                 <div key={index} className='relative group'>
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={result}
                                     alt={`Design suggestion ${index + 1}`}

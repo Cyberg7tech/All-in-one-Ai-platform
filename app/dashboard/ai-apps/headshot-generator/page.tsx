@@ -328,6 +328,7 @@ export default function HeadshotGeneratorPage() {
                         {/* Job Header */}
                         <div className='flex items-center justify-between mb-4'>
                           <div className='flex items-center space-x-3'>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={job.originalImage}
                               alt='Original'
@@ -380,6 +381,7 @@ export default function HeadshotGeneratorPage() {
                             <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
                               {job.results.map((result, index) => (
                                 <div key={index} className='relative group'>
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={result}
                                     alt={`Headshot ${index + 1}`}

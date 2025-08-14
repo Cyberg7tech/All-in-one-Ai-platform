@@ -125,7 +125,10 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
 
     if (!doc?.content || doc.content.trim().length === 0) {
-      return NextResponse.json({ success: true, answer: 'No document content found. Please re-upload your PDF.' });
+      return NextResponse.json({
+        success: true,
+        answer: 'No document content found. Please re-upload your PDF.',
+      });
     }
 
     const MAX_CHARS = 12000;
