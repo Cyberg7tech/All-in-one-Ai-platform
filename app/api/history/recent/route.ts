@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 
@@ -30,7 +30,7 @@ function makeServerClient() {
   );
 }
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   const supabase = makeServerClient();
   const {
     data: { session },

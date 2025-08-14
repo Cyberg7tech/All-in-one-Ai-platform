@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-type CountResult = { count: number };
+//
 
 function makeServerClient() {
   const cookieStore = cookies();
@@ -39,7 +39,7 @@ function startOfDaysAgo(days: number) {
   return d.toISOString();
 }
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   const supabase = makeServerClient();
   const {
     data: { session },
@@ -89,7 +89,10 @@ export async function GET(_req: NextRequest) {
           .eq('user_id', userId)
           .gte('created_at', since);
         (data || []).forEach((row: any) => push(row.created_at));
-      } catch {}
+      } catch {
+        // ignore errors per-table; analytics are best-effort
+        return;
+      }
     }
 
     await Promise.all([

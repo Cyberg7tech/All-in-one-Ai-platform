@@ -9,18 +9,20 @@ export default function HistoryPage() {
 
   useEffect(() => {
     const run = async () => {
+      const [r1, r2] = await Promise.all([
+        fetch('/api/history/recent').catch(() => null),
+        fetch('/api/pdf/list').catch(() => null),
+      ]);
       try {
-        const [r1, r2] = await Promise.all([
-          fetch('/api/history/recent'),
-          fetch('/api/pdf/list').catch(() => null), // optional, in case not implemented
-        ]);
-        const j1 = await r1.json();
-        const j2 = r2 ? await r2.json().catch(() => ({})) : {};
+        const j1 = r1 ? await r1.json() : {};
         if (j1?.success) setRecent(j1.recent || []);
+      } catch {}
+      try {
+        const j2 = r2 ? await r2.json() : {};
         if (j2?.success) setDocs(j2.documents || []);
       } catch {}
     };
-    run();
+    void run();
   }, []);
 
   return (
