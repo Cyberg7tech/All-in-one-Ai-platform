@@ -16,11 +16,15 @@ export default function HistoryPage() {
       try {
         const j1 = r1 ? await r1.json() : {};
         if (j1?.success) setRecent(j1.recent || []);
-      } catch {}
+      } catch {
+        void 0;
+      }
       try {
         const j2 = r2 ? await r2.json() : {};
         if (j2?.success) setDocs(j2.documents || []);
-      } catch {}
+      } catch {
+        void 0;
+      }
     };
     void run();
   }, []);
