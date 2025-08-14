@@ -8,6 +8,31 @@ export const dynamic = 'force-dynamic';
 
 import { togetherEmbeddings } from '@/lib/ai/providers/together';
 
+async function extractPdfWithPdfjs(buffer: Buffer): Promise<string> {
+  try {
+    // Lazy import to keep cold starts smaller
+    // pdfjs-dist works in Node if we use the legacy build
+    // and disable workers (Next.js server runtime)
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const pdfjs = require('pdfjs-dist/legacy/build/pdf.js');
+    // Disable workers in server runtime
+    pdfjs.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/legacy/build/pdf.worker.js');
+    const loadingTask = pdfjs.getDocument({ data: buffer, useSystemFonts: true, isEvalSupported: false });
+    const doc = await loadingTask.promise;
+    let text = '';
+    const numPages = doc.numPages || 0;
+    for (let i = 1; i <= numPages; i++) {
+      const page = await doc.getPage(i);
+      const content = await page.getTextContent();
+      const pageText = content.items.map((it: any) => (it.str ?? '') as string).join(' ');
+      text += `\n\n${pageText}`;
+    }
+    return text.trim();
+  } catch {
+    return '';
+  }
+}
+
 async function embedTexts(texts: string[]): Promise<number[][]> {
   const res = await togetherEmbeddings(texts, 'intfloat/multilingual-e5-large-instruct');
   return res.data.map((d: any) => d.embedding as number[]);
@@ -93,14 +118,20 @@ export async function POST(req: NextRequest) {
         // Try parsing PDF text if possible
         if (!rawText && file.type === 'application/pdf') {
           try {
-            // Attempt dynamic import of pdf-parse if available
+            // Attempt dynamic import of pdf-parse first
             // @ts-expect-error: Optional dependency only present when installed
             const pdfParse = (await import('pdf-parse')).default as any;
             const buffer = Buffer.from(arrayBuffer);
             const parsed = await pdfParse(buffer);
             rawText = parsed?.text || '';
+            if (!rawText) {
+              // Fallback to pdfjs if pdf-parse produced empty text
+              rawText = await extractPdfWithPdfjs(buffer);
+            }
           } catch {
-            // No parser installed; rely on text field fallback
+            // Fallback to pdfjs if pdf-parse import failed in host
+            const buffer = Buffer.from(arrayBuffer);
+            rawText = await extractPdfWithPdfjs(buffer);
           }
         }
       }
