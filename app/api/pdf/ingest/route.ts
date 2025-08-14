@@ -10,6 +10,7 @@ export const dynamic = 'force-dynamic';
 
 async function extractPdfWithPdfjs(buffer: Buffer): Promise<string> {
   try {
+    console.log('pdfjs: Starting extraction...');
     // Lazy import to keep cold starts smaller
     // pdfjs-dist works in Node if we use the legacy build
     // and disable workers (Next.js server runtime)
@@ -17,18 +18,29 @@ async function extractPdfWithPdfjs(buffer: Buffer): Promise<string> {
     const pdfjs = require('pdfjs-dist/legacy/build/pdf.js');
     // Disable workers in server runtime
     pdfjs.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/legacy/build/pdf.worker.js');
+    
+    console.log('pdfjs: Loading document...');
     const loadingTask = pdfjs.getDocument({ data: buffer, useSystemFonts: true, isEvalSupported: false });
     const doc = await loadingTask.promise;
+    
+    console.log('pdfjs: Document loaded, pages:', doc.numPages);
     let text = '';
     const numPages = doc.numPages || 0;
+    
     for (let i = 1; i <= numPages; i++) {
+      console.log(`pdfjs: Processing page ${i}/${numPages}`);
       const page = await doc.getPage(i);
       const content = await page.getTextContent();
       const pageText = content.items.map((it: any) => (it.str ?? '') as string).join(' ');
       text += `\n\n${pageText}`;
+      console.log(`pdfjs: Page ${i} text length:`, pageText.length);
     }
-    return text.trim();
-  } catch {
+    
+    const result = text.trim();
+    console.log('pdfjs: Total extracted text length:', result.length);
+    return result;
+  } catch (error) {
+    console.log('pdfjs: Extraction failed with error:', error);
     return '';
   }
 }
@@ -114,26 +126,39 @@ export async function POST(req: NextRequest) {
 
         // Try parsing PDF text if possible
         if (!rawText && file.type === 'application/pdf') {
+          console.log('Starting PDF text extraction for file:', file.name, 'Size:', file.size);
+          const buffer = Buffer.from(arrayBuffer);
+          
+          // Method 1: Try pdf-parse
           try {
-            // Attempt dynamic import of pdf-parse first
+            console.log('Attempting pdf-parse extraction...');
             // @ts-expect-error: Optional dependency only present when installed
             const pdfParse = (await import('pdf-parse')).default as any;
-            const buffer = Buffer.from(arrayBuffer);
             const parsed = await pdfParse(buffer);
             rawText = parsed?.text || '';
-            console.log('PDF parse result length:', rawText.length);
+            console.log('pdf-parse result length:', rawText.length);
+            console.log('pdf-parse first 200 chars:', rawText.substring(0, 200));
+
             if (!rawText) {
-              // Fallback to pdfjs if pdf-parse produced empty text
+              console.log('pdf-parse returned empty text, trying pdfjs fallback...');
               rawText = await extractPdfWithPdfjs(buffer);
-              console.log('PDFjs fallback result length:', rawText.length);
+              console.log('pdfjs fallback result length:', rawText.length);
+              console.log('pdfjs first 200 chars:', rawText.substring(0, 200));
             }
           } catch (error) {
-            console.log('PDF parse failed, using pdfjs fallback:', error);
-            // Fallback to pdfjs if pdf-parse import failed in host
-            const buffer = Buffer.from(arrayBuffer);
-            rawText = await extractPdfWithPdfjs(buffer);
-            console.log('PDFjs result length:', rawText.length);
+            console.log('pdf-parse failed with error:', error);
+            console.log('Trying pdfjs as fallback...');
+            try {
+              rawText = await extractPdfWithPdfjs(buffer);
+              console.log('pdfjs result length:', rawText.length);
+              console.log('pdfjs first 200 chars:', rawText.substring(0, 200));
+            } catch (pdfjsError) {
+              console.log('pdfjs also failed with error:', pdfjsError);
+              rawText = '';
+            }
           }
+          
+          console.log('Final extracted text length:', rawText.length);
         }
       }
     } else {
