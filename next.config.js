@@ -23,14 +23,16 @@ const nextConfig = {
     ],
   },
   webpack: (config, { isServer }) => {
-    // Only essential webpack configuration
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      net: false,
-      tls: false,
-    };
-
+    // Avoid disabling Node built-ins for server bundles.
+    // Some server-only libs (e.g., pdf-parse) require fs/net/tls.
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
     return config;
   },
   // Experimental features to improve performance
