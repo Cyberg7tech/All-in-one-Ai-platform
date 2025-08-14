@@ -71,28 +71,46 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'question is required' }, { status: 400 });
     }
 
-    const embedding = await embedQuery(question);
+    // Try vector similarity first
+    try {
+      const embedding = await embedQuery(question);
+      const { data: matches, error } = await supabase
+        .rpc('match_document_chunks', {
+          p_user_id: userId,
+          p_embedding: embedding,
+          p_match_count: Math.min(Math.max(Number(k) || 5, 1), 20),
+        })
+        .select();
+      if (!error && matches && matches.length > 0) {
+        const top = (matches || [])
+          .filter((m: any) => m?.content)
+          .map((m: any) => `- (${(m.similarity * 100).toFixed(1)}%) ${m.content}`)
+          .join('\n');
+        const systemPrompt = `You are a helpful assistant that answers strictly based on the provided document context. If the answer is not in the context, say you don't know.\nContext:\n${top}`;
+        const answer = await callLLM(systemPrompt, question);
+        return NextResponse.json({ success: true, answer, matches });
+      }
+    } catch {}
 
-    // Call similarity function
-    const { data: matches, error } = await supabase
-      .rpc('match_document_chunks', {
-        p_user_id: userId,
-        p_embedding: embedding,
-        p_match_count: Math.min(Math.max(Number(k) || 5, 1), 20),
-      })
-      .select();
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    // Fallback: use latest non-empty documents.content
+    const { data: doc } = await supabase
+      .from('documents')
+      .select('id, content')
+      .eq('user_id', userId)
+      .neq('content', '')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    const top = (matches || [])
-      .filter((m: any) => m?.content)
-      .map((m: any) => `- (${(m.similarity * 100).toFixed(1)}%) ${m.content}`)
-      .join('\n');
+    if (!doc?.content) {
+      return NextResponse.json({ success: true, answer: "There is no document provided in the context." });
+    }
 
-    const systemPrompt = `You are a helpful assistant that answers strictly based on the provided document context. If the answer is not in the context, say you don't know.
-Context:\n${top}`;
+    const MAX_CHARS = 12000;
+    const context = doc.content.length > MAX_CHARS ? doc.content.slice(0, MAX_CHARS) : doc.content;
+    const systemPrompt = `You are a helpful assistant that answers strictly based on the provided document content. If the answer is not in the content, say you don't know.\nContent:\n${context}`;
     const answer = await callLLM(systemPrompt, question);
-
-    return NextResponse.json({ success: true, answer, matches: matches || [] });
+    return NextResponse.json({ success: true, answer, matches: [] });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'Unknown error' }, { status: 500 });
   }
