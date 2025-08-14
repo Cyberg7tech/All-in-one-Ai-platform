@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { Upload, X, File, Image, Video, Music, FileText, AlertCircle } from 'lucide-react';
+import { Upload, X, File, Image as ImageIcon, Video, Music, FileText, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -41,7 +41,7 @@ export function UploadMedia({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getFileIcon = (file: File) => {
-    if (file.type.startsWith('image/')) return <Image className='size-6 text-blue-500' />;
+    if (file.type.startsWith('image/')) return <ImageIcon className='size-6 text-blue-500' />;
     if (file.type.startsWith('video/')) return <Video className='size-6 text-purple-500' />;
     if (file.type.startsWith('audio/')) return <Music className='size-6 text-green-500' />;
     if (file.type.includes('pdf')) return <FileText className='size-6 text-red-500' />;
@@ -243,6 +243,7 @@ export function UploadMedia({
                 {/* File Icon/Preview */}
                 <div className='shrink-0'>
                   {file.preview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={file.preview}
                       alt={`Preview of ${file.file.name}`}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { useAuth } from '@/contexts/auth-context';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,7 +42,6 @@ interface VideoData {
 }
 
 export default function ChatWithYouTubePage() {
-  const { user } = useAuth();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [currentVideo, setCurrentVideo] = useState<VideoData | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -274,9 +273,11 @@ export default function ChatWithYouTubePage() {
           <Card className='mb-6'>
             <CardContent className='p-4'>
               <div className='flex items-center space-x-4'>
-                <img
+                <Image
                   src={currentVideo.thumbnail}
                   alt={currentVideo.title}
+                  width={96}
+                  height={64}
                   className='w-24 h-16 object-cover rounded'
                 />
                 <div className='flex-1'>

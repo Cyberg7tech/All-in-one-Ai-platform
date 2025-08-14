@@ -12,7 +12,7 @@ export function useTextToSpeech(options: UseTextToSpeechOptions = {}) {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const { maxRetries = 3, retryDelay = 1000, timeout = 30000 } = options;
+  const { maxRetries = 3, retryDelay = 1000 } = options;
 
   const generateSpeech = useCallback(
     async (

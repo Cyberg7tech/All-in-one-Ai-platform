@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +14,7 @@ import {
   RotateCcw,
   Settings,
   Loader2,
-  Image,
+  Image as ImageIcon,
   FileText,
   Lightbulb,
 } from 'lucide-react';
@@ -30,7 +29,6 @@ interface Message {
 }
 
 export default function GeminiChatPage() {
-  const { user } = useAuth();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -489,7 +487,7 @@ Is there a particular angle you'd like me to explore further? I can provide more
                       <span>Text understanding & generation</span>
                     </li>
                     <li className='flex items-center space-x-1'>
-                      <Image className='size-3' />
+                      <ImageIcon className='size-3' />
                       <span>Image analysis (Pro Vision)</span>
                     </li>
                     <li className='flex items-center space-x-1'>

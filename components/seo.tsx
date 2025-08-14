@@ -16,7 +16,7 @@ interface SEOProps {
   structuredData?: object;
 }
 
-export function SEO({
+export function Seo({
   title = 'One AI - Complete AI Platform for Business',
   description = 'Transform your workflow with 18+ AI tools, intelligent agents, advanced analytics, and seamless access to multiple AI models. Built for developers, designed for everyone.',
   keywords = 'AI platform, artificial intelligence, AI tools, machine learning, automation, business AI, AI agents, ChatGPT, Claude, AI development',
@@ -154,5 +154,5 @@ export const seoConfigs = {
 
 // Hook for dynamic SEO
 export function useSEO(config: SEOProps) {
-  return <SEO {...config} />;
+  return <Seo {...config} />;
 }

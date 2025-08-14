@@ -16,7 +16,7 @@ import {
   Star,
   MessageSquare,
   Bot,
-  Image,
+  Image as ImageIcon,
   Video,
   Music,
   FileText,
@@ -189,7 +189,7 @@ export function PromptManager({ onSelectPrompt, onSavePrompt, className = '' }: 
       case 'chat':
         return <MessageSquare className='size-4' />;
       case 'image':
-        return <Image className='size-4' />;
+        return <ImageIcon className='size-4' />;
       case 'video':
         return <Video className='size-4' />;
       case 'audio':
