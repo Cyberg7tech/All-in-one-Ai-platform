@@ -62,10 +62,7 @@ export async function GET(_req: NextRequest) {
 
   async function safeSum(table: string, column: string): Promise<number> {
     try {
-      const { data, error } = await supabase
-        .from(table)
-        .select(`${column}`)
-        .eq('user_id', userId);
+      const { data, error } = await supabase.from(table).select(`${column}`).eq('user_id', userId);
       if (error || !data) return 0;
       return (data as any[]).reduce((acc, row) => acc + (Number(row[column]) || 0), 0);
     } catch {
@@ -122,10 +119,7 @@ export async function GET(_req: NextRequest) {
 
   async function modelDistribution(): Promise<Array<{ name: string; value: number }>> {
     try {
-      const { data } = await supabase
-        .from('chat_messages')
-        .select('model_used')
-        .eq('user_id', userId);
+      const { data } = await supabase.from('chat_messages').select('model_used').eq('user_id', userId);
       const counts = new Map<string, number>();
       (data || []).forEach((r: any) => {
         const key = r?.model_used || 'unknown';
@@ -178,5 +172,3 @@ export async function GET(_req: NextRequest) {
 
   return NextResponse.json({ success: true, data: payload });
 }
-
-

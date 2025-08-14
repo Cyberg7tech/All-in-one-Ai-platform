@@ -92,5 +92,3 @@ export async function GET(_req: NextRequest) {
       .slice(0, 10),
   });
 }
-
-

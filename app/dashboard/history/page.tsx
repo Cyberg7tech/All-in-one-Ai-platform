@@ -45,14 +45,18 @@ export default function HistoryPage() {
                 <div className='text-sm text-muted-foreground'>No recent activity yet.</div>
               )}
               {recent.map((item) => (
-                <div key={`${item.kind}-${item.id}`} className='flex items-center justify-between p-4 border rounded-lg'>
+                <div
+                  key={`${item.kind}-${item.id}`}
+                  className='flex items-center justify-between p-4 border rounded-lg'>
                   <div className='flex items-center gap-3'>
                     {item.kind === 'chat' && <MessageSquare className='size-5 text-blue-500' />}
                     {item.kind === 'image' && <ImageIcon className='size-5 text-green-500' />}
                     {item.kind === 'video' && <Video className='size-5 text-purple-500' />}
                     <div>
                       <p className='font-medium'>{item.title}</p>
-                      <p className='text-sm text-muted-foreground'>{new Date(item.created_at).toLocaleString()}</p>
+                      <p className='text-sm text-muted-foreground'>
+                        {new Date(item.created_at).toLocaleString()}
+                      </p>
                     </div>
                   </div>
                   {item.href && (
@@ -87,7 +91,9 @@ export default function HistoryPage() {
                   <div key={d.id} className='flex items-center justify-between p-3 border rounded'>
                     <div>
                       <div className='font-medium'>{d.original_name || 'Document'}</div>
-                      <div className='text-xs text-muted-foreground'>{new Date(d.created_at).toLocaleString()}</div>
+                      <div className='text-xs text-muted-foreground'>
+                        {new Date(d.created_at).toLocaleString()}
+                      </div>
                     </div>
                     <Button asChild size='sm' variant='outline'>
                       <a href={`/dashboard/ai-apps/chat-with-pdf?doc=${d.id}`}>Open</a>

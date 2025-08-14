@@ -115,7 +115,12 @@ export default function AnalyticsPage() {
       ];
       setMetrics(userMetrics);
       setUsageData(d.usage || []);
-      setModelUsage((d.modelUsage || []).map((m: any, i: number) => ({ ...m, fill: ['#8884d8','#82ca9d','#ffc658','#ff7300','#00bcd4'][i % 5] })));
+      setModelUsage(
+        (d.modelUsage || []).map((m: any, i: number) => ({
+          ...m,
+          fill: ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00bcd4'][i % 5],
+        }))
+      );
       setErrorData(d.errorBreakdown || []);
     } catch {
       // Keep defaults if API fails
