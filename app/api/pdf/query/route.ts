@@ -180,6 +180,7 @@ export async function POST(req: NextRequest) {
 
     // If no content, try to fetch latest document by created_at regardless of content and extract on the fly
     let workingDoc = doc;
+    const debug: Record<string, any> = {};
     if (!workingDoc?.content || workingDoc.content.trim().length === 0) {
       console.log('No inline content found. Attempting on-the-fly extraction from storage...');
       const { data: latestDoc } = await supabase
@@ -194,11 +195,14 @@ export async function POST(req: NextRequest) {
         try {
           // Download the file from storage
           const bucket = process.env.SUPABASE_STORAGE_BUCKET_NAME || 'documents';
+          debug.bucket = bucket;
+          debug.filename = latestDoc.filename;
           const { data: fileData, error: dlErr } = await supabase.storage
             .from(bucket)
             .download(latestDoc.filename);
           if (dlErr) {
             console.error('Error downloading PDF from storage:', dlErr);
+            debug.downloadError = String(dlErr.message || dlErr.name || dlErr);
           } else if (fileData) {
             const arrayBuffer = await fileData.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
@@ -211,8 +215,10 @@ export async function POST(req: NextRequest) {
               const parsed = await pdfParse(buffer);
               extracted = parsed?.text || '';
               console.log('On-the-fly pdf-parse length:', extracted.length);
+              debug.pdfParseLength = extracted.length;
             } catch (e) {
               console.warn('On-the-fly pdf-parse failed:', e);
+              debug.pdfParseError = String((e as Error).message || e);
             }
 
             if (!extracted) {
@@ -235,8 +241,10 @@ export async function POST(req: NextRequest) {
                 }
                 extracted = text.trim();
                 console.log('On-the-fly pdfjs length:', extracted.length);
+                debug.pdfjsLength = extracted.length;
               } catch (e) {
                 console.warn('On-the-fly pdfjs failed:', e);
+                debug.pdfjsError = String((e as Error).message || e);
               }
             }
 
@@ -247,12 +255,14 @@ export async function POST(req: NextRequest) {
                 .update({ content: extracted })
                 .eq('id', latestDoc.id);
               if (updErr) console.error('Failed to update document content after extraction:', updErr);
+              if (updErr) debug.updateError = String(updErr.message || updErr.name || updErr);
 
               workingDoc = { ...latestDoc, content: extracted } as typeof latestDoc & { content: string };
             }
           }
         } catch (e) {
           console.error('On-the-fly extraction overall failure:', e);
+          debug.extractionError = String((e as Error).message || e);
         }
       }
     }
@@ -261,6 +271,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         answer: 'No document content found. Please re-upload your PDF.',
+        debug,
       });
     }
 
@@ -269,7 +280,7 @@ export async function POST(req: NextRequest) {
     const context = content.length > MAX_CHARS ? content.slice(0, MAX_CHARS) : content;
     const systemPrompt = `You are a helpful assistant that answers strictly based on the provided document content. If the answer is not in the content, say you don't know.\nContent:\n${context}`;
     const answer = await callLLM(systemPrompt, question);
-    return NextResponse.json({ success: true, answer, matches: [] });
+    return NextResponse.json({ success: true, answer, matches: [], debug });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'Unknown error' }, { status: 500 });
   }
