@@ -6,7 +6,7 @@ import { createServerClient } from '@supabase/ssr';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-import { togetherEmbeddings } from '@/lib/ai/providers/together';
+// No chunk embeddings path anymore; we persist extracted text into documents.content only
 
 async function extractPdfWithPdfjs(buffer: Buffer): Promise<string> {
   try {
@@ -33,10 +33,7 @@ async function extractPdfWithPdfjs(buffer: Buffer): Promise<string> {
   }
 }
 
-async function embedTexts(texts: string[]): Promise<number[][]> {
-  const res = await togetherEmbeddings(texts, 'intfloat/multilingual-e5-large-instruct');
-  return res.data.map((d: any) => d.embedding as number[]);
-}
+// Embeddings removed per new requirement (no document_chunks usage)
 
 function chunkText(text: string, target = 1200, overlap = 100): string[] {
   const clean = text.replace(/\s+/g, ' ').trim();
@@ -185,26 +182,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: docErr.message }, { status: 500 });
     }
 
-    // Embed chunks in batches
-    const embeddings = await embedTexts(chunks);
-
-    // Build rows for chunks
-    const rows = chunks.map((content, i) => ({
-      document_id: doc.id,
-      chunk_index: i,
-      content,
-      embedding_data: embeddings[i],
-      metadata: null,
-    }));
-    // Insert in pages of 100
-    const pageSize = 100;
-    for (let i = 0; i < rows.length; i += pageSize) {
-      const slice = rows.slice(i, i + pageSize);
-      const { error } = await supabase.from('document_chunks').insert(slice as any);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true, documentId: doc.id, chunks: rows.length, storagePath });
+    // No document_chunks insertion anymore; return the number of logical chunks we produced
+    return NextResponse.json({ success: true, documentId: doc.id, chunks: chunks.length, storagePath });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'Unknown error' }, { status: 500 });
   }

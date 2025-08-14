@@ -90,7 +90,10 @@ export async function POST(req: NextRequest) {
         const answer = await callLLM(systemPrompt, question);
         return NextResponse.json({ success: true, answer, matches });
       }
-    } catch {}
+    } catch (err) {
+      // Vector search path failed (e.g., function/table missing). Fallback to documents.content
+      console.warn('match_document_chunks failed; falling back to documents.content', err);
+    }
 
     // Fallback: use latest non-empty documents.content
     const { data: doc } = await supabase
@@ -103,7 +106,7 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
 
     if (!doc?.content) {
-      return NextResponse.json({ success: true, answer: "There is no document provided in the context." });
+      return NextResponse.json({ success: true, answer: 'There is no document provided in the context.' });
     }
 
     const MAX_CHARS = 12000;
