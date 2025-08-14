@@ -115,16 +115,43 @@ export async function POST(req: NextRequest) {
     }
 
     // Fallback: use latest document that has non-null content
-    const { data: doc } = await supabase
+    console.log('Querying documents for user:', userId);
+
+    // First, let's check if there are any documents at all for this user
+    const { data: allDocs, error: allDocsError } = await supabase
       .from('documents')
-      .select('id, content')
+      .select('id, content, original_name, created_at')
+      .eq('user_id', userId);
+
+    if (allDocsError) {
+      console.error('Error querying all documents:', allDocsError);
+    } else {
+      console.log('Total documents for user:', allDocs?.length);
+      console.log(
+        'Documents with content:',
+        allDocs?.filter((d) => d.content && d.content.trim().length > 0).length
+      );
+    }
+
+    const { data: doc, error: docError } = await supabase
+      .from('documents')
+      .select('id, content, original_name, created_at')
       .eq('user_id', userId)
       .not('content', 'is', null)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    console.log('Retrieved document:', { id: doc?.id, contentLength: doc?.content?.length });
+    if (docError) {
+      console.error('Error querying documents:', docError);
+    }
+
+    console.log('Retrieved document:', {
+      id: doc?.id,
+      contentLength: doc?.content?.length,
+      originalName: doc?.original_name,
+      createdAt: doc?.created_at,
+    });
     console.log('Content preview:', doc?.content?.substring(0, 200));
 
     if (!doc?.content || doc.content.trim().length === 0) {

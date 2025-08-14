@@ -146,6 +146,7 @@ export async function POST(req: NextRequest) {
     // and return success with 0 chunks. This avoids blocking with 400 errors on some hosts.
     // The document can be reprocessed later or used for metadata-only workflows.
     if (!rawText) {
+      console.log('No text extracted from PDF, creating document with empty content');
       const { data: doc, error: docErr } = await supabase
         .from('documents')
         .insert({
@@ -170,6 +171,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create document row
+    console.log('Creating document with extracted text, length:', rawText.length);
     const { data: doc, error: docErr } = await supabase
       .from('documents')
       .insert({
@@ -187,6 +189,7 @@ export async function POST(req: NextRequest) {
     }
 
     // No document_chunks insertion anymore; return the number of logical chunks we produced
+    console.log('Document created successfully with ID:', doc.id);
     return NextResponse.json({ success: true, documentId: doc.id, chunks: chunks.length, storagePath });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'Unknown error' }, { status: 500 });
