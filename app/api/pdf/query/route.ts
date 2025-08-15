@@ -210,8 +210,8 @@ export async function POST(req: NextRequest) {
             // Two-step extraction similar to ingest
             let extracted = '';
             try {
-              // @ts-expect-error: Optional dependency only present when installed
-              const pdfParse = (await import('pdf-parse')).default as any;
+              // eslint-disable-next-line @typescript-eslint/no-var-requires
+              const pdfParse = require('pdf-parse');
               const parsed = await pdfParse(buffer);
               extracted = parsed?.text || '';
               console.log('On-the-fly pdf-parse length:', extracted.length);
@@ -224,8 +224,9 @@ export async function POST(req: NextRequest) {
             if (!extracted) {
               try {
                 // eslint-disable-next-line @typescript-eslint/no-var-requires
-                const pdfjs = require('pdfjs-dist/legacy/build/pdf.js');
-                pdfjs.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/legacy/build/pdf.worker.js');
+                const pdfjs = require('pdfjs-dist');
+                // Disable workers for server-side usage
+                pdfjs.GlobalWorkerOptions.workerSrc = false;
                 const loadingTask = pdfjs.getDocument({
                   data: buffer,
                   useSystemFonts: true,
