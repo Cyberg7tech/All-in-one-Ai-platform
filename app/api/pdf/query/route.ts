@@ -5,7 +5,37 @@ import { createServerClient } from '@supabase/ssr';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-async function callLLM(system: string, user: string): Promise<string> {
+async function callClaudeSonnet4(system: string, user: string): Promise<string> {
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  if (!anthropicKey) {
+    throw new Error('ANTHROPIC_API_KEY is required for Claude Sonnet 4');
+  }
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': anthropicKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 800,
+      temperature: 0.2,
+      messages: [{ role: 'user', content: `${system}\n\nUser question: ${user}` }],
+    }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Claude API error: ${res.status} ${res.statusText} - ${errorText}`);
+  }
+
+  const json = await res.json();
+  return json?.content?.[0]?.text || 'No response from Claude';
+}
+
+async function callOpenAI(system: string, user: string): Promise<string> {
   const openai = process.env.OPENAI_API_KEY;
   if (!openai) {
     throw new Error('OPENAI_API_KEY is required');
@@ -34,6 +64,22 @@ async function callLLM(system: string, user: string): Promise<string> {
 
   const json = await res.json();
   return json?.choices?.[0]?.message?.content || 'No response';
+}
+
+async function callLLM(system: string, user: string): Promise<string> {
+  try {
+    // Try Claude Sonnet 4 first (as requested by user)
+    return await callClaudeSonnet4(system, user);
+  } catch (claudeError) {
+    console.log('Claude Sonnet 4 failed, falling back to OpenAI:', claudeError);
+    try {
+      // Fallback to OpenAI
+      return await callOpenAI(system, user);
+    } catch (openaiError) {
+      console.error('Both Claude and OpenAI failed:', openaiError);
+      throw new Error('All AI providers failed. Please check your API keys.');
+    }
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -102,9 +148,9 @@ export async function POST(req: NextRequest) {
     // 3. Store embeddings in Pinecone
     // 4. Search for relevant chunks based on the question
 
-    const systemPrompt = `You are a helpful assistant that answers questions based on the provided PDF content. 
+    const systemPrompt = `You are a helpful assistant that answers questions based on the provided PDF content.
     If the answer is not in the content, say you don't know.
-    
+
     PDF Content:
     ${chatFile.file || 'No content available'}`;
 
