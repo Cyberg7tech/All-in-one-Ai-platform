@@ -41,7 +41,7 @@ export default function ChatWithPDFPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [currentDocId, setCurrentDocId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -91,18 +91,27 @@ export default function ChatWithPDFPage() {
       console.log('Starting PDF ingest for file:', file.name);
       const form = new FormData();
       form.append('file', file);
-      form.append('title', file.name.replace(/\.pdf$/i, ''));
       const res = await fetch('/api/pdf/ingest', { method: 'POST', body: form });
       const data = await res.json();
       console.log('Ingest response:', { status: res.status, data });
-      if (!res.ok) throw new Error(data?.error || 'Failed to ingest PDF');
+      if (!res.ok) {
+        if (res.status === 422) {
+          throw new Error(
+            'This PDF appears to be image-only or encrypted. Please upload a text-based PDF or enable OCR.'
+          );
+        }
+        throw new Error(data?.error || 'Failed to ingest PDF');
+      }
 
       // Move to processing/ready
       setFiles((prev) =>
         prev.map((f) =>
-          f.id === fileId ? { ...f, status: 'processing', progress: 80, documentId: data.fileId } : f
+          f.id === fileId ? { ...f, status: 'processing', progress: 80, documentId: data.docId } : f
         )
       );
+
+      // Set current document ID
+      setCurrentDocId(data.docId);
 
       await new Promise((r) => setTimeout(r, 150));
       setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, status: 'ready', progress: 100 } : f)));
@@ -153,7 +162,7 @@ export default function ChatWithPDFPage() {
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
-    if (files.filter((f) => f.status === 'ready').length === 0) {
+    if (!currentDocId) {
       toast({
         title: 'No PDF available',
         description: 'Please upload and process a PDF before asking questions.',
@@ -174,36 +183,22 @@ export default function ChatWithPDFPage() {
     setIsLoading(true);
 
     try {
-      // Ensure a persistent chat session exists
-      let sid = sessionId;
-      if (!sid) {
-        const resSession = await fetch('/api/chat/sessions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: 'PDF Chat',
-            model_id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
-          }),
+      // Check if we have a current document
+      if (!currentDocId) {
+        toast({
+          title: 'No PDF loaded',
+          description: 'Please upload a PDF first before asking questions.',
+          variant: 'destructive',
         });
-        const js = await resSession.json();
-        if (!resSession.ok) throw new Error(js?.error || 'Failed to create chat session');
-        sid = js.session?.id;
-        setSessionId(sid);
+        return;
       }
-
-      // Persist user message
-      await fetch('/api/chat/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: sid, role: 'user', content: userMessage.content }),
-      });
 
       // Ask the RAG endpoint
       console.log('Sending query to PDF API:', userMessage.content);
       const ragRes = await fetch('/api/pdf/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: userMessage.content }),
+        body: JSON.stringify({ query: userMessage.content, docId: currentDocId }),
       });
       const rag = await ragRes.json();
       console.log('Query response:', { status: ragRes.status, rag });
@@ -217,18 +212,6 @@ export default function ChatWithPDFPage() {
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-
-      // Persist assistant message
-      await fetch('/api/chat/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session_id: sid,
-          role: 'assistant',
-          content: assistantMessage.content,
-          model_used: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
-        }),
-      });
     } catch (error) {
       toast({
         title: 'Error sending message',
@@ -541,14 +524,10 @@ export default function ChatWithPDFPage() {
                         sendMessage();
                       }
                     }}
-                    disabled={isLoading || files.filter((f) => f.status === 'ready').length === 0}
+                    disabled={isLoading || !currentDocId}
                     className='flex-1'
                   />
-                  <Button
-                    onClick={sendMessage}
-                    disabled={
-                      !input.trim() || isLoading || files.filter((f) => f.status === 'ready').length === 0
-                    }>
+                  <Button onClick={sendMessage} disabled={!input.trim() || isLoading || !currentDocId}>
                     {isLoading ? <Loader2 className='size-4 animate-spin' /> : <Send className='size-4' />}
                   </Button>
                 </div>
