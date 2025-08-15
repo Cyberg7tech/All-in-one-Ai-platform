@@ -1,5 +1,6 @@
 // app/api/pdf/query/route.ts
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { Pinecone } from '@pinecone-database/pinecone';
