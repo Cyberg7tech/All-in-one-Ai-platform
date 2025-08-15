@@ -131,7 +131,7 @@ export default function ChatWithPDFPage() {
       if (data.success) {
         toast({
           title: 'Database Test Results',
-          description: `Total: ${data.totalDocuments}, With Content: ${data.documentsWithContent}`,
+          description: `Total: ${data.totalFiles}, With Content: ${data.filesWithContent}`,
         });
       } else {
         toast({
@@ -357,9 +357,34 @@ export default function ChatWithPDFPage() {
                 )}
 
                 {/* Test Database Button */}
-                <div className='pt-4 border-t'>
+                <div className='pt-4 border-t space-y-2'>
                   <Button onClick={testDatabase} variant='outline' size='sm' className='w-full'>
                     Test Database Connection
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const res = await fetch('/api/pdf/debug');
+                        const data = await res.json();
+                        console.log('Debug result:', data);
+                        toast({
+                          title: 'Debug Test',
+                          description: data.success ? 'All tests passed!' : data.error,
+                          variant: data.success ? 'default' : 'destructive',
+                        });
+                      } catch (error) {
+                        console.error('Debug test failed:', error);
+                        toast({
+                          title: 'Debug Test Failed',
+                          description: 'Could not run debug tests',
+                          variant: 'destructive',
+                        });
+                      }
+                    }}
+                    variant='outline'
+                    size='sm'
+                    className='w-full'>
+                    Debug Database
                   </Button>
                   <p className='text-xs text-muted-foreground mt-1 text-center'>
                     Debug: Check if documents are stored

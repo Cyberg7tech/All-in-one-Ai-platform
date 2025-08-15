@@ -32,6 +32,8 @@ async function extractPdfWithPdfjs(buffer: Buffer): Promise<string> {
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('PDF ingest started');
+
     const cookieStore = cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -60,20 +62,27 @@ export async function POST(req: NextRequest) {
     } = await supabase.auth.getSession();
 
     if (!session?.user) {
+      console.log('No session found');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const userId = session.user.id;
+    console.log('User ID:', userId);
+
     const formData = await req.formData();
     const file = formData.get('file') as File;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const title = formData.get('title') as string;
 
     if (!file) {
+      console.log('No file provided');
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
+    console.log('File received:', file.name, 'Size:', file.size, 'Type:', file.type);
+
     if (file.type !== 'application/pdf') {
+      console.log('Invalid file type:', file.type);
       return NextResponse.json({ error: 'Only PDF files are supported' }, { status: 400 });
     }
 
@@ -81,6 +90,7 @@ export async function POST(req: NextRequest) {
     let extractedText = '';
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    console.log('Buffer created, size:', buffer.length);
 
     try {
       // Try pdf-parse first
@@ -106,6 +116,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!extractedText.trim()) {
+      console.log('No text content extracted');
       return NextResponse.json(
         {
           error: 'No text content found in PDF',
@@ -113,6 +124,8 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    console.log('About to insert into chat_with_file table...');
 
     // Store in chat_with_file table (following BuilderKit documentation)
     const { data: chatFile, error: insertError } = await supabase
@@ -155,9 +168,11 @@ export async function POST(req: NextRequest) {
     });
   } catch (e: any) {
     console.error('PDF ingest error:', e);
+    console.error('Error stack:', e.stack);
     return NextResponse.json(
       {
         error: e?.message || 'Unknown error',
+        stack: e?.stack,
       },
       { status: 500 }
     );
