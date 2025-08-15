@@ -30,7 +30,7 @@ async function extractPdfWithPdfjs(buffer: Buffer): Promise<string> {
 export async function POST(req: NextRequest) {
   try {
     console.log('PDF parse test started');
-    
+
     const formData = await req.formData();
     const file = formData.get('file') as File;
 
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     } catch (error) {
       console.log('PDF parse failed, trying pdfjs fallback:', error);
       parseError = error;
-      
+
       try {
         console.log('Trying pdfjs...');
         extractedText = await extractPdfWithPdfjs(buffer);
@@ -77,8 +77,8 @@ export async function POST(req: NextRequest) {
           {
             error: 'Failed to extract text from PDF',
             details: {
-              pdfParseError: parseError?.message,
-              pdfjsError: pdfjsError?.message,
+              pdfParseError: parseError instanceof Error ? parseError.message : String(parseError),
+              pdfjsError: pdfjsError instanceof Error ? pdfjsError.message : String(pdfjsError),
             },
           },
           { status: 500 }
