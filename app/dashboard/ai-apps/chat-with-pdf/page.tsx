@@ -386,6 +386,67 @@ export default function ChatWithPDFPage() {
                     className='w-full'>
                     Debug Database
                   </Button>
+                  <Button
+                    onClick={async () => {
+                      if (files.length === 0) {
+                        toast({
+                          title: 'No File',
+                          description: 'Please upload a PDF first',
+                          variant: 'destructive',
+                        });
+                        return;
+                      }
+
+                      const file = files[0];
+                      if (file.status !== 'ready' && file.status !== 'error') {
+                        toast({
+                          title: 'File Not Ready',
+                          description: 'Please wait for file to be processed',
+                          variant: 'destructive',
+                        });
+                        return;
+                      }
+
+                      try {
+                        // Get the file from the input
+                        const fileInput = fileInputRef.current;
+                        if (!fileInput?.files?.[0]) {
+                          toast({
+                            title: 'No File',
+                            description: 'Please select a PDF file first',
+                            variant: 'destructive',
+                          });
+                          return;
+                        }
+
+                        const form = new FormData();
+                        form.append('file', fileInput.files[0]);
+
+                        const res = await fetch('/api/pdf/test-parse', {
+                          method: 'POST',
+                          body: form,
+                        });
+                        const data = await res.json();
+                        console.log('Parse test result:', data);
+                        toast({
+                          title: 'Parse Test',
+                          description: data.success ? `Parsed with ${data.parseMethod}` : data.error,
+                          variant: data.success ? 'default' : 'destructive',
+                        });
+                      } catch (error) {
+                        console.error('Parse test failed:', error);
+                        toast({
+                          title: 'Parse Test Failed',
+                          description: 'Could not test PDF parsing',
+                          variant: 'destructive',
+                        });
+                      }
+                    }}
+                    variant='outline'
+                    size='sm'
+                    className='w-full'>
+                    Test PDF Parse
+                  </Button>
                   <p className='text-xs text-muted-foreground mt-1 text-center'>
                     Debug: Check if documents are stored
                   </p>

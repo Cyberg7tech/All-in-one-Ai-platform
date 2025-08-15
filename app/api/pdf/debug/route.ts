@@ -49,11 +49,14 @@ export async function GET(req: NextRequest) {
 
     if (tableError) {
       console.error('Table check error:', tableError);
-      return NextResponse.json({
-        error: 'Table access error',
-        details: tableError,
-        step: 'table_check'
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: 'Table access error',
+          details: tableError,
+          step: 'table_check',
+        },
+        { status: 500 }
+      );
     }
 
     // Test 2: Try to insert a test record
@@ -62,7 +65,7 @@ export async function GET(req: NextRequest) {
       file: 'Test content for debugging',
       filename: 'debug-test.pdf',
       chat_history: [],
-      history_metadata: `Debug test: ${new Date().toISOString()}`
+      history_metadata: `Debug test: ${new Date().toISOString()}`,
     };
 
     const { data: insertResult, error: insertError } = await supabase
@@ -73,11 +76,14 @@ export async function GET(req: NextRequest) {
 
     if (insertError) {
       console.error('Insert test error:', insertError);
-      return NextResponse.json({
-        error: 'Insert test failed',
-        details: insertError,
-        step: 'insert_test'
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: 'Insert test failed',
+          details: insertError,
+          step: 'insert_test',
+        },
+        { status: 500 }
+      );
     }
 
     // Test 3: Try to read the test record
@@ -89,18 +95,18 @@ export async function GET(req: NextRequest) {
 
     if (readError) {
       console.error('Read test error:', readError);
-      return NextResponse.json({
-        error: 'Read test failed',
-        details: readError,
-        step: 'read_test'
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: 'Read test failed',
+          details: readError,
+          step: 'read_test',
+        },
+        { status: 500 }
+      );
     }
 
     // Test 4: Clean up test record
-    const { error: deleteError } = await supabase
-      .from('chat_with_file')
-      .delete()
-      .eq('id', insertResult.id);
+    const { error: deleteError } = await supabase.from('chat_with_file').delete().eq('id', insertResult.id);
 
     if (deleteError) {
       console.error('Delete test error:', deleteError);
@@ -114,17 +120,19 @@ export async function GET(req: NextRequest) {
         table_exists: true,
         insert_works: true,
         read_works: true,
-        delete_works: !deleteError
+        delete_works: !deleteError,
       },
       user_id: userId,
-      test_record_id: insertResult.id
+      test_record_id: insertResult.id,
     });
-
   } catch (e: any) {
     console.error('Debug endpoint error:', e);
-    return NextResponse.json({
-      error: e?.message || 'Unknown error',
-      stack: e?.stack
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: e?.message || 'Unknown error',
+        stack: e?.stack,
+      },
+      { status: 500 }
+    );
   }
 }
