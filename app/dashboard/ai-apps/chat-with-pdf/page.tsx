@@ -100,7 +100,7 @@ export default function ChatWithPDFPage() {
       // Move to processing/ready
       setFiles((prev) =>
         prev.map((f) =>
-          f.id === fileId ? { ...f, status: 'processing', progress: 80, documentId: data.documentId } : f
+          f.id === fileId ? { ...f, status: 'processing', progress: 80, documentId: data.fileId } : f
         )
       );
 
@@ -203,7 +203,7 @@ export default function ChatWithPDFPage() {
       const ragRes = await fetch('/api/pdf/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: userMessage.content, k: 5 }),
+        body: JSON.stringify({ question: userMessage.content }),
       });
       const rag = await ragRes.json();
       console.log('Query response:', { status: ragRes.status, rag });
