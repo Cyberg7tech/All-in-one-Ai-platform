@@ -43,7 +43,7 @@ export default function LoginForm() {
       if (isSignUp) {
         await signup(email, password, name, 'free');
       } else {
-      await login(email, password);
+        await login(email, password);
       }
 
       // Don't redirect here - let the auth context handle it
@@ -65,15 +65,15 @@ export default function LoginForm() {
     const redirectTo = `${window.location.origin}/auth/callback`;
 
     try {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo,
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
           queryParams: {
             prompt: 'select_account',
           },
-      },
-    });
+        },
+      });
     } catch (err: any) {
       setError('Failed to sign in with Google. Please try again.');
     }
