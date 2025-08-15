@@ -83,8 +83,13 @@ export async function POST(req: Request) {
     if (!text || text.length < 10) {
       return NextResponse.json(
         {
-          error:
-            'Failed to parse PDF. It may be image-only or encrypted. Try another PDF or enable OCR fallback.',
+          error: 'no_text',
+          details: {
+            bytes: buffer.length,
+            firstBytes: Array.from(buffer.slice(0, 8)),
+            textLength: text?.length || 0,
+            textPreview: text?.substring(0, 100) || 'none',
+          },
         },
         { status: 422 }
       );
