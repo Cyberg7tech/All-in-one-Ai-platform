@@ -129,9 +129,16 @@ export async function POST(req: NextRequest) {
 
     if (insertError) {
       console.error('Error inserting into chat_with_file:', insertError);
+      console.error('Insert error details:', {
+        code: insertError.code,
+        message: insertError.message,
+        details: insertError.details,
+        hint: insertError.hint,
+      });
       return NextResponse.json(
         {
-          error: 'Failed to store PDF content',
+          error: `Failed to store PDF content: ${insertError.message}`,
+          details: insertError.details,
         },
         { status: 500 }
       );
