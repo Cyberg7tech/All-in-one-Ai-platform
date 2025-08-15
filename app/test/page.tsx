@@ -251,6 +251,7 @@ export default function TestPage() {
       const duration = Date.now() - startTime;
 
       if (response.ok) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const result = await response.text();
         setTests((prev) =>
           prev.map((test) =>

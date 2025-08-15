@@ -455,6 +455,7 @@ export default function QRGeneratorPage() {
                         </div>
 
                         <div className='text-center mb-4'>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={qrCode.qrCodeUrl} alt='QR Code' className='mx-auto border rounded-lg' />
                         </div>
 

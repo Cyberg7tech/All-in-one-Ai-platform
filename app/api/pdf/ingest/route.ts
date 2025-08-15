@@ -10,23 +10,23 @@ async function extractPdfWithPdfjs(buffer: Buffer): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const pdfjs = require('pdfjs-dist');
   pdfjs.GlobalWorkerOptions.workerSrc = false;
-  
+
   const loadingTask = pdfjs.getDocument({
     data: buffer,
     useSystemFonts: true,
     isEvalSupported: false,
   });
-  
+
   const pdf = await loadingTask.promise;
   let text = '';
-  
+
   for (let i = 1; i <= (pdf.numPages || 0); i++) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
     const pageText = content.items.map((it: any) => (it.str ?? '') as string).join(' ');
     text += `\n\n${pageText}`;
   }
-  
+
   return text.trim();
 }
 
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
     const userId = session.user.id;
     const formData = await req.formData();
     const file = formData.get('file') as File;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const title = formData.get('title') as string;
 
     if (!file) {
@@ -95,16 +96,22 @@ export async function POST(req: NextRequest) {
         console.log('PDFjs fallback successful, extracted length:', extractedText.length);
       } catch (pdfjsError) {
         console.error('Both PDF parsers failed:', pdfjsError);
-        return NextResponse.json({ 
-          error: 'Failed to extract text from PDF' 
-        }, { status: 500 });
+        return NextResponse.json(
+          {
+            error: 'Failed to extract text from PDF',
+          },
+          { status: 500 }
+        );
       }
     }
 
     if (!extractedText.trim()) {
-      return NextResponse.json({ 
-        error: 'No text content found in PDF' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'No text content found in PDF',
+        },
+        { status: 400 }
+      );
     }
 
     // Store in chat_with_file table (following BuilderKit documentation)
@@ -115,16 +122,19 @@ export async function POST(req: NextRequest) {
         file: extractedText,
         filename: file.name,
         chat_history: [],
-        history_metadata: `Uploaded: ${new Date().toISOString()}`
+        history_metadata: `Uploaded: ${new Date().toISOString()}`,
       })
       .select()
       .single();
 
     if (insertError) {
       console.error('Error inserting into chat_with_file:', insertError);
-      return NextResponse.json({ 
-        error: 'Failed to store PDF content' 
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: 'Failed to store PDF content',
+        },
+        { status: 500 }
+      );
     }
 
     console.log('Successfully stored PDF in chat_with_file table:', chatFile.id);
@@ -134,13 +144,15 @@ export async function POST(req: NextRequest) {
       message: 'PDF uploaded and processed successfully',
       fileId: chatFile.id,
       filename: file.name,
-      contentLength: extractedText.length
+      contentLength: extractedText.length,
     });
-
   } catch (e: any) {
     console.error('PDF ingest error:', e);
-    return NextResponse.json({ 
-      error: e?.message || 'Unknown error' 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: e?.message || 'Unknown error',
+      },
+      { status: 500 }
+    );
   }
 }

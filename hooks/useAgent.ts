@@ -46,6 +46,7 @@ export function useAgent(options: UseAgentOptions = {}) {
         
         Please provide a detailed response about this agent's capabilities and how it should behave.`;
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const response = await callTogetherAI(prompt);
 
         const newAgent: Agent = {

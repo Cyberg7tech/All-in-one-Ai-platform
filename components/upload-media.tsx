@@ -144,7 +144,7 @@ export function UploadMedia({
         onUpload(validFiles);
       }
     },
-    [files.length, maxFiles, onUpload, validateFile, createFilePreview, simulateUpload]
+    [files.length, maxFiles, onUpload]
   );
 
   const handleDrop = useCallback(
