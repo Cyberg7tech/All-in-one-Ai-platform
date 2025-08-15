@@ -96,6 +96,7 @@ export default function ChatWithPDFPage() {
       console.log('Ingest response:', { status: res.status, data });
       if (!res.ok) {
         if (res.status === 422) {
+          console.log('422 Debug details:', data);
           throw new Error(
             'This PDF appears to be image-only or encrypted. Please upload a text-based PDF or enable OCR.'
           );
